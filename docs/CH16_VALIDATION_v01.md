@@ -1,0 +1,17 @@
+# 제16장 검증 기록
+- 발행 파일: ch16_mac_npu_integer_verification_v01.html
+- 원본 DUT: Yuul-Jung/amd_soc_rtl/part03/ch01/rtl/mac_core.v (Blob d3f911b882f65e8f6096d76d31a2b710c18ae38d)
+- 원본 DUT: Yuul-Jung/amd_soc_rtl/part03/ch03/rtl/mac_pipeline_core.v (Blob f690b2db2a16626a43e0bb9f3c859d616e57116d)
+- 원본 RTL: 수정 없음. reference_rtl에 바이트 동일 사본만 추가
+- TB: tb/ch16/tb_mac_integer.sv
+- 실행: scripts/run_ch16.sh
+- Python 정수 모델: scripts/ch16_reference.py
+- 파라미터: DATA_WIDTH=8, ACC_WIDTH=16, clk=10ns, resetn 동기 active-low
+- 포트 계약: valid_i=1일 때 mac_core는 같은 상승 에지 누산, mac_pipeline_core는 다음 상승 에지 누산
+- 우선순위: !resetn > clear_i > valid_i
+- 경계: 127*127, -128*127, -128*-128, 버블, 오버플로, clear/reset
+- 정적 점검: 7개 SECTION, 원본 포트 일치, 코드/도식 이름 일치, INDEX 상대 링크, 기존 PART>CHAPTER>SECTION site.js 보존
+- RTL_SIM: NOT_RUN (실행 환경에 iverilog/vvp 없음)
+- PYTHON_MODEL: NOT_RUN (실제 실행 로그 확보 전)
+- BROWSER_VISUAL: NOT_RUN
+- SECURITY: 소스/문서에 사용자 로컬 경로·이메일·토큰 삽입 없음
