@@ -1,0 +1,193 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="제17장 최소 UVM 환경, 기존 PWM RTL 검증"><title>제17장 · 최소 UVM 환경</title><link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch17"><a class="access-skip" href="#main-content">본문 바로가기</a><button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div><header class="hero"><div class="hero-inner"><p class="kicker">제5부 · UVM 검증 환경</p><h1>제17장 · 최소 UVM 환경</h1><p>기존 PWM RTL과 uvm_test·uvm_env·Phase를 연결하는 첫 실습</p><div class="chips"><span class="chip">PART 05 · CHAPTER 17</span><span class="chip">1교시 60분 + 2교시 60분</span><span class="chip">원본 RTL 변경 없음</span></div></div></header><div class="wrap"><nav class="toc" id="course-nav" aria-label="부·장·절 탐색"></nav><main class="content" id="main-content"><section class="section" id="s00"><h2><span class="num">00</span>개요 · UVM 환경의 출발점</h2><p>UVM(Universal Verification Methodology, 범용 검증 방법론)은 검증 객체를 계층적으로 구성하고 공통 실행 단계를 제공합니다. 제17장은 기존 <code>pwm_core</code>를 변경하지 않고 <code>uvm_test</code>와 <code>uvm_env</code>를 연결하는 가장 작은 구조를 구현합니다. 이후 제18장의 Sequence·Driver, 제19장의 Monitor·Scoreboard를 얹을 수 있는 기초입니다.</p><table><tr><th>1교시 60분</th><td>0~20분 DUT 계약 / 20~40분 UVM 계층 / 40~60분 Phase·Objection</td></tr><tr><th>2교시 60분</th><td>60~90분 전체 TB / 90~105분 실행 / 105~120분 오류 분석</td></tr></table><div class="figure-wrap" tabindex="0"><svg viewBox="0 0 780 185" width="100%" role="img" aria-label="pwm_test에서 pwm_env와 pwm_if를 통해 pwm_core를 검증하는 구조"><defs><marker id="arrow17" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#4635b1" stroke-width="1.5"/></marker></defs><rect x="15" y="42" width="150" height="80" rx="7" fill="#edeafa" stroke="#4635b1"/><text x="90" y="74" text-anchor="middle" font-size="16">pwm_test</text><text x="90" y="99" text-anchor="middle" font-size="12">run_phase</text><rect x="215" y="42" width="150" height="80" rx="7" fill="#edeafa" stroke="#4635b1"/><text x="290" y="74" text-anchor="middle" font-size="16">pwm_env</text><text x="290" y="99" text-anchor="middle" font-size="12">expect / check</text><rect x="415" y="42" width="150" height="80" rx="7" fill="#fff" stroke="#4635b1"/><text x="490" y="74" text-anchor="middle" font-size="16">pwm_if</text><text x="490" y="99" text-anchor="middle" font-size="12">virtual interface</text><rect x="615" y="42" width="150" height="80" rx="7" fill="#fff" stroke="#4635b1"/><text x="690" y="74" text-anchor="middle" font-size="16">pwm_core</text><text x="690" y="99" text-anchor="middle" font-size="12">기존 RTL DUT</text><g stroke="#4635b1" stroke-width="2" fill="none" marker-end="url(#arrow17)"><path d="M165 82H210"/><path d="M365 82H410"/><path d="M565 82H610"/></g><text x="390" y="155" text-anchor="middle" font-size="13">build_phase → run_phase → check_phase → report_phase</text></svg></div></section><section class="section" id="s01"><h2><span class="num">01</span>1교시 ① · 기존 PWM의 시간 계약 (0~20분)</h2><p><code>pwm_core</code>는 10ns 클록의 상승 에지에서 설정을 저장합니다. <code>resetn=0</code>은 동기 레지스터 초기화를 유도하고 <code>pwm_out</code>을 조합적으로 LOW로 차단합니다. <code>cfg_apply=1</code>이면 설정이 Shadow에 저장되고 <code>pending=1</code>이 됩니다. 실제 <code>active_period/active_duty/active_enable/active_polarity</code>는 다음 주기 경계에서 바뀝니다. 경계와 <code>cfg_apply</code>가 겹치면 새 요청은 다음 경계에 반영됩니다.</p><p>실습 설정은 <code>RESET_PERIOD=8</code>, <code>cfg_period=8</code>, <code>cfg_duty=4</code>, <code>cfg_enable=1</code>, <code>cfg_polarity=0</code>입니다. 정상 동작에서는 한 주기 8클록 중 4클록 HIGH, 4클록 LOW를 기대합니다.</p></section><section class="section" id="s02"><h2><span class="num">02</span>1교시 ② · uvm_test와 uvm_env (20~40분)</h2><table><tr><th>요소</th><th>역할</th></tr><tr><td><code>pwm_test extends uvm_test</code></td><td>환경 생성 및 시뮬레이션 종료 시점 관리</td></tr><tr><td><code>pwm_env extends uvm_env</code></td><td>가상 인터페이스 확보, DUT 자극·검사</td></tr><tr><td><code>uvm_config_db</code></td><td><code>pwm_if</code> 핸들을 계층에 전달</td></tr><tr><td><code>type_id::create</code></td><td>Factory(팩토리, 등록형 객체 생성기)를 통해 환경 생성</td></tr><tr><td><code>run_test</code></td><td>UVM 실행과 Phase 관리 시작</td></tr></table><p>이 장에서는 복잡한 Agent와 Sequencer를 만들지 않습니다. UVM 구조가 실제 PWM의 리셋·설정·출력 검사와 연결되는지 확인하는 것이 목표입니다.</p></section><section class="section" id="s03"><h2><span class="num">03</span>1교시 ③ · Phase와 Objection (40~60분)</h2><p><code>build_phase</code>는 구성 요소와 가상 인터페이스를 준비하는 함수 단계입니다. <code>run_phase</code>는 시간을 소비하는 태스크 단계로, 클록을 기다리며 DUT를 검사합니다. <code>check_phase</code>는 검증 횟수를 확인하고 <code>report_phase</code>는 결과를 기록합니다.</p><p><code>raise_objection()</code>은 테스트가 아직 끝나지 않았음을 UVM에 알리고, <code>drop_objection()</code>은 종료할 수 있음을 알립니다. Test와 Environment의 <code>run_phase</code>는 병렬로 실행되므로, 이 예제는 <code>wait(env.checks == 1)</code>로 검사 완료를 확인한 뒤 Objection을 내립니다. <strong>Objection을 너무 일찍 내리면 검사가 중간에 종료될 수 있습니다.</strong></p></section><section class="section" id="s04"><h2><span class="num">04</span>2교시 ① · 전체 UVM 테스트벤치 (60~90분)</h2><p>원본 <code>reference_rtl/pwm_core.v</code>는 수정하지 않습니다. 인터페이스·환경·테스트·Top을 하나의 파일에 넣어 계층 관계를 먼저 확인합니다. <code>pwm_if</code>는 TB에서 만든 연결 객체이며 원본 DUT의 포트명은 그대로 유지합니다.</p><div class="codeblock"><div class="codebar"><span>tb/ch17/tb_pwm_uvm.sv · SystemVerilog / UVM · 전체 코드</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제17장: 기존 pwm_core를 읽기 전용 DUT로 사용하는 최소 UVM 환경.
+// UVM의 build/connect/run/check/report phase와 objection 수명주기를 확인한다.
+interface pwm_if(input logic clk);
+    logic resetn = 0;
+    logic cfg_apply = 0;
+    logic [31:0] cfg_period = 8;
+    logic [31:0] cfg_duty = 0;
+    logic cfg_enable = 0;
+    logic cfg_polarity = 0;
+    wire pwm_out;
+    wire pending;
+    wire [31:0] active_period, active_duty;
+    wire active_enable, active_polarity;
+endinterface
+
+package ch17_uvm_pkg;
+    import uvm_pkg::*;
+    `include &quot;uvm_macros.svh&quot;
+
+    class pwm_env extends uvm_env;
+        `uvm_component_utils(pwm_env)
+        virtual pwm_if vif;
+        int unsigned checks = 0;
+
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (!uvm_config_db#(virtual pwm_if)::get(this, &quot;&quot;, &quot;vif&quot;, vif))
+                `uvm_fatal(&quot;NOVIF&quot;, &quot;pwm_if was not provided&quot;)
+        endfunction
+
+        // 출력이 바뀌는 에지 직후를 피하고 negedge에서 확인한다.
+        task automatic expect_ports(
+            input logic [31:0] duty, input logic enable,
+            input logic expected_pwm
+        );
+            @(negedge vif.clk);
+            if (vif.active_period !== 32'd8 ||
+                vif.active_duty !== duty ||
+                vif.active_enable !== enable ||
+                vif.active_polarity !== 1'b0 ||
+                vif.pwm_out !== expected_pwm)
+                `uvm_fatal(&quot;MISMATCH&quot;, $sformatf(
+                    &quot;period=%0d duty=%0d enable=%b pwm=%b&quot;,
+                    vif.active_period, vif.active_duty,
+                    vif.active_enable, vif.pwm_out))
+            checks++;
+        endtask
+
+        task run_phase(uvm_phase phase);
+            // DUT는 동기 리셋: resetn=0인 동안 posedge가 필요하다.
+            repeat (3) @(negedge vif.clk);
+            if (vif.active_period !== 32'd8 ||
+                vif.active_duty !== 0 ||
+                vif.active_enable !== 0 || vif.pending !== 0)
+                `uvm_fatal(&quot;RESET&quot;, &quot;PWM reset contract violated&quot;)
+            `uvm_info(&quot;PWM&quot;, &quot;RESET_CHECKED&quot;, UVM_LOW)
+
+            // 설정은 Shadow에 저장되고, 다음 주기 경계에서 활성화된다.
+            vif.resetn = 1;
+            @(negedge vif.clk);
+            vif.cfg_period = 8;
+            vif.cfg_duty = 4;
+            vif.cfg_enable = 1;
+            vif.cfg_polarity = 0;
+            vif.cfg_apply = 1;
+            @(negedge vif.clk);
+            vif.cfg_apply = 0;
+            if (vif.pending !== 1'b1)
+                `uvm_fatal(&quot;PENDING&quot;, &quot;cfg_apply was not latched&quot;)
+
+            // 8클록 주기 경계가 도래할 때까지 기다린다.
+            // 비활성 상태에서 활성 상태로 전환되는 조건만 감시한다.
+            begin
+                int guard;
+                guard = 0;
+                while (vif.pending !== 1'b0) begin
+                    @(negedge vif.clk);
+                    guard++;
+                    if (guard &gt; 12)
+                        `uvm_fatal(&quot;TIMEOUT&quot;, &quot;PWM apply boundary timeout&quot;)
+                end
+            end
+            if (vif.active_duty !== 32'd4 || vif.active_enable !== 1'b1)
+                `uvm_fatal(&quot;APPLY&quot;, &quot;PWM active settings mismatch&quot;)
+
+            // duty=4, period=8: 첫 네 클록 HIGH, 다음 네 클록 LOW.
+            // 경계 직후 counter=0이므로 현재 출력은 HIGH이다.
+            if (vif.pwm_out !== 1'b1)
+                `uvm_fatal(&quot;PWM&quot;, &quot;Expected HIGH at new period&quot;)
+            // 4번의 상승 에지 후 counter=4, 출력은 LOW.
+            repeat (4) @(negedge vif.clk);
+            if (vif.pwm_out !== 1'b0)
+                `uvm_fatal(&quot;PWM&quot;, &quot;Expected LOW after duty window&quot;)
+            checks++;
+            `uvm_info(&quot;PWM&quot;, &quot;PWM_DUTY_CHECKED&quot;, UVM_LOW)
+        endtask
+
+        function void check_phase(uvm_phase phase);
+            super.check_phase(phase);
+            if (checks != 1)
+                `uvm_fatal(&quot;CHECK&quot;, $sformatf(&quot;checks=%0d&quot;, checks))
+        endfunction
+
+        function void report_phase(uvm_phase phase);
+            super.report_phase(phase);
+            `uvm_info(&quot;RESULT&quot;, $sformatf(
+                &quot;PASS CH17 checks=%0d&quot;, checks), UVM_NONE)
+        endfunction
+    endclass
+
+    class pwm_test extends uvm_test;
+        `uvm_component_utils(pwm_test)
+        pwm_env env;
+
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            env = pwm_env::type_id::create(&quot;env&quot;, this);
+        endfunction
+
+        task run_phase(uvm_phase phase);
+            phase.raise_objection(this);
+            // env의 run_phase와 test의 run_phase는 병렬 수행된다.
+            // 이 장에서는 env의 완료를 기다리는 명시적 동기화가 필요하다.
+            wait (env.checks == 1);
+            phase.drop_objection(this);
+        endtask
+    endclass
+endpackage
+
+module tb_pwm_uvm;
+    import uvm_pkg::*;
+    import ch17_uvm_pkg::*;
+
+    logic clk = 0;
+    always #5 clk = ~clk;
+    pwm_if bus(clk);
+
+    pwm_core #(.RESET_PERIOD(8)) dut (
+        .clk(clk), .resetn(bus.resetn), .cfg_apply(bus.cfg_apply),
+        .cfg_period(bus.cfg_period), .cfg_duty(bus.cfg_duty),
+        .cfg_enable(bus.cfg_enable), .cfg_polarity(bus.cfg_polarity),
+        .pwm_out(bus.pwm_out), .pending(bus.pending),
+        .active_period(bus.active_period), .active_duty(bus.active_duty),
+        .active_enable(bus.active_enable),
+        .active_polarity(bus.active_polarity)
+    );
+
+    initial begin
+        uvm_config_db#(virtual pwm_if)::set(null, &quot;*&quot;, &quot;vif&quot;, bus);
+        run_test(&quot;pwm_test&quot;);
+    end
+    initial begin
+        #2000;
+        $fatal(1, &quot;FAIL CH17 GLOBAL_TIMEOUT&quot;);
+    end
+endmodule
+</code></pre></div><h3>코드 풀이 — 핵심 구문</h3><p><code>`uvm_component_utils</code>는 클래스를 Factory에 등록합니다. <code>uvm_config_db::get</code> 실패는 즉시 <code>uvm_fatal</code>로 처리하여 잘못된 연결을 숨기지 않습니다. <code>cfg_apply</code>를 한 클록만 유지한 뒤 <code>pending</code>이 내려갈 때까지 기다리므로 PWM의 Shadow→Active 전환을 실제 시간 계약에 맞춰 검사합니다. 이후 4클록 뒤 LOW가 되는지 비교합니다. <code>!==</code>는 X/Z 상태까지 검출합니다.</p></section><section class="section" id="s05"><h2><span class="num">05</span>2교시 ② · 실행 및 예상 출력 (90~105분)</h2><p>Ubuntu에서 먼저 UVM 라이브러리가 포함된 시뮬레이터 환경을 준비해야 합니다. <code>UVM_HOME</code>은 <code>src/uvm_pkg.sv</code>가 있는 UVM 설치 디렉터리입니다. <code>bash scripts/run_ch17.sh</code>는 Verilator와 UVM 파일의 존재를 확인하고 컴파일·실행한 뒤 결과 문구를 검사합니다. <strong>UVM 지원은 Verilator의 버전과 설치된 UVM 구현에 따라 달라질 수 있습니다.</strong></p><div class="codeblock"><div class="codebar"><span>scripts/run_ch17.sh · Bash · 전체 코드</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 제17장: UVM 라이브러리가 설치된 Verilator 5.x에서 실행.
+set -euo pipefail
+ROOT=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)/..&quot; &amp;&amp; pwd)&quot;
+RTL=&quot;${DUT_PATH:-$ROOT/reference_rtl/pwm_core.v}&quot;
+if [[ ! -f &quot;$RTL&quot; ]]; then
+  echo &quot;NOT_RUN: DUT missing: $RTL&quot; &gt;&amp;2
+  exit 2
+fi
+if ! command -v verilator &gt;/dev/null 2&gt;&amp;1; then
+  echo &quot;NOT_RUN: Verilator not installed&quot; &gt;&amp;2
+  exit 2
+fi
+if [[ -z &quot;${UVM_HOME:-}&quot; || ! -f &quot;$UVM_HOME/src/uvm_pkg.sv&quot; ]]; then
+  echo &quot;NOT_RUN: UVM_HOME/src/uvm_pkg.sv not found&quot; &gt;&amp;2
+  exit 2
+fi
+mkdir -p &quot;$ROOT/.build/ch17&quot;
+verilator --binary --timing --assert -Wno-fatal \
+  --top-module tb_pwm_uvm \
+  --Mdir &quot;$ROOT/.build/ch17/obj_dir&quot; \
+  +incdir+&quot;$UVM_HOME/src&quot; \
+  &quot;$UVM_HOME/src/uvm_pkg.sv&quot; &quot;$RTL&quot; \
+  &quot;$ROOT/tb/ch17/tb_pwm_uvm.sv&quot;
+&quot;$ROOT/.build/ch17/obj_dir/Vtb_pwm_uvm&quot; \
+  +UVM_TESTNAME=pwm_test | tee &quot;$ROOT/.build/ch17/simulation.log&quot;
+grep -q 'PASS CH17 checks=1' &quot;$ROOT/.build/ch17/simulation.log&quot;
+</code></pre></div><h3>예상 출력 · 실제 실행 로그 아님</h3><div class="codeblock"><div class="codebar"><span>예상 출력 · text · 전체 코드</span></div><pre tabindex="0"><code>UVM_INFO ... RESET_CHECKED\nUVM_INFO ... PWM_DUTY_CHECKED\nUVM_INFO ... PASS CH17 checks=1\n</code></pre></div><p>실제 로그가 없는 경우 RTL_SIM은 <code>NOT_RUN</code>입니다. 예상 출력 문구만으로 PASS 판정을 내리지 않습니다.</p></section><section class="section" id="s06"><h2><span class="num">06</span>2교시 ③ · 장애 분석 및 검증 (105~120분)</h2><table><tr><th>증상</th><th>원인과 점검</th></tr><tr><td><code>NOVIF</code></td><td><code>uvm_config_db</code> set/get 범위, 가상 인터페이스 타입</td></tr><tr><td><code>RESET</code></td><td>동기 리셋 중 상승 에지 3회 확보 여부</td></tr><tr><td><code>PENDING</code></td><td><code>cfg_apply</code>가 상승 에지에 유효했는지 확인</td></tr><tr><td><code>TIMEOUT</code></td><td>주기 경계, <code>pending</code> 상태, 클록 실행 여부</td></tr><tr><td><code>PWM</code></td><td>Active 설정값과 듀티 4/8의 카운터 경계 확인</td></tr><tr><td>컴파일 실패</td><td>UVM 패키지/매크로 경로 및 시뮬레이터 UVM 지원 확인</td></tr></table><p>원본 PWM의 포트와 리셋·Shadow 적용 계약을 정적으로 대조했습니다. 실제 UVM 시뮬레이션과 브라우저 시각 검증은 실행 기록을 확보하기 전까지 <strong>NOT_RUN</strong>으로 남깁니다.</p></section><div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH17 · RTL_SIM NOT_RUN</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v01.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v01.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v02.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v02.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v01.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v02.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v02.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v01.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v01.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v01.html"},{"id":"ch14","number":14,"title":"FIFO 및 흐름 제어","file":"ch14_fifo_flow_control_v01.html"},{"id":"ch15","number":15,"title":"AXI4-Lite 레지스터 검증","file":"ch15_axi4lite_register_verification_v01.html"},{"id":"ch16","number":16,"title":"MAC·NPU 정수 연산 검증","file":"ch16_mac_npu_integer_verification_v01.html"},{"id":"ch17","number":17,"title":"최소 UVM 환경","file":"ch17_minimal_uvm_environment_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
