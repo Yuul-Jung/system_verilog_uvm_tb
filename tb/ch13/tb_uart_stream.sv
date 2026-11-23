@@ -91,7 +91,7 @@ module tb_uart_stream;
         rx_valid_i = 1'b0;
         tx_ready_i = 1'b0;
         expect_ports(8'h45, 1'b0, 1'b0);
-        if (accepted != 3 || checks != 11)
+        if (accepted != 3 || checks != 12)
             $fatal(1, "FAIL count accepted=%0d checks=%0d", accepted, checks);
         $display("PASS CH13 accepted=%0d checks=%0d", accepted, checks);
         $finish;
