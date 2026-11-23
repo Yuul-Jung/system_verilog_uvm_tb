@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v19",
+  "version": "v20",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -148,6 +148,15 @@
       "slug": "ch16_mac_npu_integer_verification",
       "version": "v01",
       "source": "tb/ch16/tb_mac_integer.sv"
+    },
+    {
+      "id": "ch17",
+      "number": 17,
+      "title": "최소 UVM 환경",
+      "subtitle": "기존 PWM 코어의 uvm_test·uvm_env·phase·objection 검증",
+      "slug": "ch17_minimal_uvm_environment",
+      "version": "v01",
+      "source": "tb/ch17/tb_pwm_uvm.sv"
     }
   ]
 }
