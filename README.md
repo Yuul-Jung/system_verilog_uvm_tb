@@ -1,10 +1,10 @@
 # RTL Testbench · SystemVerilog · UVM 검증 학습안내서
 
 - **전체 편성:** 독립 6부, 총 24장/48시간, 한 장은 60분 × 2회로 진행
-- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [전체 편성](CURRICULUM.md)
+- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [전체 편성](CURRICULUM.md)
 - **검증용 RTL:** `reference_rtl/uart_echo_controller.v`(제01·05·06·07장), `reference_rtl/pwm_core.v`(제02~04장). 두 파일은 `amd_soc_rtl`에서 동일한 바이트로 복사한 읽기 전용 DUT 스냅샷입니다.
 - **목표:** 문법 → Testbench → Self-checking → SVA/Coverage → UVM → Regression/CI
-- **상태:** 제01~07장 배포용 HTML·TB·실행 스크립트 발행. 제07장은 정적 분석 완료, **RTL_SIM=NOT_RUN** (실행 환경에 Verilator 없음).
+- **상태:** 제01~08장 배포용 HTML·TB·실행 스크립트 발행. 제08장은 정적 검토 완료, **RTL_SIM=NOT_RUN** (실행 환경에 Verilator 없음).
 
 ## 규칙
 - 정본 [rule_md](https://github.com/Yuul-Jung/rule_md) / [HTML STANDARD](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/STANDARD.md)
@@ -23,7 +23,7 @@ cd system_verilog_uvm_tb
 
 이 과정은 **독립 저장소 루트**를 기준으로 동작합니다. `reference_rtl/`은 `amd_soc_rtl`에서 읽기 전용으로 복사한 **원본 동일 스냅샷**입니다. 다른 버전의 DUT 검증이 필요하면 `DUT_PATH`로 원본 파일을 직접 지정합니다.
 
-## 제01~07장 실행 (Ubuntu)
+## 제01~08장 실행 (Ubuntu)
 ```bash
 # 위 git clone 작업으로 이 폴더에 진입한 상태에서 실행
 # pwd로 현재 경로를 확인한다
@@ -38,6 +38,8 @@ bash scripts/run_ch06.sh
 # 제07장은 clocking block 실습으로 Verilator를 사용함
 verilator --version
 bash scripts/run_ch07.sh
+# 제08장 객체·제약 무작위 입력 검증
+bash scripts/run_ch08.sh
 ```
 
 별도 복제 저장소에서도 실행할 수 있습니다.
@@ -70,3 +72,7 @@ DUT_PATH=/실제/RTL/경로/pwm_core.v bash scripts/run_ch03.sh
 - **참고(과거 잘못 작성한 사본):** `Yuul-Jung/amd_soc_rtl/system_verilog_uvm_tb/`. 이 경로에 신규 커밋하지 않습니다.
 - **원본 DUT:** `reference_rtl/`에는 원본과 동일한 2개 파일을 보관합니다. 복사본의 Git Blob SHA를 원본과 비교합니다.
 - **예상 결과와 실제 실행 판정:** 실제 시뮬레이터 실행 증거가 없으면 `NOT_RUN`으로 표시합니다.
+
+### 제08장 제약 무작위화 실습
+- `bash scripts/run_ch08.sh`는 SystemVerilog class·extends·constraint·randomize() 지원 시뮬레이터가 필요합니다.
+- Verilator 버전과 제약 해결기 지원을 확인하십시오. 실제 실행이 없으면 RTL_SIM=NOT_RUN입니다.
