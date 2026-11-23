@@ -114,3 +114,9 @@
 - DUT: reference_rtl/axi4lite_slave_adapter.v (Blob eadaf8d3580023bed0c9b06f3e9b2a99de0cf266), reference_rtl/custom_register_bank.v (Blob 49e5d0219574d1bcb9086dc99f259c191e35d82e), 원본과 바이트 동일.
 - TB: tb/ch15/tb_axi4lite_registers.sv; script: scripts/run_ch15.sh; HTML: ch15_axi4lite_register_verification_v01.html.
 - RTL_SIM NOT_RUN, BROWSER_VISUAL NOT_RUN. 상세: docs/CH15_VALIDATION_v01.md.
+
+## 제16장 · MAC·NPU 정수 연산 검증
+- 원본: amd_soc_rtl/part03/ch01/rtl/mac_core.v (Blob d3f911b882f65e8f6096d76d31a2b710c18ae38d); part03/ch03/rtl/mac_pipeline_core.v (Blob f690b2db2a16626a43e0bb9f3c859d616e57116d).
+- 바이트 동일 DUT 사본: reference_rtl/mac_core.v, reference_rtl/mac_pipeline_core.v.
+- TB: tb/ch16/tb_mac_integer.sv; Python: scripts/ch16_reference.py; 실행: scripts/run_ch16.sh.
+- HTML: ch16_mac_npu_integer_verification_v01.html; RTL_SIM NOT_RUN, BROWSER_VISUAL NOT_RUN.
