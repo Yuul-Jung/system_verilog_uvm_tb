@@ -91,7 +91,7 @@ module tb_uart_stream;
         rx_valid_i = 1'b0;
         tx_ready_i = 1'b0;
         expect_ports(8'h45, 1'b0, 1'b0);
-        if (accepted != 3 || checks != 11)
+        if (accepted != 3 || checks != 12)
             $fatal(1, &quot;FAIL count accepted=%0d checks=%0d&quot;, accepted, checks);
         $display(&quot;PASS CH13 accepted=%0d checks=%0d&quot;, accepted, checks);
         $finish;
@@ -112,6 +112,6 @@ mkdir -p &quot;$ROOT/.build/ch13&quot;
 cd &quot;$ROOT/.build/ch13&quot;
 iverilog -g2012 -s tb_uart_stream -o sim &quot;$DUT&quot; &quot;$TB&quot;
 vvp sim | tee simulation.log
-grep -q '^PASS CH13 accepted=3 checks=11$' simulation.log
-</code></pre></div><h3>예상 출력 — 실제 실행 결과가 아님</h3><div class="codeblock"><div class="codebar"><span>시뮬레이션 마지막 줄 · 예상 출력 · text · 전체 코드</span></div><pre tabindex="0"><code>PASS CH13 accepted=3 checks=11
+grep -q '^PASS CH13 accepted=3 checks=12$' simulation.log
+</code></pre></div><h3>예상 출력 — 실제 실행 결과가 아님</h3><div class="codeblock"><div class="codebar"><span>시뮬레이션 마지막 줄 · 예상 출력 · text · 전체 코드</span></div><pre tabindex="0"><code>PASS CH13 accepted=3 checks=12
 </code></pre></div><p>작성 환경의 RTL 시뮬레이션은 <strong>NOT_RUN</strong>입니다. 위 문자열은 예상 결과일 뿐 실제 통과 로그가 아닙니다.</p></section><section class="section" id="s06"><h2><span class="num">06</span>2교시 ③ · 검증·장애 분석 (105~120분)</h2><table><tr><th>증상</th><th>확인 사항</th></tr><tr><td>컴파일 오류</td><td>SystemVerilog 옵션 <code>-g2012</code>와 실제 원본 DUT 경로</td></tr><tr><td>ready가 계속 0</td><td><code>tx_ready_i</code>의 구동값과 <code>rx_ready_o</code> 연결</td></tr><tr><td>중복 수락</td><td><code>valid</code>가 다음 상승 에지 전에 내려가는지 확인</td></tr><tr><td>데이터 불일치</td><td><code>rx_data_i</code> 유지, 조합 안정화 시점, <code>!==</code> 비교</td></tr><tr><td>직렬 UART 오류 검출 필요</td><td>현재 DUT는 해당 기능이 없으므로 실제 UART RX RTL이 있는 후속 과제로 분리</td></tr></table><p>검증 판정: 원본 6포트 및 조합 전달 계약 확인. RTL_SIM NOT_RUN, 실제 브라우저 시각 검증 NOT_RUN. 검증되지 않은 실행 결과는 PASS로 기록하지 않습니다.</p></section><div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH13 · RTL_SIM NOT_RUN</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v01.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v01.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v02.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v02.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v01.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v02.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v02.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v01.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v01.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
