@@ -1,0 +1,15 @@
+# 제15장 검증 기록
+- HTML: ch15_axi4lite_register_verification_v01.html
+- DUT: reference_rtl/axi4lite_slave_adapter.v (원본 Blob eadaf8d3580023bed0c9b06f3e9b2a99de0cf266)
+- DUT: reference_rtl/custom_register_bank.v (원본 Blob 49e5d0219574d1bcb9086dc99f259c191e35d82e)
+- 출처: Yuul-Jung/amd_soc_rtl/part01/legacy/code/soc12/axi4lite_slave_adapter.v 및 part01/legacy/code/soc12/custom_register_bank.v
+- 규칙: rule_md AGENTS.md / STANDARD.md / code-development-rules.md / code-style-rules.md / flowchart-rules.md
+- TB: tb/ch15/tb_axi4lite_registers.sv
+- 스크립트: scripts/run_ch15.sh
+- 검증 범위: AW 먼저, W 먼저, WSTRB 0101, B/R backpressure, CONTROL/RO, Reset
+- 기대: PASS CH15 commits=3 checks=9 (예상값, 실제 로그 아님)
+- 정적 검토: 원본 모듈·포트·주소·비트·신호 이름, 7개 절, 파일 링크, 스크립트 경로
+- RTL_SIM: NOT_RUN (현재 실행 환경에 iverilog/vvp 없음)
+- BROWSER_VISUAL: NOT_RUN
+- 개인정보: 문서 본문에 사용자 계정·이메일·토큰·로컬 경로 없음
+- INDEX: PART04의 CH15 링크, course.json의 CH15 등록
