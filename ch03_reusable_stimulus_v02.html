@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="기존 PWM RTL을 사용하여 task·function·repeat·for·wait를 실무형 검증 코드로 연결하는 2시간 실습"><title>제03장 · 반복 자극과 작업 분리 · RTL Testbench · SystemVerilog · UVM 실무 검증</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch03">
+<a class="access-skip" href="#main-content" style="position:absolute;left:-9999px;top:0">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div>
+<header class="hero"><div class="hero-inner"><p class="kicker">제1부 · VERILOG TESTBENCH</p><h1>제03장 · 반복 자극과 작업 분리</h1><p>기존 PWM RTL을 사용하여 task·function·repeat·for·wait를 실무형 검증 코드로 연결하는 2시간 실습</p>
+<div class="chips"><span class="chip">6부 · 24장</span><span class="chip">각 장 2시간 · 1시간씩 분리</span><span class="chip">기존 RTL 재사용</span></div></div></header>
+<div class="wrap"><nav class="toc" id="course-nav" aria-label="장과 절 탐색"></nav>
+<main class="content" id="main-content"><section class="section" id="s00"><h2><span class="num">00</span>학습 개요 · 같은 입력을 여러 번 시험하는 이유</h2><p>제02장에서는 PWM(펄스폭 변조) 코어의 클록과 리셋을 관찰했습니다. 이번 장은 회로를 다시 만들지 않고 <strong>입력 자극을 반복해서 만드는 검증 코드</strong>를 정리합니다. 같은 일을 다섯 번 복사하는 대신, 작업을 하나의 <code>task</code>(태스크, 시간 흐름을 포함할 수 있는 작업 단위)로 묶고 반복문으로 호출합니다.</p>
+<div class="figure-wrap" style="overflow-x:auto;padding:12px;background:#fafaf8;border:1px solid #dddfd8">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 205" role="img" aria-label="for 루프가 request_pwm task에 duty 값을 전달하고, task가 pwm_core의 cfg_duty와 cfg_apply를 구동한다. pending의 적용 완료를 wait로 기다린 뒤 observe_one_period task가 pwm_out을 반복 관찰한다." style="width:100%;min-width:640px;height:auto">
+<rect x="13" y="36" width="164" height="132" rx="5" fill="#edeafa" stroke="#4635b1" stroke-width="2"/>
+<text x="95" y="63" font-size="16" text-anchor="middle" font-weight="bold" fill="#33228d">for 반복</text>
+<text x="95" y="93" font-size="13" text-anchor="middle" fill="#42465b">duty_step</text>
+<text x="95" y="115" font-size="13" text-anchor="middle" fill="#42465b">0 · 2 · 4 · 6 · 8</text>
+<text x="95" y="142" font-size="12" text-anchor="middle" fill="#42465b">TB 내부 입력 선택</text>
+<rect x="212" y="36" width="199" height="132" rx="5" fill="#fff" stroke="#7061b6" stroke-width="2"/>
+<text x="311" y="63" font-size="15" text-anchor="middle" font-weight="bold" fill="#33228d">request_pwm</text>
+<text x="311" y="87" font-size="12" text-anchor="middle" fill="#454a59">cfg_apply · cfg_duty</text>
+<text x="311" y="110" font-size="12" text-anchor="middle" fill="#454a59">wait(pending 1 → 0)</text>
+<text x="311" y="142" font-size="12" text-anchor="middle" fill="#454a59">duty_percent()</text>
+<rect x="448" y="36" width="195" height="132" rx="5" fill="#fff" stroke="#626976" stroke-width="2"/>
+<text x="545" y="63" font-size="16" text-anchor="middle" font-weight="bold" fill="#15171c">pwm_core (DUT)</text>
+<text x="545" y="88" font-size="12" text-anchor="middle" fill="#454a59">Shadow → Active</text>
+<text x="545" y="109" font-size="12" text-anchor="middle" fill="#454a59">pending · active_duty</text>
+<text x="545" y="142" font-size="12" text-anchor="middle" fill="#454a59">기존 RTL 유지</text>
+<rect x="679" y="36" width="225" height="132" rx="5" fill="#f5f5f2" stroke="#626976" stroke-width="2"/>
+<text x="791" y="62" font-size="15" text-anchor="middle" font-weight="bold" fill="#15171c">observe_one_period</text>
+<text x="791" y="88" font-size="12" text-anchor="middle" fill="#454a59">8회 pwm_out 관찰</text>
+<text x="791" y="110" font-size="12" text-anchor="middle" fill="#454a59">HIGH 표본 개수</text>
+<text x="791" y="140" font-size="12" text-anchor="middle" fill="#454a59">SAMPLE / OBSERVED</text>
+<path d="M177 98 H204" stroke="#4635b1" stroke-width="2.2"/><path d="M204 98 l-9 -5 v10 Z" fill="#4635b1"/>
+<path d="M411 98 H440" stroke="#4635b1" stroke-width="2.2"/><path d="M440 98 l-9 -5 v10 Z" fill="#4635b1"/>
+<path d="M643 98 H671" stroke="#4635b1" stroke-width="2.2"/><path d="M671 98 l-9 -5 v10 Z" fill="#4635b1"/>
+<text x="460" y="194" font-size="12" text-anchor="middle" fill="#5b6171">실제 모듈: pwm_core · 나머지는 테스트벤치 내부 작업 단위</text>
+</svg></div>
+<table><thead><tr><th>시간</th><th>구성</th><th>실습 결과</th></tr></thead><tbody>
+<tr><td><strong>1교시 · 0~60분</strong></td><td>task·function·repeat·for·wait 문법과 신호 흐름</td><td>중복을 줄이는 검증 절차 설계</td></tr>
+<tr><td><strong>2교시 · 60~120분</strong></td><td>기존 PWM DUT를 이용한 전체 TB와 파형 확인</td><td>5개 듀티 설정을 하나의 반복 루프로 관찰</td></tr></tbody></table>
+<p>검증 대상 DUT(디유티, 검증 대상 회로)는 제02장과 같은 원본 <code>part02_1/ch04/rtl/pwm_core.v</code>입니다. 실습을 빠르게 끝내기 위해 인스턴스의 <code>RESET_PERIOD</code>만 8로 설정하며 기존 RTL은 변경하지 않습니다.</p></section>
+<section class="section" id="s01"><h2><span class="num">01</span>1교시 ① · task와 function의 차이 (0~25분)</h2><p><strong>task(태스크, 절차를 묶은 작업)</strong>는 여러 문장을 하나의 이름으로 묶습니다. 시간이 걸리는 <code>@(negedge clk)</code>나 <code>wait</code>도 포함할 수 있으므로, 설정을 쓰고 결과가 반영될 때까지 기다리는 시뮬레이션 절차에 적합합니다.</p>
+<p><strong>function(펑션, 값을 계산해 돌려주는 함수)</strong>은 입력으로부터 결과를 계산합니다. 이번 예제의 <code>duty_percent()</code>는 듀티 클록 수와 전체 주기를 받아 백분율을 반환합니다. 일반적인 Verilog/SystemVerilog 함수 내부에서는 시간 지연·에지 대기처럼 시뮬레이션 시간을 소비하는 명령을 사용하지 않습니다.</p>
+<div class="codeblock"><div class="codebar"><span>핵심 문법 · 설명용 부분 코드 · SystemVerilog · 교육용 발췌</span></div><pre tabindex="0"><code>// function: 계산 후 값 하나를 반환, 시간은 흐르지 않음.
+function automatic integer duty_percent(
+    input [31:0] high_ticks,
+    input [31:0] period_ticks
+);
+    begin
+        duty_percent = (high_ticks * 100) / period_ticks;
+    end
+endfunction
+
+// task: 실제 시간과 이벤트를 포함하는 작업
+task automatic request_pwm(input [31:0] duty_ticks);
+    begin
+        @(negedge clk);
+        cfg_duty = duty_ticks;
+        cfg_apply = 1'b1;
+        // 이후 wait(pending...) 등은 전체 코드에 이어짐
+    end
+endtask</code></pre></div>
+<table><thead><tr><th>비교</th><th><code>task</code></th><th><code>function</code></th></tr></thead><tbody>
+<tr><td>주요 용도</td><td>시간에 맞춰 입력을 주는 절차</td><td>듀티비처럼 즉시 구하는 계산</td></tr>
+<tr><td>시간 소비</td><td>가능: <code>#</code>, <code>@</code>, <code>wait</code></td><td>일반 함수는 불가</td></tr>
+<tr><td>결과 전달</td><td>출력 인자 등을 사용할 수 있음</td><td>반환값이 있음</td></tr>
+<tr><td>이번 장</td><td><code>request_pwm()</code>, <code>observe_one_period()</code></td><td><code>duty_percent()</code></td></tr></tbody></table>
+<p><code>automatic</code>(오토매틱, 호출마다 독립적인 지역 저장 공간을 사용하는 선언)을 사용하면 반복 호출 시 지역 변수와 인자를 각 실행에 독립적으로 처리할 수 있습니다. 다만 이 예제는 순차적으로 호출하므로 동시 실행 문제를 아직 다루지 않습니다.</p></section>
+<section class="section" id="s02"><h2><span class="num">02</span>1교시 ② · repeat·for·wait의 역할 (25~45분)</h2><p><code>repeat</code>(리피트, 지정 횟수 반복)는 몇 번 실행할지가 정해져 있을 때 쓰고, <code>for</code>(포, 초기값·조건·증가식 반복)는 반복하는 동안 값을 변경할 때 편리합니다. <code>wait</code>(웨이트, 조건 충족까지 대기)는 시간을 미리 계산하지 않고 회로의 상태 변화에 맞춰 다음 단계로 넘어가게 합니다.</p>
+<div class="codeblock"><div class="codebar"><span>반복과 상태 대기 · 핵심 코드 · SystemVerilog · 교육용 발췌</span></div><pre tabindex="0"><code>// 리셋을 두 번의 하강 에지까지 유지한다.
+repeat (2) @(negedge clk);
+
+// 0, 2, 4, 6, 8의 5개 설정을 반복한다.
+for (duty_step = 0; duty_step &lt;= 8;
+     duty_step = duty_step + 2) begin
+    request_pwm(duty_step);
+    observe_one_period();
+end
+
+// 먼저 대기 설정을 받았는지 확인한다.
+wait (pending === 1'b1);
+// 이어서 주기 경계에서 적용 완료되기를 기다린다.
+wait (pending === 1'b0);</code></pre></div>
+<p><strong>왜 <code>wait(pending === 1'b0)</code>만 쓰면 위험할까요?</strong> 설정을 요청하기 전의 <code>pending</code>은 이미 0일 수 있습니다. 그때 적용이 끝났다고 오해하면 아직 반영되지 않은 값을 관찰합니다. 먼저 <code>pending</code>이 1이 되는 <strong>요청 수락 이후</strong>를 확인하고, 다시 0으로 내려오는 <strong>적용 완료 이후</strong>에 출력을 읽어야 합니다.</p>
+<p><code>wait</code>는 조건이 이미 참이면 지체 없이 통과하고, 거짓이면 참이 될 때까지 멈춥니다. 반면 <code>@(posedge clk)</code>는 해당 신호의 다음 상승 이벤트까지 기다립니다. 이 차이는 실제 실무용 버스 검증에서도 중요합니다.</p></section>
+<section class="section" id="s03"><h2><span class="num">03</span>1교시 ③ · PWM 한 주기의 시간표 (45~60분)</h2><p>클록 전체 주기는 10ns입니다. 20ns 하강 에지에서 리셋을 해제하고, 30ns에 첫 번째 설정 요청을 올립니다. 35ns에 원본 코어는 Shadow 값을 저장하고 <code>pending</code>을 1로 만듭니다. 이후 주기 경계인 95ns에 Active 설정을 갱신하며 <code>pending</code>이 0으로 돌아갑니다.</p>
+<div class="figure-wrap" style="overflow-x:auto;padding:12px;background:#fafaf8;border:1px solid #dddfd8">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 180" role="img" aria-label="요청 30ns, Shadow 저장 35ns, Active 반영 95ns, 첫 번째 주기 관찰 100~170ns, 다음 요청 180ns의 시간 순서" style="width:100%;min-width:640px;height:auto">
+<text x="18" y="24" font-size="14" font-weight="bold" fill="#322384">첫 반복(duty_step 0)의 실행 시점 · 시간 단위 ns</text>
+<path d="M41 90 H881" stroke="#626a77" stroke-width="2"/><path d="M881 90 l-10 -5 v10 Z" fill="#626a77"/>
+<circle cx="100" cy="90" r="5" fill="#8077ac"/><path d="M100 85 V42" stroke="#9e94bd" stroke-width="1.3" stroke-dasharray="3 3"/><text x="100" y="37" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#34344a">20</text><text x="100" y="56" text-anchor="middle" font-size="12" fill="#49505d">리셋 해제</text><circle cx="237" cy="90" r="5" fill="#8077ac"/><path d="M237 85 V118" stroke="#9e94bd" stroke-width="1.3" stroke-dasharray="3 3"/><text x="237" y="136" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#34344a">30</text><text x="237" y="154" text-anchor="middle" font-size="12" fill="#49505d">설정 요청</text><circle cx="369" cy="90" r="5" fill="#8077ac"/><path d="M369 85 V42" stroke="#9e94bd" stroke-width="1.3" stroke-dasharray="3 3"/><text x="369" y="37" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#34344a">35</text><text x="369" y="56" text-anchor="middle" font-size="12" fill="#49505d">pending=1</text><circle cx="517" cy="90" r="5" fill="#4635b1"/><path d="M517 85 V118" stroke="#9e94bd" stroke-width="1.3" stroke-dasharray="3 3"/><text x="517" y="136" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#34344a">95</text><text x="517" y="154" text-anchor="middle" font-size="12" fill="#49505d">pending=0</text><circle cx="707" cy="90" r="5" fill="#8077ac"/><path d="M707 85 V42" stroke="#9e94bd" stroke-width="1.3" stroke-dasharray="3 3"/><text x="707" y="37" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#34344a">100~170</text><text x="707" y="56" text-anchor="middle" font-size="12" fill="#49505d">8회 표본</text><circle cx="837" cy="90" r="5" fill="#8077ac"/><path d="M837 85 V118" stroke="#9e94bd" stroke-width="1.3" stroke-dasharray="3 3"/><text x="837" y="136" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#34344a">180</text><text x="837" y="154" text-anchor="middle" font-size="12" fill="#49505d">다음 요청</text>
+<text x="41" y="173" font-size="11" fill="#596070">가독성을 위한 압축 시간축. 길이는 실제 시간에 비례하지 않음</text>
+</svg></div>
+<table><thead><tr><th>시점</th><th>TB 코드</th><th>실제 RTL의 의미</th></tr></thead><tbody>
+<tr><td>30ns</td><td><code>cfg_apply = 1</code></td><td>새 듀티 설정 요청</td></tr>
+<tr><td>35ns</td><td><code>wait(pending === 1'b1)</code>의 선행 조건 충족</td><td>Shadow 저장 완료</td></tr>
+<tr><td>95ns</td><td><code>wait(pending === 1'b0)</code> 통과</td><td>Active 설정 적용 완료</td></tr>
+<tr><td>96ns</td><td><code>#1; $display(...)</code></td><td>비차단 대입 이후 안정된 값 관찰</td></tr>
+<tr><td>100~170ns</td><td><code>observe_one_period()</code></td><td>8개의 하강 에지에서 PWM 출력 표본 기록</td></tr>
+<tr><td>180ns</td><td>다음 <code>request_pwm(2)</code></td><td>다음 듀티 설정 요청</td></tr></tbody></table>
+<p>이 방식에서는 <code>#80</code>처럼 고정 지연으로 설정 완료를 추정하지 않습니다. 설정 요청과 실제 적용이 서로 다른 클록에 발생하는 이유를 <code>pending</code>으로 확인합니다. 안전한 무한 대기 방지를 위해 TB에는 별도로 2000ns의 전체 시뮬레이션 제한을 둡니다.</p></section>
+<section class="section" id="s04"><h2><span class="num">04</span>2교시 ① · 테스트벤치 전체 소스 (60~85분)</h2><p>앞의 핵심 문법을 하나의 실행 가능한 테스트벤치로 묶습니다. <code>request_pwm()</code>는 설정을 요청하고 실제 적용을 기다리며, <code>observe_one_period()</code>는 8개 표본에서 출력 HIGH 횟수를 셉니다. 마지막 <code>for</code> 루프가 두 태스크를 다섯 번 호출합니다.</p>
+<div class="codeblock"><div class="codebar"><span>tb/ch03/tb_pwm_reusable_stimulus.sv · SystemVerilog · 신규 교육용 TB · 실제 컴파일 판정 별도</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제03장: task, function, repeat, for, wait로 PWM 입력 자극을 재사용한다.
+// DUT는 기존 pwm_core 원본을 참조하며, 이 TB는 관찰용이다.
+// 자동 PASS/FAIL 판정은 제04장에서 다룬다.
+module tb_pwm_reusable_stimulus;
+    reg         clk;
+    reg         resetn;
+    reg         cfg_apply;
+    reg  [31:0] cfg_period;
+    reg  [31:0] cfg_duty;
+    reg         cfg_enable;
+    reg         cfg_polarity;
+
+    wire        pwm_out;
+    wire        pending;
+    wire [31:0] active_period;
+    wire [31:0] active_duty;
+    wire        active_enable;
+    wire        active_polarity;
+
+    // 원본 RTL의 포트 13개를 이름 그대로 연결한다.
+    // 인스턴스 초기 주기만 8클록으로 축소해 관찰 시간을 절약한다.
+    pwm_core #(.RESET_PERIOD(32'd8)) dut (
+        .clk             (clk),
+        .resetn          (resetn),
+        .cfg_apply       (cfg_apply),
+        .cfg_period      (cfg_period),
+        .cfg_duty        (cfg_duty),
+        .cfg_enable      (cfg_enable),
+        .cfg_polarity    (cfg_polarity),
+        .pwm_out         (pwm_out),
+        .pending         (pending),
+        .active_period   (active_period),
+        .active_duty     (active_duty),
+        .active_enable   (active_enable),
+        .active_polarity (active_polarity)
+    );
+
+    // (추가) 클록 주기: 5ns + 5ns → 10ns.
+    initial clk = 1'b0;
+    always #5 clk = ~clk;
+
+    // (추가) function은 시뮬레이션 시간을 소비하지 않고 값을 반환한다.
+    // 실습 범위는 period=8이므로 나눗셈 분모는 항상 0이 아니다.
+    function automatic integer duty_percent(
+        input [31:0] high_ticks,
+        input [31:0] period_ticks
+    );
+        begin
+            duty_percent = (high_ticks * 100) / period_ticks;
+        end
+    endfunction
+
+    // (추가) 설정 요청을 매번 중복 작성하지 않고 task 한 곳에 모은다.
+    // cfg_apply는 하강 에지에서 한 클록 동안 유지한다.
+    task automatic request_pwm(input [31:0] duty_ticks);
+        begin
+            @(negedge clk);
+            cfg_duty  = duty_ticks;
+            cfg_apply = 1'b1;
+            $display(&quot;REQUEST t=%0d ns duty=%0d&quot;, $time, duty_ticks);
+
+            @(negedge clk);
+            cfg_apply = 1'b0;
+
+            // 먼저 Shadow 저장 완료를 확인한 뒤 적용 완료를 기다린다.
+            // pending=0만 즉시 검사하면 이전 상태를 오인할 수 있다.
+            wait (pending === 1'b1);
+            wait (pending === 1'b0);
+            #1;
+            $display(&quot;APPLIED t=%0d ns duty=%0d percent=%0d&quot;,
+                $time, active_duty,
+                duty_percent(active_duty, active_period));
+        end
+    endtask
+
+    // (추가) 한 PWM 주기의 8개 하강 에지에서 출력을 샘플링한다.
+    // 표본 개수를 표시할 뿐, 아직 기대값과 자동 비교하지 않는다.
+    task automatic observe_one_period;
+        integer cycle_index;
+        integer high_samples;
+        begin
+            high_samples = 0;
+
+            for (cycle_index = 0; cycle_index &lt; 8;
+                 cycle_index = cycle_index + 1) begin
+                @(negedge clk);
+                if (pwm_out === 1'b1)
+                    high_samples = high_samples + 1;
+
+                $display(&quot;SAMPLE duty=%0d cycle=%0d pwm=%b&quot;,
+                    active_duty, cycle_index, pwm_out);
+            end
+
+            $display(&quot;OBSERVED duty=%0d HIGH=%0d/8&quot;,
+                active_duty, high_samples);
+        end
+    endtask
+
+    initial begin
+        $dumpfile(&quot;ch03_pwm_reusable_stimulus.vcd&quot;);
+        $dumpvars(0, tb_pwm_reusable_stimulus);
+    end
+
+    // (추가) 시뮬레이션 무한 대기를 방지하기 위한 안전 종료.
+    initial begin
+        #2000;
+        $display(&quot;TIMEOUT: PWM 설정 완료 신호를 확인하세요.&quot;);
+        $finish;
+    end
+
+    integer duty_step;
+
+    initial begin
+        resetn       = 1'b0;
+        cfg_apply    = 1'b0;
+        cfg_period   = 32'd8;
+        cfg_duty     = 32'd0;
+        cfg_enable   = 1'b1;
+        cfg_polarity = 1'b0;
+
+        $display(&quot;=== CH03 REUSABLE STIMULUS START ===&quot;);
+
+        // (추가) 리셋을 두 번의 하강 에지 동안 유지한다.
+        repeat (2) @(negedge clk);
+        resetn = 1'b1;
+
+        // (추가) 0, 2, 4, 6, 8클록의 Duty를 순서대로 시험한다.
+        // cfg_period=8이므로 0%, 25%, 50%, 75%, 100%가 된다.
+        for (duty_step = 0; duty_step &lt;= 8;
+             duty_step = duty_step + 2) begin
+            request_pwm(duty_step);
+            observe_one_period();
+        end
+
+        $display(&quot;=== CH03 END: OBSERVATION ONLY ===&quot;);
+        $finish;
+    end
+endmodule
+</code></pre></div>
+<h3>코드 풀이 — 한 줄의 호출이 수행하는 일</h3>
+<p><code>request_pwm(duty_step)</code> 한 줄은 하강 에지 대기 → 듀티 설정 → <code>cfg_apply</code> 한 클록 유지 → <code>pending</code> 상승·하강 대기 → 실제 <code>active_duty</code> 출력까지 수행합니다. 외부에서는 매번 같은 문장을 다시 작성할 필요가 없습니다.</p>
+<p><code>observe_one_period()</code>는 <code>for</code> 반복문을 이용해 각 하강 에지에서 <code>pwm_out</code>을 관찰하고 HIGH 표본 수를 집계합니다. 숫자를 세는 <code>if</code>는 아직 DUT가 올바른지 자동 판정하는 검증문이 아닙니다. 제04장에서 기대값과 비교하는 PASS/FAIL로 확장합니다.</p>
+<p><code>duty_percent(active_duty, active_period)</code>의 결과는 설정 2/8에서 25, 4/8에서 50입니다. 이 예제에서는 주기가 8로 고정되어 분모가 0이 아니며 연산 폭의 문제가 없습니다. 범용 모듈로 확장할 때는 0 주기 처리와 곱셈 폭을 검토해야 합니다.</p></section>
+<section class="section" id="s05"><h2><span class="num">05</span>2교시 ② · Ubuntu 실행·파일 확인 (85~100분)</h2><p>Ubuntu(우분투, 리눅스 배포판)에서는 기존 설치된 Icarus Verilog(아이카루스 베릴로그, RTL 시뮬레이터)를 사용합니다. 기존 저장소의 원본 PWM 파일은 읽기 전용으로 컴파일 대상에 지정할 뿐 복사하거나 수정하지 않습니다.</p>
+<div class="codeblock"><div class="codebar"><span>Ubuntu 터미널 · Bash · 실행 명령 · 최초 환경에 따라 설치 확인</span></div><pre tabindex="0"><code># 1. 저장소의 검증 과정 폴더로 이동한다.
+cd /path/to/system_verilog_uvm_tb
+
+# 2. Icarus Verilog가 설치되어 있는지 확인한다.
+iverilog -V
+
+# 3. TB와 기존 pwm_core를 컴파일하고 시뮬레이션한다.
+bash scripts/run_ch03.sh
+
+# 4. 로그에서 각 듀티의 관찰 요약을 확인한다.
+grep '^OBSERVED' .build/ch03/output.log
+
+# 5. GTKWave가 설치되었다면 파형 파일을 연다.
+gtkwave .build/ch03/ch03_pwm_reusable_stimulus.vcd</code></pre></div>
+<div class="codeblock"><div class="codebar"><span>scripts/run_ch03.sh · Bash · 신규 교육용 실행 스크립트</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 제03장: 기존 pwm_core와 반복 자극 TB를 컴파일하고 시뮬레이션한다.
+set -euo pipefail
+
+SCRIPT_DIR=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)&quot; &amp;&amp; pwd)&quot;
+COURSE_ROOT=&quot;$(cd &quot;$SCRIPT_DIR/..&quot; &amp;&amp; pwd)&quot;
+DUT_PATH=&quot;${DUT_PATH:-$COURSE_ROOT/reference_rtl/pwm_core.v}&quot;
+TB_PATH=&quot;$COURSE_ROOT/tb/ch03/tb_pwm_reusable_stimulus.sv&quot;
+OUT_DIR=&quot;$COURSE_ROOT/.build/ch03&quot;
+
+# 컴파일러·실행기를 반드시 함께 확인한다.
+for tool in iverilog vvp; do
+  if ! command -v &quot;$tool&quot; &gt;/dev/null 2&gt;&amp;1; then
+    echo &quot;ERROR: $tool 명령이 없습니다. sudo apt install iverilog&quot;
+    exit 2
+  fi
+done
+
+# DUT가 없으면 파일을 복사하지 말고 경로를 먼저 확인한다.
+if [[ ! -f &quot;$DUT_PATH&quot; ]]; then
+  echo &quot;ERROR: 원본 RTL 없음: $DUT_PATH&quot;
+  echo &quot;사용법: DUT_PATH=/실제/경로/pwm_core.v bash scripts/run_ch03.sh&quot;
+  exit 2
+fi
+
+mkdir -p &quot;$OUT_DIR&quot;
+
+# -g2012는 이 테스트벤치의 SystemVerilog 문법을 지원하기 위한 옵션이다.
+iverilog -g2012 -s tb_pwm_reusable_stimulus \
+  -o &quot;$OUT_DIR/simulation.vvp&quot; &quot;$DUT_PATH&quot; &quot;$TB_PATH&quot;
+
+# 표준 출력과 VCD 파형을 이 장만의 출력 폴더에 보존한다.
+(cd &quot;$OUT_DIR&quot; &amp;&amp; vvp simulation.vvp | tee output.log)
+echo &quot;로그: $OUT_DIR/output.log&quot;
+echo &quot;파형: $OUT_DIR/ch03_pwm_reusable_stimulus.vcd&quot;
+</code></pre></div>
+<p>스크립트의 <code>DUT_PATH</code>는 기본적으로 상위 <code>part02_1/ch04/rtl/pwm_core.v</code>를 가리킵니다. 독립 경로로 옮긴 경우에는 <code>DUT_PATH=/절대/경로/pwm_core.v bash scripts/run_ch03.sh</code>로 실행합니다. 컴파일된 결과와 VCD(브이시디, 신호 변화 기록)는 <code>.build/ch03/</code>에 보관합니다.</p></section>
+<section class="section" id="s06"><h2><span class="num">06</span>2교시 ③ · 예상 출력과 해석 (100~110분)</h2><p>다음은 원본 PWM 카운터의 상승 에지 동작과 테스트벤치의 하강 에지 호출 순서로 계산한 <strong>예상 로그 발췌</strong>입니다. 매 반복마다 8개의 <code>SAMPLE</code> 행이 추가되므로 아래에서는 요약만 표시합니다. 시뮬레이터를 실제 실행한 로그로 간주하지 않습니다.</p>
+<div class="codeblock"><div class="codebar"><span>output.log 예상 요약 · TEXT · 예상값 · 실제 실행 기록과 구별</span></div><pre tabindex="0"><code>=== CH03 REUSABLE STIMULUS START ===
+REQUEST t=30 ns duty=0
+APPLIED t=96 ns duty=0 percent=0
+OBSERVED duty=0 HIGH=0/8
+REQUEST t=180 ns duty=2
+APPLIED t=256 ns duty=2 percent=25
+OBSERVED duty=2 HIGH=2/8
+REQUEST t=340 ns duty=4
+APPLIED t=416 ns duty=4 percent=50
+OBSERVED duty=4 HIGH=4/8
+REQUEST t=500 ns duty=6
+APPLIED t=576 ns duty=6 percent=75
+OBSERVED duty=6 HIGH=6/8
+REQUEST t=660 ns duty=8
+APPLIED t=736 ns duty=8 percent=100
+OBSERVED duty=8 HIGH=8/8
+=== CH03 END: OBSERVATION ONLY ===</code></pre></div>
+<table><thead><tr><th><code>cfg_duty</code></th><th>함수 계산(%)</th><th>한 주기의 HIGH 표본 예상</th><th>LOW 표본 예상</th></tr></thead><tbody>
+<tr><td>0</td><td>0%</td><td>0회</td><td>8회</td></tr>
+<tr><td>2</td><td>25%</td><td>2회</td><td>6회</td></tr>
+<tr><td>4</td><td>50%</td><td>4회</td><td>4회</td></tr>
+<tr><td>6</td><td>75%</td><td>6회</td><td>2회</td></tr>
+<tr><td>8</td><td>100%</td><td>8회</td><td>0회</td></tr></tbody></table>
+<p><strong>관찰값과 기대값의 구분:</strong> <code>OBSERVED</code>는 TB가 출력 상태를 세어 기록하는 이름일 뿐 자동 검증 통과를 뜻하지 않습니다. 기대 표본 횟수는 원본 RTL의 <code>counter &lt; active_duty</code> 조건에서 얻은 이론값입니다. 실제로 같았는지는 실행 후에만 확정합니다.</p></section>
+<section class="section" id="s07"><h2><span class="num">07</span>2교시 ④ · 오류 확인·다음 실습 (110~120분)</h2><table><thead><tr><th>문제 상황</th><th>확인할 곳</th></tr></thead><tbody>
+<tr><td><code>wait</code>에서 진행되지 않음</td><td><code>cfg_apply</code>가 한 번의 상승 에지에 HIGH였는지, <code>pending</code>이 1로 올라왔는지 확인</td></tr>
+<tr><td>예상 HIGH 개수와 차이</td><td><code>RESET_PERIOD=8</code>, <code>cfg_period=8</code>, <code>cfg_polarity=0</code> 여부 확인</td></tr>
+<tr><td>파형 파일이 없음</td><td><code>$dumpfile</code>과 <code>vvp</code> 실행 여부, 실행 디렉터리 확인</td></tr>
+<tr><td>컴파일 오류</td><td><code>iverilog -g2012</code> 사용 여부, DUT 경로와 포트 이름 확인</td></tr></tbody></table>
+<p><strong>완료 기준:</strong> 동일 DUT에 0·2·4·6·8의 다섯 듀티를 입력하고, <code>REQUEST</code>·<code>APPLIED</code>·<code>OBSERVED</code>의 순서를 확인하며, 로그와 VCD에서 HIGH 표본이 어떻게 달라지는지 설명합니다.</p>
+<p><strong>다음 제04장:</strong> 지금까지는 출력 관찰과 집계만 수행했습니다. 다음 장에서는 <code>if</code>, <code>===</code>, <code>$error</code>, <code>$fatal</code>을 이용해 기준값과 실제값을 비교하고 PASS/FAIL을 자동으로 판정합니다.</p></section>
+<section class="section" id="s08"><h2><span class="num">08</span>참고 · 재사용한 pwm_core 원본 코드</h2><p>실제 검증 대상은 아래 기존 RTL과 동일합니다. <code>pending</code>, <code>shadow_duty</code>, <code>active_duty</code>, <code>counter</code>의 관계를 소스에서 다시 확인하면, 태스크가 무엇을 기다리는지 자연스럽게 이해할 수 있습니다.</p>
+<div class="codeblock"><div class="codebar"><span>part02_1/ch04/rtl/pwm_core.v · Verilog · 기존 원본 · 소스 변경 없음</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// P2-04: 보드와 무관한 단일 채널 범용 PWM 코어.
+// (추가) period와 duty는 클록 횟수 단위. 0%/100%는 지속 LOW/HIGH.
+// (추가) 설정은 주기 마지막 경계에서만 활성값으로 반영.
+module pwm_core #(
+    parameter [31:0] RESET_PERIOD = 32'd100000
+)(
+    input  wire        clk,
+    input  wire        resetn,
+    input  wire        cfg_apply,
+    input  wire [31:0] cfg_period,
+    input  wire [31:0] cfg_duty,
+    input  wire        cfg_enable,
+    input  wire        cfg_polarity,
+    output wire        pwm_out,
+    output reg         pending,
+    output reg [31:0] active_period,
+    output reg [31:0] active_duty,
+    output reg         active_enable,
+    output reg         active_polarity
+);
+    reg [31:0] counter;
+    reg [31:0] shadow_period;
+    reg [31:0] shadow_duty;
+    reg        shadow_enable;
+    reg        shadow_polarity;
+
+    wire boundary = (counter &gt;= active_period - 32'd1);
+    wire duty_high = (counter &lt; active_duty);
+
+    // (주의) enable=0이면 polarity와 관계없이 LOW로 차단.
+    // (설명) 기본 polarity에서 active_duty=0이면 항상 LOW,
+    //         active_duty=active_period이면 항상 HIGH.
+    assign pwm_out = resetn &amp;&amp; active_enable &amp;&amp;
+                     (active_polarity ? !duty_high : duty_high);
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            counter         &lt;= 32'd0;
+            active_period   &lt;= RESET_PERIOD;
+            active_duty     &lt;= 32'd0;
+            active_enable   &lt;= 1'b0;
+            active_polarity &lt;= 1'b0;
+            shadow_period   &lt;= RESET_PERIOD;
+            shadow_duty     &lt;= 32'd0;
+            shadow_enable   &lt;= 1'b0;
+            shadow_polarity &lt;= 1'b0;
+            pending         &lt;= 1'b0;
+        end else begin
+            if (boundary) begin
+                counter &lt;= 32'd0;
+                if (pending) begin
+                    active_period   &lt;= shadow_period;
+                    active_duty     &lt;= shadow_duty;
+                    active_enable   &lt;= shadow_enable;
+                    active_polarity &lt;= shadow_polarity;
+                    pending         &lt;= 1'b0;
+                end
+            end else begin
+                counter &lt;= counter + 32'd1;
+            end
+            // (추가) 경계와 APPLY가 겹치면 새 값은 다음 경계에 적용.
+            // 여러 APPLY가 겹치면 최종 요청값을 우선하는 단일 Shadow 구조.
+            if (cfg_apply) begin
+                shadow_period   &lt;= cfg_period;
+                shadow_duty     &lt;= cfg_duty;
+                shadow_enable   &lt;= cfg_enable;
+                shadow_polarity &lt;= cfg_polarity;
+                pending         &lt;= 1'b1;
+            end
+        end
+    end
+endmodule
+</code></pre></div>
+<p>주기 경계 검사는 <code>boundary</code>, 출력 HIGH 구간 검사는 <code>duty_high</code>로 구현되어 있습니다. 도식과 테스트벤치의 신호 명칭은 원본 포트명과 동일하게 유지했습니다.</p></section><div class="chapter-links" id="chapter-links"></div></main></div>
+<footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · v08 · 실제 실행 기록과 예상 결과를 구분</footer>
+<script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v01.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v01.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v02.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v02.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"}]};</script><script src="assets/site.js"></script></body></html>

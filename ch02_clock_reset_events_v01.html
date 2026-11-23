@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="기존 PWM RTL로 클록·리셋·설정 반영의 실제 시간 관계를 읽는 2시간 실습"><title>제02장 · Clock·Reset·이벤트 · RTL Testbench · SystemVerilog · UVM 실무 검증</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch02">
+<a class="access-skip" href="#main-content" style="position:absolute;left:-9999px;top:0">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div>
+<header class="hero"><div class="hero-inner"><p class="kicker">제1부 · VERILOG TESTBENCH</p><h1>제02장 · Clock·Reset·이벤트</h1><p>기존 PWM RTL로 클록·리셋·설정 반영의 실제 시간 관계를 읽는 2시간 실습</p>
+<div class="chips"><span class="chip">6부 · 24장</span><span class="chip">각 장 2시간 · 1시간씩 분리</span><span class="chip">기존 RTL 재사용</span></div></div></header>
+<div class="wrap"><nav class="toc" id="course-nav" aria-label="장과 절 탐색"></nav>
+<main class="content" id="main-content"><section class="section" id="s00"><h2><span class="num">00</span>학습 흐름 · 시간에 따라 변하는 회로</h2><p>제01장에서는 클록이 없는 UART Echo 연결 회로를 시험했습니다. 제02장에서는 클록에 따라 내부 상태가 달라지는 PWM(펄스폭 변조) 회로를 검증합니다. 이미 구현된 <code>pwm_core</code>를 그대로 사용하여 <strong>클록 생성 → 리셋 → 설정 요청 → 주기 경계 반영 → 출력 관찰</strong>을 따라갑니다.</p>
+ <div class="figure-wrap" style="border:1px solid #dddfd8;background:#fafaf8;padding:14px;overflow-x:auto;margin:18px 0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 870 163" role="img" aria-label="TB 입력 clk resetn cfg_apply cfg_period cfg_duty가 기존 pwm_core로 들어가며, pending active_duty pwm_out을 관찰한다" style="width:100%;min-width:620px;height:auto">
+<rect x="10" y="21" width="245" height="121" rx="6" fill="#edeafa" stroke="#4635B1" stroke-width="2"/>
+<text x="132" y="46" text-anchor="middle" fill="#322384" font-size="16" font-weight="bold">tb_pwm_clock_reset</text>
+<text x="132" y="70" text-anchor="middle" fill="#303447" font-size="12.5">clk · resetn · cfg_apply</text>
+<text x="132" y="91" text-anchor="middle" fill="#303447" font-size="12.5">cfg_period · cfg_duty</text>
+<text x="132" y="113" text-anchor="middle" fill="#303447" font-size="12">negedge에서 입력 준비</text>
+<path d="M255 81 H305" fill="none" stroke="#4635B1" stroke-width="2"/><path d="M305 81 l-10 -6 v12 Z" fill="#4635B1"/>
+<rect x="311" y="21" width="235" height="121" rx="6" fill="#ffffff" stroke="#5d6471" stroke-width="2"/>
+<text x="429" y="47" text-anchor="middle" fill="#15171c" font-size="17" font-weight="bold">pwm_core (DUT)</text>
+<text x="429" y="74" text-anchor="middle" fill="#303447" font-size="12.5">posedge에서 상태 갱신</text>
+<text x="429" y="97" text-anchor="middle" fill="#303447" font-size="12.5">Shadow → Active</text>
+<text x="429" y="119" text-anchor="middle" fill="#303447" font-size="12">기존 RTL 원본 보존</text>
+<path d="M546 81 H594" fill="none" stroke="#4635B1" stroke-width="2"/><path d="M594 81 l-10 -6 v12 Z" fill="#4635B1"/>
+<rect x="602" y="21" width="256" height="121" rx="6" fill="#f5f5f2" stroke="#5d6471" stroke-width="2"/>
+<text x="730" y="47" text-anchor="middle" fill="#15171c" font-size="17" font-weight="bold">TB 출력 관찰</text>
+<text x="730" y="74" text-anchor="middle" fill="#303447" font-size="12.5">pending · active_duty</text>
+<text x="730" y="96" text-anchor="middle" fill="#303447" font-size="12.5">active_enable · pwm_out</text>
+<text x="730" y="119" text-anchor="middle" fill="#303447" font-size="12">posedge + #1ns · 로그 · VCD</text>
+</svg></div>
+ <table><thead><tr><th>구간</th><th>시간</th><th>실습 내용</th></tr></thead><tbody>
+ <tr><td><strong>1교시</strong></td><td>0~60분</td><td>클록 문법, 상승·하강 에지, 원본 PWM의 Shadow 구조, 시간표 분석</td></tr>
+ <tr><td><strong>2교시</strong></td><td>60~120분</td><td>전체 테스트벤치 작성, Ubuntu 실행, 파형 및 리셋 시점 해석</td></tr></tbody></table>
+ <p>실습 대상은 기존 <code>part02_1/ch04/rtl/pwm_core.v</code>입니다. 보드가 없어도 시뮬레이터만 있으면 검증할 수 있으며, 원본 RTL·기존 성공 프로젝트는 수정하지 않습니다.</p></section>
+<section class="section" id="s01"><h2><span class="num">01</span>1교시 ① · always, #, posedge, negedge (0~20분)</h2><p><strong>Clock(클록, 회로의 동작 박자)</strong>은 일정한 주기로 0과 1을 반복합니다. <code>always #5 clk = ~clk;</code>는 5ns마다 클록을 반전하므로 <strong>한 주기는 10ns, 주파수는 100MHz(메가헤르츠)</strong>입니다. 여기서 <code>#5</code>는 <code>`timescale 1ns/1ps</code>를 기준으로 계산합니다.</p>
+ <div class="codeblock"><div class="codebar"><span>클록·이벤트 핵심 문법 · Verilog · 교육용 발췌</span></div><pre tabindex="0"><code>initial clk = 1'b0;      // 시뮬레이션 시작 시 LOW
+always #5 clk = ~clk;    // 5ns마다 반전: 10ns 주기
+
+@(posedge clk);          // 다음 상승 에지까지 대기
+@(negedge clk);          // 다음 하강 에지까지 대기
+#1;                      // 1ns 지난 뒤 출력 관찰</code></pre></div>
+ <p><code>initial</code>은 시작할 때 한 번 실행하고, <code>always</code>는 반복 수행합니다. <code>posedge</code>는 0에서 1로 상승하는 순간, <code>negedge</code>는 1에서 0으로 하강하는 순간을 가리킵니다.</p>
+ <p><strong>왜 TB는 하강 에지에서 입력을 바꿀까요?</strong> 원본 PWM은 상승 에지에서 입력을 읽습니다. 같은 상승 에지에서 TB도 입력을 바꾸면 실행 순서를 확신하기 어려운 <em>Race Condition(레이스 컨디션, 실행 순서 경쟁)</em>이 생길 수 있습니다. 하강 에지에 미리 값을 바꾸면 다음 상승 에지에서 안정된 입력을 읽습니다.</p>
+ <p>반대로 DUT가 내부 레지스터를 갱신하는 상승 에지 직후에는 비차단 대입 <code>&lt;=</code> 결과가 아직 반영되기 전일 수 있습니다. 이번 장에서는 관찰용으로 <code>#1</code>을 둡니다. 이 지연은 하드웨어에 합성되는 회로 지연이 아닙니다.</p></section>
+<section class="section" id="s02"><h2><span class="num">02</span>1교시 ② · 원본 PWM의 포트와 상태 (20~40분)</h2><p>기존 <code>pwm_core</code>는 새로운 설정을 받은 즉시 파형에 반영하지 않습니다. 먼저 <strong>Shadow(섀도, 대기 설정 레지스터)</strong>에 값을 저장하고, 현재 PWM 주기가 끝나는 경계에서 <strong>Active(액티브, 실제 사용 설정)</strong>로 옮깁니다. 따라서 <code>cfg_apply</code>를 1로 만들었다고 출력이 바로 변하지는 않습니다.</p>
+ <table><thead><tr><th>실제 포트</th><th>의미</th></tr></thead><tbody>
+ <tr><td><code>clk</code> / <code>resetn</code></td><td>상승 에지 클록 / LOW 활성 리셋</td></tr>
+ <tr><td><code>cfg_apply</code></td><td>새 설정을 Shadow에 보관하도록 요청</td></tr>
+ <tr><td><code>cfg_period</code> / <code>cfg_duty</code></td><td>주기·HIGH 구간을 나타내는 클록 개수</td></tr>
+ <tr><td><code>cfg_enable</code> / <code>cfg_polarity</code></td><td>출력 허용 / 극성 설정</td></tr>
+ <tr><td><code>pending</code></td><td>Shadow 값을 Active에 적용하기 전 대기 표시</td></tr>
+ <tr><td><code>active_period</code> / <code>active_duty</code></td><td>현재 적용 중인 주기·듀티</td></tr>
+ <tr><td><code>active_enable</code> / <code>active_polarity</code></td><td>현재 적용 중인 활성화·극성</td></tr>
+ <tr><td><code>pwm_out</code></td><td>최종 PWM 출력</td></tr></tbody></table>
+ <p><code>RESET_PERIOD</code>를 교육용으로 8클록으로 줄이고, <code>cfg_period=8</code>, <code>cfg_duty=3</code>으로 요청합니다. 활성화 이후 주기는 80ns, HIGH 구간은 30ns로 <strong>듀티비가 37.5%</strong>입니다.</p>
+ <p><strong>리셋은 두 층으로 나뉩니다.</strong> <code>always @(posedge clk)</code> 내부의 레지스터는 상승 에지에서 <code>resetn</code>을 확인하므로 동기식으로 초기화됩니다. 반면 <code>pwm_out</code>은 조합식에서 <code>resetn</code>을 직접 사용하므로 LOW 리셋을 인가하면 상승 에지 이전에도 곧바로 출력이 0으로 차단됩니다.</p></section>
+<section class="section" id="s03"><h2><span class="num">03</span>1교시 ③ · 시간축을 실제 코드와 맞추기 (40~60분)</h2><p>클록은 5, 15, 25, 35…ns에 상승합니다. 입력은 20, 30, 40…ns의 하강 에지에 바뀌며, 로그는 DUT 레지스터가 갱신된 다음 1ns에 기록합니다.</p>
+ <div class="figure-wrap" style="border:1px solid #dddfd8;background:#fafaf8;padding:12px;overflow-x:auto;margin:16px 0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 180" role="img" aria-label="t20 리셋 해제, t30 설정 요청, t35 shadow 저장, t95 active 반영, t190 리셋 재인가, t195 레지스터 초기화" style="width:100%;min-width:630px;height:auto">
+<text x="17" y="24" font-size="14" font-weight="bold" fill="#322384">입력과 레지스터 변경 시점</text><path d="M35 88 H853" stroke="#606777" stroke-width="2" fill="none"/><path d="M853 88 l-10 -5 v10 Z" fill="#606777"/>
+<circle cx="92" cy="88" r="5" fill="#8074ae"/><path d="M92 81 V42" stroke="#a29ac4" stroke-width="1.2" stroke-dasharray="3 3"/><text x="92" y="37" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#303447">20ns</text><text x="92" y="57" text-anchor="middle" font-size="11.5" fill="#4a4f5a">Reset 해제</text><circle cx="220" cy="88" r="5" fill="#8074ae"/><path d="M220 81 V114" stroke="#a29ac4" stroke-width="1.2" stroke-dasharray="3 3"/><text x="220" y="133" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#303447">30ns</text><text x="220" y="151" text-anchor="middle" font-size="11.5" fill="#4a4f5a">Apply 요청</text><circle cx="334" cy="88" r="5" fill="#8074ae"/><path d="M334 81 V42" stroke="#a29ac4" stroke-width="1.2" stroke-dasharray="3 3"/><text x="334" y="37" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#303447">35ns</text><text x="334" y="57" text-anchor="middle" font-size="11.5" fill="#4a4f5a">Shadow 저장</text><circle cx="510" cy="88" r="5" fill="#4635B1"/><path d="M510 81 V114" stroke="#a29ac4" stroke-width="1.2" stroke-dasharray="3 3"/><text x="510" y="133" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#303447">95ns</text><text x="510" y="151" text-anchor="middle" font-size="11.5" fill="#4a4f5a">Active 반영</text><circle cx="690" cy="88" r="5" fill="#8074ae"/><path d="M690 81 V42" stroke="#a29ac4" stroke-width="1.2" stroke-dasharray="3 3"/><text x="690" y="37" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#303447">190ns</text><text x="690" y="57" text-anchor="middle" font-size="11.5" fill="#4a4f5a">Reset 재인가</text><circle cx="812" cy="88" r="5" fill="#8074ae"/><path d="M812 81 V114" stroke="#a29ac4" stroke-width="1.2" stroke-dasharray="3 3"/><text x="812" y="133" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#303447">195ns</text><text x="812" y="151" text-anchor="middle" font-size="11.5" fill="#4a4f5a">내부 초기화</text>
+<text x="35" y="172" font-size="11.5" fill="#565b6b">교육용 압축 시간축입니다. 지점 사이의 길이는 실제 시간 비율과 다릅니다.</text></svg></div>
+ <table><thead><tr><th>시각</th><th>동작</th><th>예상 상태</th></tr></thead><tbody>
+ <tr><td>20ns</td><td><code>resetn</code> 해제</td><td>25ns 상승 에지부터 카운터 진행</td></tr>
+ <tr><td>30ns</td><td><code>cfg_apply</code> HIGH</td><td>새 설정 요청</td></tr>
+ <tr><td>35ns</td><td>Shadow 저장</td><td><code>pending=1</code>, Active 듀티는 0 유지</td></tr>
+ <tr><td>95ns</td><td>PWM 주기 경계</td><td><code>pending=0</code>, Active 듀티 3, 출력 HIGH</td></tr>
+ <tr><td>125ns</td><td>듀티 구간 종료</td><td>출력 LOW</td></tr>
+ <tr><td>175ns</td><td>다음 PWM 주기</td><td>출력 HIGH</td></tr>
+ <tr><td>190ns</td><td>LOW 리셋 재인가</td><td>조합식의 출력 즉시 LOW</td></tr>
+ <tr><td>195ns</td><td>리셋 상태의 상승 에지</td><td>내부 Active 값 초기화</td></tr></tbody></table>
+ <p>35ns에 이미 요청을 저장했는데도 95ns까지 출력이 바뀌지 않는 이유는, <code>counter</code>가 <code>active_period-1</code>의 경계에 도달해야만 Shadow 값이 Active 값으로 옮겨가기 때문입니다.</p></section>
+<section class="section" id="s04"><h2><span class="num">04</span>2교시 ① · 전체 테스트벤치 작성 (60~85분)</h2><p>테스트벤치는 세 가지 흐름을 병렬로 수행합니다. 클록 생성 <code>always</code>, 출력 관찰 <code>always @(posedge clk)</code>, 리셋과 설정 입력을 넣는 <code>initial</code>입니다. PWM 원본 포트명은 바꾸지 않습니다.</p>
+ <div class="codeblock"><div class="codebar"><span>tb/ch02/tb_pwm_clock_reset.sv · SystemVerilog · 신규 TB · RTL 시뮬레이션 미실행</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제02장: 기존 pwm_core의 클록·리셋·주기 경계를 관찰한다.
+// DUT 원본은 변경하지 않는다. 자동 PASS/FAIL 판정은 제04장에서 다룬다.
+module tb_pwm_clock_reset;
+    reg         clk;
+    reg         resetn;
+    reg         cfg_apply;
+    reg  [31:0] cfg_period;
+    reg  [31:0] cfg_duty;
+    reg         cfg_enable;
+    reg         cfg_polarity;
+
+    wire        pwm_out;
+    wire        pending;
+    wire [31:0] active_period;
+    wire [31:0] active_duty;
+    wire        active_enable;
+    wire        active_polarity;
+
+    // (추가) 실제 DUT의 모든 포트를 원래 이름으로 연결한다.
+    // RESET_PERIOD만 교육용으로 8클록으로 축소한다.
+    pwm_core #(.RESET_PERIOD(32'd8)) dut (
+        .clk             (clk),
+        .resetn          (resetn),
+        .cfg_apply       (cfg_apply),
+        .cfg_period      (cfg_period),
+        .cfg_duty        (cfg_duty),
+        .cfg_enable      (cfg_enable),
+        .cfg_polarity    (cfg_polarity),
+        .pwm_out         (pwm_out),
+        .pending         (pending),
+        .active_period   (active_period),
+        .active_duty     (active_duty),
+        .active_enable   (active_enable),
+        .active_polarity (active_polarity)
+    );
+
+    // 5ns마다 반전하므로 클록의 전체 주기는 10ns이다.
+    initial clk = 1'b0;
+    always #5 clk = ~clk;
+
+    // 출력과 내부 신호를 VCD 파일에 기록한다.
+    initial begin
+        $dumpfile(&quot;ch02_pwm_clock_reset.vcd&quot;);
+        $dumpvars(0, tb_pwm_clock_reset);
+    end
+
+    // 상승 에지 이후 1ns를 기다려 비차단 대입 결과를 읽는다.
+    // #1은 하드웨어 지연이 아니라 테스트벤치 관찰용 시간 이동이다.
+    always @(posedge clk) begin
+        #1;
+        $display(&quot;POS t=%0t ns rst=%b apply=%b pending=%b period=%0d duty=%0d en=%b pwm=%b&quot;,
+            $time, resetn, cfg_apply, pending,
+            active_period, active_duty, active_enable, pwm_out);
+    end
+
+    initial begin
+        // 0~20ns: 활성 LOW 리셋을 유지한다.
+        resetn       = 1'b0;
+        cfg_apply    = 1'b0;
+        cfg_period   = 32'd8;
+        cfg_duty     = 32'd3;
+        cfg_enable   = 1'b1;
+        cfg_polarity = 1'b0;
+        $display(&quot;=== CH02 PWM CLOCK / RESET START ===&quot;);
+
+        // t=20ns 하강 에지에 리셋 해제.
+        @(negedge clk);
+        @(negedge clk);
+        resetn = 1'b1;
+
+        // t=30~40ns 설정 요청, t=35ns Shadow 저장.
+        @(negedge clk);
+        cfg_apply = 1'b1;
+        @(negedge clk);
+        cfg_apply = 1'b0;
+
+        // t=190ns: PWM이 HIGH인 구간에서 리셋 재인가.
+        repeat (15) @(negedge clk);
+        resetn = 1'b0;
+        #1;
+        // 리셋 입력만 LOW로 바뀌어도 조합 출력은 즉시 LOW가 된다.
+        $display(&quot;EVENT t=%0t ns resetn=%b active_duty=%0d pwm=%b&quot;,
+            $time, resetn, active_duty, pwm_out);
+
+        // t=195ns 순차 레지스터 리셋, t=200ns 리셋 해제.
+        @(negedge clk);
+        resetn = 1'b1;
+
+        repeat (4) @(negedge clk);
+        $display(&quot;=== CH02 END: OBSERVATION ONLY ===&quot;);
+        $finish;
+    end
+endmodule
+</code></pre></div>
+ <h3>코드 풀이 — 숫자와 실제 시간의 관계</h3>
+ <p><code>.RESET_PERIOD(32'd8)</code>는 DUT의 초기 주기를 8클록으로 지정합니다. 10ns 클록의 8번 상승 에지 경계를 사용해 짧은 시간에 주기를 관찰할 수 있습니다.</p>
+ <p><code>repeat (15) @(negedge clk);</code>는 설정 요청을 내린 40ns 이후 열다섯 번째 하강 에지인 190ns까지 기다립니다. 이 시각에 리셋을 다시 인가하면 현재 PWM이 HIGH여도 <code>pwm_out</code>은 LOW로 내려갑니다.</p>
+ <p><code>$dumpfile</code>은 저장할 파형 파일 이름을, <code>$dumpvars</code>는 기록할 계층을 지정합니다. <code>$display</code>는 콘솔 기록, <code>$finish</code>는 시뮬레이션 종료입니다. 이번 장은 관찰 단계이므로 출력에 PASS를 임의로 붙이지 않습니다.</p></section>
+<section class="section" id="s05"><h2><span class="num">05</span>2교시 ② · Ubuntu 실행과 파형 확인 (85~100분)</h2><p>제01장에서 설치한 Icarus Verilog(아이카루스 베릴로그, 오픈소스 HDL 시뮬레이터)를 그대로 사용합니다. <code>amd_soc_rtl</code> 아래의 과정 폴더를 기준으로 원본 PWM 파일을 읽기 전용으로 참조합니다. 다른 위치에 복제했다면 <code>DUT_PATH</code> 환경변수로 원본을 지정합니다.</p>
+ <div class="codeblock"><div class="codebar"><span>Ubuntu 터미널 · Bash · 실행 절차 · 제작 환경에서는 미실행</span></div><pre tabindex="0"><code># 1. 검증 과정 폴더로 이동
+cd /path/to/system_verilog_uvm_tb
+
+# 2. RTL과 테스트벤치 컴파일 및 시뮬레이션
+bash scripts/run_ch02.sh
+
+# 3. GTKWave(지티케이웨이브, 파형 분석 도구)로 결과 열기
+gtkwave .build/ch02/ch02_pwm_clock_reset.vcd
+
+# 4. 별도 저장소에 기존 PWM RTL이 있다면 파일 경로를 지정
+DUT_PATH=/실제/경로/pwm_core.v bash scripts/run_ch02.sh</code></pre></div>
+ <div class="codeblock"><div class="codebar"><span>scripts/run_ch02.sh · Bash · 실행 스크립트 · 미실행</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 제02장: 기존 RTL을 수정하지 않고 테스트벤치·VCD·로그를 실행한다.
+set -euo pipefail
+
+SCRIPT_DIR=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)&quot; &amp;&amp; pwd)&quot;
+COURSE_ROOT=&quot;$(cd &quot;$SCRIPT_DIR/..&quot; &amp;&amp; pwd)&quot;
+
+# 과정 폴더가 amd_soc_rtl 안에 있다면 기본 DUT 경로를 사용한다.
+# 독립 경로에 있다면 DUT_PATH 환경변수로 파일 위치를 지정한다.
+DUT_PATH=&quot;${DUT_PATH:-$COURSE_ROOT/reference_rtl/pwm_core.v}&quot;
+TB_PATH=&quot;$COURSE_ROOT/tb/ch02/tb_pwm_clock_reset.sv&quot;
+OUT_DIR=&quot;$COURSE_ROOT/.build/ch02&quot;
+
+for tool in iverilog vvp; do
+  if ! command -v &quot;$tool&quot; &gt;/dev/null 2&gt;&amp;1; then
+    echo &quot;ERROR: $tool 명령이 없습니다. sudo apt install iverilog&quot;
+    exit 2
+  fi
+done
+if [[ ! -f &quot;$DUT_PATH&quot; ]]; then
+  echo &quot;ERROR: DUT 파일 없음: $DUT_PATH&quot;
+  echo &quot;사용법: DUT_PATH=/실제/경로/pwm_core.v bash scripts/run_ch02.sh&quot;
+  exit 2
+fi
+
+mkdir -p &quot;$OUT_DIR&quot;
+
+# SystemVerilog 문법과 원본 PWM 회로를 함께 컴파일한다.
+iverilog -g2012 -s tb_pwm_clock_reset \
+  -o &quot;$OUT_DIR/simulation.vvp&quot; &quot;$DUT_PATH&quot; &quot;$TB_PATH&quot;
+
+# 실행 로그와 파형을 작업 폴더에 저장한다.
+(cd &quot;$OUT_DIR&quot; &amp;&amp; vvp simulation.vvp | tee output.log)
+echo &quot;로그: $OUT_DIR/output.log&quot;
+echo &quot;파형: $OUT_DIR/ch02_pwm_clock_reset.vcd&quot;
+</code></pre></div>
+ <p><code>iverilog</code>는 두 파일을 컴파일하고, <code>vvp</code>는 시뮬레이션을 실행합니다. 성공적으로 실행되면 <code>.build/ch02/output.log</code>와 <code>.build/ch02/ch02_pwm_clock_reset.vcd</code>가 생성됩니다.</p>
+ <p>파형에서 <code>clk</code>, <code>resetn</code>, <code>cfg_apply</code>, <code>pending</code>, <code>active_duty</code>, <code>pwm_out</code>을 함께 표시하면 경계와 동기식 리셋의 차이를 직접 볼 수 있습니다.</p></section>
+<section class="section" id="s06"><h2><span class="num">06</span>2교시 ③ · 예상 결과 해석 (100~110분)</h2><p>다음은 원본 <code>pwm_core.v</code>의 순차·조합 논리와 TB 입력 시간표를 대조해 계산한 <strong>예상 로그 일부</strong>입니다. 전체 출력이 아니라 주요 행만 표시했고, 실제 실행 로그는 아닙니다.</p>
+ <div class="codeblock"><div class="codebar"><span>output.log 중요 시점 · TEXT · 예상 출력 · 실제 실행하지 않음</span></div><pre tabindex="0"><code>POS t=26 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0
+POS t=36 ns rst=1 apply=1 pending=1 period=8 duty=0 en=0 pwm=0
+POS t=96 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1
+POS t=126 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0
+POS t=176 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1
+EVENT t=191 ns resetn=0 active_duty=3 pwm=0
+POS t=196 ns rst=0 apply=0 pending=0 period=8 duty=0 en=0 pwm=0</code></pre></div>
+ <p><strong>t=36ns:</strong> <code>cfg_apply</code>가 35ns 상승 에지에 읽혀 Shadow 값이 보관됩니다. <code>pending=1</code>이지만 Active 듀티는 아직 0이므로 PWM은 LOW입니다.</p>
+ <p><strong>t=96ns:</strong> 95ns 상승 에지에 주기 경계가 발생해 Active 듀티가 3으로 바뀌고 PWM이 HIGH가 됩니다. 이후 125ns 상승 에지에서 카운터가 3이 되어 LOW로 내려갑니다. 다음 175ns 상승 에지에 다시 HIGH가 됩니다.</p>
+ <p><strong>t=191ns:</strong> 리셋을 내린 즉시 조합 출력은 LOW지만, <code>active_duty</code>는 여전히 3입니다. <strong>t=196ns:</strong> 195ns 상승 에지에 내부 레지스터가 초기화되어 Active 듀티도 0이 됩니다.</p>
+ <p>결과가 다르면 입력을 <code>negedge</code>에서 변경했는지, <code>RESET_PERIOD</code>가 8인지, 설정 적용 시점에 <code>pending</code>이 1이었는지 순서대로 확인합니다.</p></section>
+<section class="section" id="s07"><h2><span class="num">07</span>2교시 ④ · 스스로 점검하고 다음으로 (110~120분)</h2><table><thead><tr><th>확인 질문</th><th>핵심 답</th></tr></thead><tbody>
+ <tr><td><code>always #5</code>가 만든 주기는?</td><td>HIGH 5ns + LOW 5ns → 10ns</td></tr>
+ <tr><td>TB가 하강 에지에서 입력을 바꾸는 이유는?</td><td>DUT 상승 에지 구동과 경쟁을 피하기 위해</td></tr>
+ <tr><td>35ns에 Shadow만 바뀌는 이유는?</td><td>주기 경계에서만 Active로 복사하기 때문</td></tr>
+ <tr><td>190ns와 195ns의 차이는?</td><td>조합 출력의 즉시 차단 / 순차 레지스터 초기화</td></tr></tbody></table>
+ <p><strong>완료 기준:</strong> 테스트벤치 실행 후 로그·VCD를 열어 35ns, 95ns, 125ns, 175ns, 190ns, 195ns를 실제 파형과 비교합니다. 현재 이 교재 제작 환경에서 <code>iverilog</code>를 실행하지 못했으므로 RTL_SIM 상태는 <strong>NOT_RUN(미검증)</strong>입니다.</p>
+ <p><strong>다음 제03장:</strong> 동일 PWM RTL을 재사용해 <code>task</code>, <code>function</code>, <code>repeat</code>, <code>for</code>, <code>wait</code>로 입력 자극을 재사용 가능하게 구성합니다.</p></section>
+<section class="section" id="s08"><h2><span class="num">08</span>참고 · 원본 pwm_core 전체 코드</h2><p>아래는 재사용한 기존 RTL 원본 전문입니다. 표·도식·테스트벤치의 신호명과 원본 포트·상태명을 직접 대조할 수 있습니다. 기존 소스는 변경하지 않았습니다.</p>
+ <div class="codeblock"><div class="codebar"><span>part02_1/ch04/rtl/pwm_core.v · Verilog · 원본 · Blob SHA e813f3fb107bd327054d11e0b397817b8e7bd813</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// P2-04: 보드와 무관한 단일 채널 범용 PWM 코어.
+// (추가) period와 duty는 클록 횟수 단위. 0%/100%는 지속 LOW/HIGH.
+// (추가) 설정은 주기 마지막 경계에서만 활성값으로 반영.
+module pwm_core #(
+    parameter [31:0] RESET_PERIOD = 32'd100000
+)(
+    input  wire        clk,
+    input  wire        resetn,
+    input  wire        cfg_apply,
+    input  wire [31:0] cfg_period,
+    input  wire [31:0] cfg_duty,
+    input  wire        cfg_enable,
+    input  wire        cfg_polarity,
+    output wire        pwm_out,
+    output reg         pending,
+    output reg [31:0] active_period,
+    output reg [31:0] active_duty,
+    output reg         active_enable,
+    output reg         active_polarity
+);
+    reg [31:0] counter;
+    reg [31:0] shadow_period;
+    reg [31:0] shadow_duty;
+    reg        shadow_enable;
+    reg        shadow_polarity;
+
+    wire boundary = (counter &gt;= active_period - 32'd1);
+    wire duty_high = (counter &lt; active_duty);
+
+    // (주의) enable=0이면 polarity와 관계없이 LOW로 차단.
+    // (설명) 기본 polarity에서 active_duty=0이면 항상 LOW,
+    //         active_duty=active_period이면 항상 HIGH.
+    assign pwm_out = resetn &amp;&amp; active_enable &amp;&amp;
+                     (active_polarity ? !duty_high : duty_high);
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            counter         &lt;= 32'd0;
+            active_period   &lt;= RESET_PERIOD;
+            active_duty     &lt;= 32'd0;
+            active_enable   &lt;= 1'b0;
+            active_polarity &lt;= 1'b0;
+            shadow_period   &lt;= RESET_PERIOD;
+            shadow_duty     &lt;= 32'd0;
+            shadow_enable   &lt;= 1'b0;
+            shadow_polarity &lt;= 1'b0;
+            pending         &lt;= 1'b0;
+        end else begin
+            if (boundary) begin
+                counter &lt;= 32'd0;
+                if (pending) begin
+                    active_period   &lt;= shadow_period;
+                    active_duty     &lt;= shadow_duty;
+                    active_enable   &lt;= shadow_enable;
+                    active_polarity &lt;= shadow_polarity;
+                    pending         &lt;= 1'b0;
+                end
+            end else begin
+                counter &lt;= counter + 32'd1;
+            end
+            // (추가) 경계와 APPLY가 겹치면 새 값은 다음 경계에 적용.
+            // 여러 APPLY가 겹치면 최종 요청값을 우선하는 단일 Shadow 구조.
+            if (cfg_apply) begin
+                shadow_period   &lt;= cfg_period;
+                shadow_duty     &lt;= cfg_duty;
+                shadow_enable   &lt;= cfg_enable;
+                shadow_polarity &lt;= cfg_polarity;
+                pending         &lt;= 1'b1;
+            end
+        end
+    end
+endmodule
+</code></pre></div>
+ <p>출력은 <code>resetn</code>과 <code>active_enable</code>, <code>counter &lt; active_duty</code>의 결과에 의해 결정됩니다. <code>pending</code>과 <code>boundary</code>의 코드 조건을 함께 읽으면 앞선 시간표와 일치합니다.</p></section><div class="chapter-links" id="chapter-links"></div></main></div>
+<footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · v08 · 실제 실행 기록과 예상 결과를 구분</footer>
+<script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v01.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v01.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v02.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v02.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
