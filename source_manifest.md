@@ -86,3 +86,14 @@
 - **검증 상태:** GitHub 파일·포트·INDEX 정적 검증 완료, RTL_SIM **NOT_RUN**. 예상 결과는 실제 로그 아님.
 
 - **제09장 검증 근거:** `docs/CH09_VALIDATION_v02.md`. 이론상 score_cycles=72이나 실제 RTL_SIM은 NOT_RUN.
+
+## 제10장 · 경계조건·오류 주입과 검출
+- **검증 DUT:** `reference_rtl/pwm_core.v`, 원본 Blob SHA `e813f3fb107bd327054d11e0b397817b8e7bd813`. DUT 파일은 읽기 전용.
+- **배포 페이지:** `ch10_corner_reset_timeout_v02.html`.
+- **TB:** `tb/ch10/tb_pwm_corner_reset_timeout.sv`. DUT의 실제 7개 입력·6개 출력 포트를 원본 이름으로 연결.
+- **정상 시나리오:** `RESET_PERIOD=8`, 주기 8클록, 0% LOW 16번, 100% HIGH 16번, 중간 LOW 리셋→재설정 HIGH 16번, 총 48회 출력 검사.
+- **오류 주입 A:** `+INJECT_FAULT`는 검증기 측 `measured_pwm` 값만 반전하여 `DETECTED_INJECTED_FAULT`를 기대.
+- **오류 주입 B:** `+INJECT_TIMEOUT`은 TB 외부 입력의 듀티 8 `cfg_apply`를 누락하여 10클록 내 Active 적용 실패 `DETECTED_APPLY_TIMEOUT` 기대.
+- **검증 스크립트:** `scripts/run_ch10.sh`는 정상 시뮬레이션 종료 코드 0 및 48회 PASS 확인 후, 두 부정 시험이 정확한 이유로 비정상 종료한 것을 확인해야 성공한다.
+- **파형·로그:** `.build/ch10/normal.log`, `fault_injection.log`, `apply_timeout.log`; 사용 가능 시 각 `.vcd` 분리 기록.
+- **제작 검증:** 정적 소스/문서/포트/링크 분석 완료, 실제 RTL_SIM=NOT_RUN. 근거는 `docs/CH10_VALIDATION_v02.md`.
