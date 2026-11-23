@@ -1,0 +1,13 @@
+# 제14장 검증 기록
+- 배포: ch14_fifo_flow_control_v01.html
+- DUT: reference_rtl/uart_core.v (Blob 5390c312b186c27abb2b2818f76ec76d164c75f1), reference_rtl/uart_rx.v (Blob f0d2f9fcdf84aec913720103fb373738417bf7d1), reference_rtl/uart_tx.v (Blob dfcb0cf10293a2a66ab7d704621a5219144673eb)
+- 원본: Yuul-Jung/amd_soc_rtl/part03/common/rtl, 원본 변경 없음
+- TB: tb/ch14/tb_uart_fifo_flow.sv
+- 스크립트: scripts/run_ch14.sh
+- 설정: CLK_HZ=1000000, BAUD=100000, CPB=10, 10ns TB 클록
+- 정상 시나리오: TX 18바이트 순서·직렬 핀 복조, RX 16바이트 보류·순서 확인, Reset
+- 예상 출력: PASS CH14 tx=18 rx=16 (실제 로그 아님)
+- 정적 점검: 7개 HTML 절, 원본 3모듈 포트, 상대 링크, 실행 스크립트, 코스 등록
+- RTL_SIM: NOT_RUN (시뮬레이터 실행 증거 없음)
+- BROWSER_VISUAL: NOT_RUN
+- 주의: FIFO 깊이 16과 PHY의 별도 보류 레지스터를 구분한다.
