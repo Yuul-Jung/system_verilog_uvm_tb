@@ -1,0 +1,151 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="제16장 MAC NPU 정수 연산 검증"><title>제16장 · MAC·NPU 정수 연산 검증</title><link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch16"><a class="access-skip" href="#main-content">본문 바로가기</a><button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div><header class="hero"><div class="hero-inner"><p class="kicker">제4부 · 인터페이스·연산기 검증</p><h1>제16장 · MAC·NPU 정수 연산 검증</h1><p>INT8 부호·누산·파이프라인 지연을 기존 RTL과 독립 모델로 검증합니다.</p><div class="chips"><span class="chip">PART 04 · CHAPTER 16</span><span class="chip">1교시 60분 + 2교시 60분</span><span class="chip">원본 RTL 변경 없음</span></div></div></header><div class="wrap"><nav class="toc" id="course-nav" aria-label="부·장·절 탐색"></nav><main class="content" id="main-content"><section class="section" id="s00"><h2><span class="num">00</span>개요 · INT8 MAC을 검증하는 이유</h2><p>MAC(맥, 곱셈·누산)은 NPU(엔피유, 신경망 연산 장치)의 기본 계산입니다. 두 입력을 곱한 뒤 이전 누산값에 더합니다. 부호가 있는 정수에서는 <strong>곱셈 폭, 부호 확장, 누산 폭, 결과 지연</strong>을 각각 검증해야 합니다.</p><p>이 장은 기존 <code>mac_core</code>와 <code>mac_pipeline_core</code>를 그대로 재사용합니다. NPU 전체 모델을 새로 만드는 대신, 가장 작은 계산 블록의 정답을 확정하는 실습입니다.</p><table><tr><th>1교시 60분</th><td>0~20분 INT8 수치 / 20~40분 실제 RTL 포트 / 40~60분 파이프라인 타이밍</td></tr><tr><th>2교시 60분</th><td>60~90분 전체 TB / 90~105분 Python 독립 모델·실행 / 105~120분 검증·장애 분석</td></tr></table><div class="figure-wrap" tabindex="0" style="overflow-x:auto"><svg viewBox="0 0 820 210" role="img" aria-label="동일한 a_i b_i valid_i가 mac_core와 mac_pipeline_core에 전달되고 각각 acc_o valid_o를 출력하는 구조" style="width:100%;min-width:620px"><rect x="12" y="14" width="796" height="180" rx="8" fill="#f8f8fc" stroke="#9a9ab1"/><rect x="32" y="72" width="185" height="76" rx="6" fill="#edeafa" stroke="#4635b1"/><text x="124" y="99" text-anchor="middle" font-size="15">TB 입력</text><text x="124" y="121" text-anchor="middle" font-size="12">a_i · b_i · valid_i</text><rect x="292" y="38" width="245" height="58" rx="6" fill="#fff" stroke="#4635b1"/><text x="414" y="61" text-anchor="middle" font-size="15">mac_core</text><text x="414" y="81" text-anchor="middle" font-size="12">동일 상승 에지 누산</text><rect x="292" y="117" width="245" height="58" rx="6" fill="#fff" stroke="#4635b1"/><text x="414" y="140" text-anchor="middle" font-size="15">mac_pipeline_core</text><text x="414" y="160" text-anchor="middle" font-size="12">1클록 뒤 누산</text><rect x="624" y="72" width="160" height="76" rx="6" fill="#edeafa" stroke="#4635b1"/><text x="704" y="100" text-anchor="middle" font-size="15">독립 모델 비교</text><text x="704" y="122" text-anchor="middle" font-size="12">acc_o · valid_o</text><path d="M217 110H248V67H292 M248 110V146H292 M537 67H575V110H624 M537 146H575V110" fill="none" stroke="#4635b1" stroke-width="2.5"/><text x="410" y="27" text-anchor="middle" font-size="13">기존 RTL 포트 기반 구현 구조</text></svg></div></section><section class="section" id="s01"><h2><span class="num">01</span>1교시 ① · INT8 부호와 곱셈 폭 (0~20분)</h2><p>INT8(8비트 부호 있는 정수)의 범위는 -128~127입니다. 두 8비트 값을 곱하면 결과를 온전히 담는 데 16비트가 필요합니다. 예를 들어 <code>-128 × -128</code>은 16384이며 <code>-128 × 127</code>은 -16256입니다. 두 값 모두 16비트 signed(부호 있는 정수)로 표현할 수 있습니다.</p><p>이번 TB는 <code>DATA_WIDTH=8</code>, <code>ACC_WIDTH=16</code>을 사용합니다. 누산 결과가 범위를 넘으면 원본 RTL과 동일하게 상위 비트를 버리고 16비트 2의 보수로 순환합니다. 이것은 포화 연산이 아닙니다.</p></section><section class="section" id="s02"><h2><span class="num">02</span>1교시 ② · 실제 포트와 우선순위 (20~40분)</h2><table><tr><th>포트</th><th>의미</th></tr><tr><td><code>clk</code>, <code>resetn</code></td><td>상승 에지 동기식 리셋, active-low</td></tr><tr><td><code>clear_i</code></td><td>누산 초기화, valid 입력보다 우선</td></tr><tr><td><code>valid_i</code>, <code>a_i</code>, <code>b_i</code></td><td>유효한 signed 곱셈 입력</td></tr><tr><td><code>acc_o</code>, <code>valid_o</code></td><td>누산 결과와 결과 유효 신호</td></tr></table><p>원본 두 모듈 모두 <code>!resetn → clear_i → valid_i</code> 우선순위를 갖습니다. <code>clear_i=1</code>인 에지에 들어온 곱은 버려집니다. <code>valid_i=0</code>이면 누산값을 유지합니다. 원본 기본 파라미터는 16/40비트지만 TB 인스턴스에서 8/16비트로 지정합니다.</p></section><section class="section" id="s03"><h2><span class="num">03</span>1교시 ③ · 파이프라인 지연 (40~60분)</h2><p><code>mac_core</code>는 입력이 유효한 상승 에지에서 곱을 즉시 누산 레지스터에 반영합니다. <code>mac_pipeline_core</code>는 먼저 <code>product_q</code>와 <code>product_valid_q</code>에 곱을 저장하고, 다음 상승 에지에 그 곱을 누산합니다. 따라서 같은 입력이라도 <code>acc_o</code>와 <code>valid_o</code>의 비교 시점은 한 클록 다릅니다.</p><p>파이프라인은 클록 속도를 높이기 위한 구조이지 수치 결과를 바꾸는 구조가 아닙니다. <code>clear_i</code>와 <code>resetn</code>이 활성화되면 아직 누산되지 않은 <code>product_q</code>의 유효 상태도 폐기됩니다.</p></section><section class="section" id="s04"><h2><span class="num">04</span>2교시 ① · 전체 SystemVerilog TB (60~90분)</h2><p>두 DUT에 같은 입력을 연결하고, 테스트벤치 안에서 서로 다른 시간 모델을 유지합니다. 모델은 DUT 내부 레지스터를 읽지 않습니다. <code>posedge clk</code> 뒤 <code>#1</code>에서 NBA(논블로킹 대입 갱신)가 끝난 결과를 비교합니다.</p><div class="codeblock"><div class="codebar"><span>tb/ch16/tb_mac_integer.sv · SystemVerilog · 전체 코드 · 실행 미검증</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제16장: 원본 MAC 및 파이프라인 MAC의 INT8 signed 누산 검증.
+// RTL 수정 없이 동일 입력을 두 DUT에 주고 서로 다른 출력 지연을 검사한다.
+module tb_mac_integer;
+    reg clk = 0;
+    reg resetn = 0, clear_i = 0, valid_i = 0;
+    reg signed [7:0] a_i = 0, b_i = 0;
+    wire signed [15:0] acc_basic, acc_pipe;
+    wire valid_basic, valid_pipe;
+    reg signed [15:0] model_basic = 0, model_pipe = 0;
+    reg signed [15:0] pending_product = 0;
+    reg pending_valid = 0;
+    reg expected_basic_valid = 0, expected_pipe_valid = 0;
+    integer cycles = 0, valid_count = 0, pipe_count = 0;
+    integer i;
+    reg signed [15:0] product;
+    reg signed [7:0] va, vb;
+
+    always #5 clk = ~clk;
+
+    mac_core #(.DATA_WIDTH(8), .ACC_WIDTH(16)) basic (
+        .clk(clk), .resetn(resetn), .clear_i(clear_i),
+        .valid_i(valid_i), .a_i(a_i), .b_i(b_i),
+        .acc_o(acc_basic), .valid_o(valid_basic)
+    );
+    mac_pipeline_core #(.DATA_WIDTH(8), .ACC_WIDTH(16)) piped (
+        .clk(clk), .resetn(resetn), .clear_i(clear_i),
+        .valid_i(valid_i), .a_i(a_i), .b_i(b_i),
+        .acc_o(acc_pipe), .valid_o(valid_pipe)
+    );
+
+    // 기대 모델은 DUT의 내부 신호를 참조하지 않는다.
+    // 16비트 누산에서 오버플로는 하위 16비트만 남긴다.
+    always @(posedge clk) begin
+        if (!resetn || clear_i) begin
+            model_basic = 0;
+            model_pipe = 0;
+            pending_product = 0;
+            pending_valid = 0;
+            expected_basic_valid = 0;
+            expected_pipe_valid = 0;
+        end else begin
+            expected_pipe_valid = pending_valid;
+            if (pending_valid)
+                model_pipe = model_pipe + pending_product;
+            expected_basic_valid = valid_i;
+            if (valid_i) begin
+                product = $signed(a_i) * $signed(b_i);
+                model_basic = model_basic + product;
+                pending_product = product;
+            end
+            pending_valid = valid_i;
+        end
+        // 비차단 대입이 완료된 뒤 두 결과를 비교한다.
+        #1;
+        cycles = cycles + 1;
+        if (acc_basic !== model_basic ||
+            valid_basic !== expected_basic_valid)
+            $fatal(1, &quot;FAIL BASIC cycle=%0d got=%0d/%b expected=%0d/%b&quot;,
+                   cycles, acc_basic, valid_basic,
+                   model_basic, expected_basic_valid);
+        if (acc_pipe !== model_pipe ||
+            valid_pipe !== expected_pipe_valid)
+            $fatal(1, &quot;FAIL PIPE cycle=%0d got=%0d/%b expected=%0d/%b&quot;,
+                   cycles, acc_pipe, valid_pipe,
+                   model_pipe, expected_pipe_valid);
+        if (expected_basic_valid) valid_count = valid_count + 1;
+        if (expected_pipe_valid) pipe_count = pipe_count + 1;
+    end
+
+    // 모든 입력은 하강 에지에서 변경해 상승 에지 경합을 방지한다.
+    task automatic apply(
+        input bit rst, input bit clr, input bit v,
+        input signed [7:0] aa, input signed [7:0] bb
+    );
+        begin
+            @(negedge clk);
+            resetn = rst;
+            clear_i = clr;
+            valid_i = v;
+            a_i = aa;
+            b_i = bb;
+        end
+    endtask
+
+    initial begin
+        #100000;
+        $fatal(1, &quot;FAIL GLOBAL_TIMEOUT&quot;);
+    end
+
+    initial begin
+        $dumpfile(&quot;ch16_mac_integer.vcd&quot;);
+        $dumpvars(0, tb_mac_integer);
+        // 최초 2클록 동안 동기 리셋 유지.
+        repeat(2) @(negedge clk);
+        apply(1, 0, 1, 127, 127);    // 양수 최댓값 곱
+        apply(1, 0, 1, -128, 127);   // 음수 최솟값 곱
+        apply(1, 0, 1, -128, -128);  // 양수 16384
+        apply(1, 0, 0, 8, 9);        // 버블: 누산 유지
+        apply(1, 0, 1, 127, 127);    // 누산 오버플로 검증
+        apply(1, 1, 1, 100, 100);   // clear 우선: 입력 폐기
+        apply(1, 0, 1, -3, 7);      // clear 후 새 누산
+        apply(1, 0, 1, 5, -6);
+        apply(1, 0, 0, 0, 0);        // 파이프라인 마지막 곱 배출
+        apply(0, 0, 1, 2, 3);        // reset 우선
+        apply(1, 0, 1, -128, 127);
+        apply(1, 0, 0, 0, 0);
+        apply(1, 0, 0, 0, 0);
+        @(negedge clk);
+        if (valid_count &lt; 6 || pipe_count &lt; 5)
+            $fatal(1, &quot;FAIL COVERAGE basic=%0d pipe=%0d&quot;,
+                   valid_count, pipe_count);
+        $display(&quot;PASS CH16 cycles=%0d basic_valid=%0d pipe_valid=%0d&quot;,
+                 cycles, valid_count, pipe_count);
+        $finish;
+    end
+endmodule
+</code></pre></div><h3>코드 풀이 — 핵심 구문</h3><p><code>product = $signed(a_i) * $signed(b_i)</code>는 부호 있는 곱을 계산합니다. <code>model_basic</code>은 현재 유효 입력을 즉시 더하고, <code>model_pipe</code>는 이전 에지의 <code>pending_product</code>만 더합니다. <code>!==</code>는 X/Z 상태도 오류로 판정합니다. <code>apply()</code>는 하강 에지에 입력을 바꾸므로 DUT 샘플링과 경합하지 않습니다.</p></section><section class="section" id="s05"><h2><span class="num">05</span>2교시 ② · Python 모델과 실행 (90~105분)</h2><p>Python(파이썬, 범용 프로그래밍 언어)에서는 임의 정밀도 정수를 사용하므로 하위 16비트를 잘라 2의 보수로 되돌려야 RTL과 같은 결과가 됩니다. 아래는 <strong>수치 독립 확인용</strong> 모델이며 파이프라인 시간 검증은 TB가 담당합니다.</p><div class="codeblock"><div class="codebar"><span>scripts/ch16_reference.py · Python · 전체 코드 · 실행 미검증</span></div><pre tabindex="0"><code>#!/usr/bin/env python3
+# 제16장: 8비트 부호 있는 곱과 16비트 누산의 독립 정수 모델.
+def signed16(value):
+    value &amp;= 0xffff
+    return value - 65536 if value &amp; 0x8000 else value
+
+vectors = [(127, 127), (-128, 127), (-128, -128), (127, 127)]
+acc = 0
+for a, b in vectors:
+    acc = signed16(acc + a * b)
+    print(f&quot;a={a:4d} b={b:4d} product={a*b:7d} acc={acc:7d}&quot;)
+</code></pre></div><h3>예상 출력 — Python 계산 예시</h3><div class="codeblock"><div class="codebar"><span>예상 출력 · text · 전체 코드 · 실행 미검증</span></div><pre tabindex="0"><code>a= 127 b= 127 product=  16129 acc=  16129\na=-128 b= 127 product= -16256 acc=   -127\na=-128 b=-128 product=  16384 acc=  16257\na= 127 b= 127 product=  16129 acc=  32386\n</code></pre></div><p>Ubuntu에서 <code>python3 scripts/ch16_reference.py</code>로 수치 모델을 실행하고, <code>bash scripts/run_ch16.sh</code>로 Icarus Verilog(아이카루스 베릴로그, RTL 시뮬레이터)를 컴파일·실행합니다. 실행 스크립트는 원본 RTL과 TB를 읽기 전용으로 참조하며 결과를 <code>.build/ch16/</code>에 저장합니다.</p><div class="codeblock"><div class="codebar"><span>scripts/run_ch16.sh · Bash · 전체 코드 · 실행 미검증</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 제16장: 원본 RTL 사본 두 개를 변경하지 않고 컴파일한다.
+set -euo pipefail
+ROOT=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)/..&quot; &amp;&amp; pwd)&quot;
+RTL=&quot;${RTL_DIR:-$ROOT/reference_rtl}&quot;
+if ! command -v iverilog &gt;/dev/null 2&gt;&amp;1 || ! command -v vvp &gt;/dev/null 2&gt;&amp;1; then
+  echo &quot;NOT_RUN: iverilog/vvp 설치 필요&quot; &gt;&amp;2
+  exit 2
+fi
+for f in mac_core.v mac_pipeline_core.v; do
+  if [[ ! -f &quot;$RTL/$f&quot; ]]; then
+    echo &quot;NOT_RUN: $RTL/$f 없음&quot; &gt;&amp;2
+    exit 2
+  fi
+done
+mkdir -p &quot;$ROOT/.build/ch16&quot;
+cd &quot;$ROOT/.build/ch16&quot;
+iverilog -g2012 -s tb_mac_integer -o sim \
+  &quot;$RTL/mac_core.v&quot; &quot;$RTL/mac_pipeline_core.v&quot; \
+  &quot;$ROOT/tb/ch16/tb_mac_integer.sv&quot;
+vvp sim | tee simulation.log
+grep -q '^PASS CH16 ' simulation.log
+</code></pre></div><h3>예상 출력 — RTL 시뮬레이션</h3><div class="codeblock"><div class="codebar"><span>예상 출력 · text · 전체 코드 · 실행 미검증</span></div><pre tabindex="0"><code>PASS CH16 cycles=... basic_valid=... pipe_valid=...</code></pre></div><p>위 PASS 문구는 실행이 성공했을 때 나타날 형식입니다. 실제 실행 결과로 확인되기 전에는 검증 통과로 취급하지 않습니다.</p></section><section class="section" id="s06"><h2><span class="num">06</span>2교시 ③ · 장애 분석과 검증 (105~120분)</h2><table><tr><th>증상</th><th>점검</th></tr><tr><td>음수 곱 오차</td><td><code>$signed</code>, 16비트 곱 폭, 부호 확장</td></tr><tr><td>파이프라인 한 클록 오차</td><td><code>pending_product</code>와 <code>pending_valid</code> 갱신 순서</td></tr><tr><td>Clear 뒤 값이 남음</td><td><code>clear_i</code> 우선순위, 보류 곱 폐기</td></tr><tr><td>출력 X 발생</td><td>동기식 <code>resetn</code>을 상승 에지에 적용했는지</td></tr><tr><td>누산 결과 차이</td><td>16비트 wrap-around와 Python의 무한 정밀도 차이</td></tr></table><p><strong>검증 상태:</strong> 실제 원본 포트·연산 폭·리셋 우선순위·파이프라인 지연을 소스에서 대조했습니다. RTL_SIM은 실행 환경에 Icarus Verilog가 없어 <strong>NOT_RUN</strong>입니다. 브라우저 시각 확인 역시 <strong>NOT_RUN</strong>이며 HTML·링크·탐색 구조는 정적으로 검토합니다.</p></section><div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH16 · RTL_SIM NOT_RUN</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v01.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v01.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v02.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v02.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v01.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v02.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v02.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v01.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v01.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v01.html"},{"id":"ch14","number":14,"title":"FIFO 및 흐름 제어","file":"ch14_fifo_flow_control_v01.html"},{"id":"ch15","number":15,"title":"AXI4-Lite 레지스터 검증","file":"ch15_axi4lite_register_verification_v01.html"},{"id":"ch16","number":16,"title":"MAC·NPU 정수 연산 검증","file":"ch16_mac_npu_integer_verification_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
