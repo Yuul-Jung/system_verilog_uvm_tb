@@ -1,0 +1,341 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="제21장 UVM RAL 레지스터 추상화와 AXI4-Lite 검증"><title>제21장 · UVM 레지스터 추상화</title><link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch21"><a class="access-skip" href="#main-content">본문 바로가기</a><button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div><header class="hero"><div class="hero-inner"><p class="kicker">제6부 · 실무 회귀 검증</p><h1>제21장 · UVM 레지스터 추상화</h1><p>RAL · Adapter · Predictor로 기존 AXI4-Lite 레지스터를 검증합니다.</p><div class="chips"><span class="chip">PART 06 · CHAPTER 21</span><span class="chip">1교시 60분 + 2교시 60분</span><span class="chip">기존 RTL 변경 없음</span></div></div></header><div class="wrap"><nav class="toc" id="course-nav" aria-label="부·장·절 탐색"></nav><main class="content" id="main-content"><section class="section" id="s00"><h2><span class="num">00</span>개요 · UVM RAL로 레지스터를 객체로 다루기</h2><p>제21장은 제6부의 시작입니다. RAL(Register Abstraction Layer, 레지스터 추상화 계층)은 레지스터 주소·접근 권한·리셋값을 모델로 정의하여 <code>model.data_in.write()</code>와 <code>model.data_in.read()</code>처럼 버스 신호를 직접 제어하지 않고 레지스터를 검사합니다. 제15장의 실제 <code>axi4lite_slave_adapter</code>와 <code>custom_register_bank</code>를 그대로 사용합니다.</p><table><tr><th>1교시 60분</th><td>0~20분 레지스터 모델 / 20~40분 Adapter·Map / 40~60분 Predictor·Mirror</td></tr><tr><th>2교시 60분</th><td>60~90분 전체 UVM TB / 90~105분 실행·예상 결과 / 105~120분 검증·장애 분석</td></tr></table></section><section class="section" id="s01"><h2><span class="num">01</span>1교시 ① · 실제 Register Map 확인 (0~20분)</h2><table><tr><th>주소</th><th>원본 레지스터</th><th>접근·의미</th></tr><tr><td>0x00</td><td>CONTROL</td><td>RW, enable bit0, mode bits[2:1]</td></tr><tr><td>0x04</td><td>STATUS</td><td>RO, busy/done/error</td></tr><tr><td>0x08</td><td>COMMAND</td><td>W1P, start/clear pulse</td></tr><tr><td>0x0C</td><td>IRQ_STATUS</td><td>이벤트 set, W1C clear</td></tr><tr><td>0x10</td><td>DATA_IN</td><td>RW, 32-bit, WSTRB 지원</td></tr><tr><td>0x14</td><td>DATA_OUT</td><td>RO, 외부 데이터</td></tr><tr><td>0x18</td><td>VERSION</td><td>RO, 0x00010000</td></tr><tr><td>0x1C</td><td>ID</td><td>RO, 0x524D4150</td></tr></table><p>이번 첫 RAL 예제는 CONTROL·DATA_IN·VERSION·ID 네 개를 모델링합니다. CONTROL은 원본에서 유효 비트가 3개뿐이므로 일반적인 32비트 RW 모델이 아니라 필드 마스크를 보강하는 것이 후속 과제입니다. 이번에는 유효값 0x5만 기록합니다. STATUS·COMMAND·IRQ_STATUS는 후속 확장 대상으로 남깁니다.</p></section><section class="section" id="s02"><h2><span class="num">02</span>1교시 ② · Adapter와 Frontdoor 경로 (20~40분)</h2><div class="figure-wrap" tabindex="0" style="overflow-x:auto"><svg viewBox="0 0 920 170" role="img" aria-label="axi21_block에서 axi21_adapter, axi21_sequencer, axi21_driver, axi4lite_slave_adapter, custom_register_bank로 연결되는 RAL 프런트도어 구조" style="width:100%;min-width:680px"><defs><marker id="a21" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="#4635b1"/></marker></defs><rect x="12" y="42" width="140" height="70" rx="6" fill="#edeafa" stroke="#4635b1"/><text x="82" y="81" font-size="12" text-anchor="middle">axi21_block</text><path d="M152 77h12" stroke="#4635b1" stroke-width="2" marker-end="url(#a21)"/><rect x="164" y="42" width="140" height="70" rx="6" fill="#edeafa" stroke="#4635b1"/><text x="234" y="81" font-size="12" text-anchor="middle">axi21_adapter</text><path d="M304 77h12" stroke="#4635b1" stroke-width="2" marker-end="url(#a21)"/><rect x="316" y="42" width="140" height="70" rx="6" fill="#edeafa" stroke="#4635b1"/><text x="386" y="81" font-size="12" text-anchor="middle">axi21_sequencer</text><path d="M456 77h12" stroke="#4635b1" stroke-width="2" marker-end="url(#a21)"/><rect x="468" y="42" width="140" height="70" rx="6" fill="#edeafa" stroke="#4635b1"/><text x="538" y="81" font-size="12" text-anchor="middle">axi21_driver</text><path d="M608 77h12" stroke="#4635b1" stroke-width="2" marker-end="url(#a21)"/><rect x="620" y="42" width="140" height="70" rx="6" fill="#fff" stroke="#4635b1"/><text x="690" y="81" font-size="10" text-anchor="middle">axi4lite_slave_adapter</text><path d="M760 77h12" stroke="#4635b1" stroke-width="2" marker-end="url(#a21)"/><rect x="772" y="42" width="140" height="70" rx="6" fill="#fff" stroke="#4635b1"/><text x="842" y="81" font-size="10" text-anchor="middle">custom_register_bank</text><text x="460" y="145" text-anchor="middle" font-size="13">Frontdoor: RAL 요청 → AXI4-Lite 버스 거래 → 원본 레지스터</text></svg></div><p><code>axi21_adapter.reg2bus()</code>는 RAL의 주소·데이터·읽기/쓰기 요청을 <code>axi21_item</code>으로 바꾸고, <code>bus2reg()</code>는 응답을 다시 RAL 상태로 바꿉니다. <code>set_sequencer()</code>로 실제 AXI Driver를 연결합니다. AW/W는 각각 독립 핸드셰이크이며 B/R 응답까지 완료해야 하나의 거래가 끝납니다.</p></section><section class="section" id="s03"><h2><span class="num">03</span>1교시 ③ · Predictor와 Mirror의 의미 (40~60분)</h2><p>Predictor(프리딕터, 관찰한 거래를 이용해 모델값을 갱신하는 구성요소)는 <code>axi21_driver.completed_ap</code>에서 완료 거래를 받아 <code>uvm_reg_predictor</code>로 전달합니다. <code>set_auto_predict(0)</code>으로 중복 자동 갱신을 막습니다. <code>get_mirrored_value()</code>는 DUT의 실제 레지스터를 읽는 함수가 아니라 <strong>RAL이 마지막으로 관찰·예측한 값</strong>을 반환합니다. 따라서 반드시 실제 <code>read()</code>와 함께 비교해야 합니다.</p><p>이번 예제는 Driver 완료 통지를 사용하며 <strong>독립적인 AXI 버스 Monitor는 아직 없습니다.</strong> 독립 감시가 필요한 실무 환경에서는 AW/W/B/AR/R을 별도 Monitor로 관찰하고 Predictor에 연결해야 합니다. 제22장에서 다중 Agent 구조로 확장합니다.</p></section><section class="section" id="s04"><h2><span class="num">04</span>2교시 ① · 전체 UVM 테스트벤치 (60~90분)</h2><p>전체 코드는 인터페이스, RAL 레지스터/블록, Adapter, Sequencer, Driver, Predictor, Environment, Test, 최상위 순서로 구성합니다. 원본 RTL은 읽기 전용입니다.</p><div class="codeblock"><div class="codebar"><span>tb/ch21/tb_axi_uvm_ral.sv · SystemVerilog · 전체 코드 · 실행 전</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// CH21: UVM RAL frontdoor + adapter + predictor. DUT is read-only.
+interface axi21_if(input logic clk);
+    logic resetn=0;
+    logic [31:0] awaddr=0,wdata=0,araddr=0;
+    logic [3:0] wstrb=0;
+    logic awvalid=0,wvalid=0,bready=0,arvalid=0,rready=0;
+    wire awready,wready,bvalid,arready,rvalid;
+    wire [1:0] bresp,rresp;
+    wire [31:0] rdata;
+endinterface
+
+package ch21_pkg;
+    import uvm_pkg::*;
+    `include &quot;uvm_macros.svh&quot;
+
+    // AXI4-Lite master transaction: one completed read or write.
+    class axi21_item extends uvm_sequence_item;
+        `uvm_object_utils(axi21_item)
+        bit is_write;
+        bit [31:0] addr,data;
+        bit [3:0] strb=4'hf;
+        bit [1:0] resp;
+        function new(string name=&quot;axi21_item&quot;);
+            super.new(name);
+        endfunction
+    endclass
+
+    class axi21_adapter extends uvm_reg_adapter;
+        `uvm_object_utils(axi21_adapter)
+        function new(string name=&quot;axi21_adapter&quot;);
+            super.new(name);
+            supports_byte_enable=1;
+            provides_responses=0;
+        endfunction
+        virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
+            axi21_item t=axi21_item::type_id::create(&quot;t&quot;);
+            t.is_write=(rw.kind==UVM_WRITE);
+            t.addr=rw.addr;
+            t.data=rw.data;
+            t.strb=rw.byte_en;
+            return t;
+        endfunction
+        virtual function void bus2reg(uvm_sequence_item bus_item,
+                                       ref uvm_reg_bus_op rw);
+            axi21_item t;
+            if (!$cast(t,bus_item))
+                `uvm_fatal(&quot;ADAPTER&quot;,&quot;Unexpected bus transaction&quot;)
+            rw.kind=t.is_write ? UVM_WRITE : UVM_READ;
+            rw.addr=t.addr;
+            rw.data=t.data;
+            rw.byte_en=t.strb;
+            rw.status=(t.resp==2'b00) ? UVM_IS_OK : UVM_NOT_OK;
+        endfunction
+    endclass
+
+    class axi21_reg extends uvm_reg;
+        `uvm_object_utils(axi21_reg)
+        uvm_reg_field value;
+        string access_mode=&quot;RW&quot;;
+        uvm_reg_data_t reset_value=0;
+        function new(string name=&quot;axi21_reg&quot;);
+            super.new(name,32,UVM_NO_COVERAGE);
+        endfunction
+        virtual function void build();
+            value=uvm_reg_field::type_id::create(&quot;value&quot;);
+            value.configure(this,32,0,access_mode,0,reset_value,1,1,0);
+        endfunction
+    endclass
+
+    class axi21_block extends uvm_reg_block;
+        `uvm_object_utils(axi21_block)
+        axi21_reg control,data_in,version_reg,id_reg;
+        function new(string name=&quot;axi21_block&quot;);
+            super.new(name,UVM_NO_COVERAGE);
+        endfunction
+        virtual function void build();
+            default_map=create_map(&quot;map&quot;,0,4,UVM_LITTLE_ENDIAN,1);
+            control=axi21_reg::type_id::create(&quot;control&quot;);
+            control.configure(this);
+            control.build();
+            default_map.add_reg(control,'h00,&quot;RW&quot;);
+            data_in=axi21_reg::type_id::create(&quot;data_in&quot;);
+            data_in.configure(this);
+            data_in.build();
+            default_map.add_reg(data_in,'h10,&quot;RW&quot;);
+            version_reg=axi21_reg::type_id::create(&quot;version_reg&quot;);
+            version_reg.access_mode=&quot;RO&quot;;
+            version_reg.reset_value=32'h00010000;
+            version_reg.configure(this);
+            version_reg.build();
+            default_map.add_reg(version_reg,'h18,&quot;RO&quot;);
+            id_reg=axi21_reg::type_id::create(&quot;id_reg&quot;);
+            id_reg.access_mode=&quot;RO&quot;;
+            id_reg.reset_value=32'h524D4150;
+            id_reg.configure(this);
+            id_reg.build();
+            default_map.add_reg(id_reg,'h1c,&quot;RO&quot;);
+            lock_model();
+        endfunction
+    endclass
+
+    class axi21_sequencer extends uvm_sequencer #(axi21_item);
+        `uvm_component_utils(axi21_sequencer)
+        function new(string name,uvm_component parent);
+            super.new(name,parent);
+        endfunction
+    endclass
+
+    class axi21_driver extends uvm_driver #(axi21_item);
+        `uvm_component_utils(axi21_driver)
+        virtual axi21_if vif;
+        uvm_analysis_port #(axi21_item) completed_ap;
+        function new(string name,uvm_component parent);
+            super.new(name,parent);
+            completed_ap=new(&quot;completed_ap&quot;,this);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (!uvm_config_db#(virtual axi21_if)::get(this,&quot;&quot;,&quot;vif&quot;,vif))
+                `uvm_fatal(&quot;NO_VIF&quot;,&quot;Missing AXI interface&quot;)
+        endfunction
+        task automatic write_one(axi21_item t);
+            // AW and W independent; hold both until their handshakes.
+            bit aw_done=0,w_done=0;
+            @(negedge vif.clk);
+            vif.awaddr=t.addr;vif.wdata=t.data;vif.wstrb=t.strb;
+            vif.awvalid=1;vif.wvalid=1;
+            for(int k=0;k&lt;100;k++) begin
+                @(posedge vif.clk);
+                if(vif.awvalid &amp;&amp; vif.awready) aw_done=1;
+                if(vif.wvalid &amp;&amp; vif.wready) w_done=1;
+                @(negedge vif.clk);
+                if(aw_done) vif.awvalid=0;
+                if(w_done) vif.wvalid=0;
+                if(aw_done &amp;&amp; w_done) break;
+            end
+            if(!aw_done || !w_done) `uvm_fatal(&quot;AW_W&quot;,&quot;Handshake timeout&quot;)
+            for(int k=0;k&lt;100;k++) begin
+                @(negedge vif.clk);
+                if(vif.bvalid) begin
+                    t.resp=vif.bresp;
+                    vif.bready=1;
+                    @(posedge vif.clk);
+                    @(negedge vif.clk);
+                    vif.bready=0;
+                    return;
+                end
+            end
+            `uvm_fatal(&quot;B_TIMEOUT&quot;,&quot;Write response timeout&quot;)
+        endtask
+        task automatic read_one(axi21_item t);
+            bit accepted=0;
+            @(negedge vif.clk);
+            vif.araddr=t.addr;vif.arvalid=1;
+            for(int k=0;k&lt;100;k++) begin
+                @(posedge vif.clk);
+                if(vif.arvalid &amp;&amp; vif.arready) accepted=1;
+                @(negedge vif.clk);
+                if(accepted) begin vif.arvalid=0;break;end
+            end
+            if(!accepted) `uvm_fatal(&quot;AR_TIMEOUT&quot;,&quot;Address timeout&quot;)
+            for(int k=0;k&lt;100;k++) begin
+                @(negedge vif.clk);
+                if(vif.rvalid) begin
+                    t.data=vif.rdata;t.resp=vif.rresp;
+                    vif.rready=1;
+                    @(posedge vif.clk);
+                    @(negedge vif.clk);
+                    vif.rready=0;
+                    return;
+                end
+            end
+            `uvm_fatal(&quot;R_TIMEOUT&quot;,&quot;Read response timeout&quot;)
+        endtask
+        task run_phase(uvm_phase phase);
+            axi21_item req;
+            forever begin
+                seq_item_port.get_next_item(req);
+                if(req.is_write) write_one(req);
+                else read_one(req);
+                // Completion stream feeds predictor; it is NOT an independent bus monitor.
+                completed_ap.write(req);
+                seq_item_port.item_done();
+            end
+        endtask
+    endclass
+
+    class axi21_env extends uvm_env;
+        `uvm_component_utils(axi21_env)
+        axi21_driver drv;
+        axi21_sequencer sqr;
+        axi21_adapter adapter;
+        axi21_block model;
+        uvm_reg_predictor #(axi21_item) predictor;
+        function new(string name,uvm_component parent);
+            super.new(name,parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            drv=axi21_driver::type_id::create(&quot;drv&quot;,this);
+            sqr=axi21_sequencer::type_id::create(&quot;sqr&quot;,this);
+            predictor=uvm_reg_predictor#(axi21_item)::type_id::create(&quot;predictor&quot;,this);
+            adapter=axi21_adapter::type_id::create(&quot;adapter&quot;);
+            model=axi21_block::type_id::create(&quot;model&quot;);
+            model.build();
+        endfunction
+        function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+            drv.seq_item_port.connect(sqr.seq_item_export);
+            model.default_map.set_sequencer(sqr,adapter);
+            model.default_map.set_auto_predict(0);
+            predictor.map=model.default_map;
+            predictor.adapter=adapter;
+            drv.completed_ap.connect(predictor.bus_in);
+        endfunction
+    endclass
+
+    class axi21_test extends uvm_test;
+        `uvm_component_utils(axi21_test)
+        axi21_env env;
+        virtual axi21_if vif;
+        function new(string name,uvm_component parent);
+            super.new(name,parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            env=axi21_env::type_id::create(&quot;env&quot;,this);
+            if(!uvm_config_db#(virtual axi21_if)::get(this,&quot;&quot;,&quot;vif&quot;,vif))
+                `uvm_fatal(&quot;NO_VIF&quot;,&quot;Test interface missing&quot;)
+        endfunction
+        task run_phase(uvm_phase phase);
+            uvm_status_e status;
+            uvm_reg_data_t value;
+            phase.raise_objection(this);
+            repeat(4) @(negedge vif.clk);
+            vif.resetn=1;
+            @(negedge vif.clk);
+            env.model.reset();
+
+            // Frontdoor: RAL -&gt; adapter -&gt; AXI driver -&gt; DUT.
+            env.model.data_in.write(status,32'h11223344);
+            if(status!=UVM_IS_OK) `uvm_fatal(&quot;WRITE&quot;,&quot;DATA_IN write failed&quot;)
+            env.model.data_in.read(status,value);
+            if(status!=UVM_IS_OK || value!==32'h11223344)
+                `uvm_fatal(&quot;DATA_IN&quot;,&quot;Readback mismatch&quot;)
+            if(env.model.data_in.get_mirrored_value()!==32'h11223344)
+                `uvm_fatal(&quot;PREDICT&quot;,&quot;Mirror did not update&quot;)
+
+            env.model.control.write(status,32'h00000005);
+            env.model.control.read(status,value);
+            if(status!=UVM_IS_OK || value!==32'h00000005)
+                `uvm_fatal(&quot;CONTROL&quot;,&quot;Readback mismatch&quot;)
+            env.model.version_reg.read(status,value);
+            if(status!=UVM_IS_OK || value!==32'h00010000)
+                `uvm_fatal(&quot;VERSION&quot;,&quot;VERSION mismatch&quot;)
+            env.model.id_reg.read(status,value);
+            if(status!=UVM_IS_OK || value!==32'h524D4150)
+                `uvm_fatal(&quot;ID&quot;,&quot;ID mismatch&quot;)
+            `uvm_info(&quot;CH21&quot;,&quot;PASS CH21 RAL frontdoor reads=4 writes=2&quot;,UVM_LOW)
+            phase.drop_objection(this);
+        endtask
+    endclass
+endpackage
+
+module tb_axi_uvm_ral;
+    import uvm_pkg::*;
+    import ch21_pkg::*;
+    logic clk=0;
+    always #5 clk=~clk;
+    axi21_if bus(clk);
+    wire wr_en;
+    wire [7:0] wr_offset,rd_offset;
+    wire [31:0] wr_data,rd_data;
+    wire [3:0] wr_strb;
+    wire enable_o,start_pulse_o,clear_pulse_o;
+    wire [1:0] mode_o,irq_status_o;
+    wire [31:0] data_in_o;
+    axi4lite_slave_adapter dut(
+        .s_axi_aclk(clk),.s_axi_aresetn(bus.resetn),
+        .s_axi_awaddr(bus.awaddr),.s_axi_awprot(3'b000),
+        .s_axi_awvalid(bus.awvalid),.s_axi_awready(bus.awready),
+        .s_axi_wdata(bus.wdata),.s_axi_wstrb(bus.wstrb),
+        .s_axi_wvalid(bus.wvalid),.s_axi_wready(bus.wready),
+        .s_axi_bresp(bus.bresp),.s_axi_bvalid(bus.bvalid),.s_axi_bready(bus.bready),
+        .s_axi_araddr(bus.araddr),.s_axi_arprot(3'b000),
+        .s_axi_arvalid(bus.arvalid),.s_axi_arready(bus.arready),
+        .s_axi_rdata(bus.rdata),.s_axi_rresp(bus.rresp),
+        .s_axi_rvalid(bus.rvalid),.s_axi_rready(bus.rready),
+        .wr_en(wr_en),.wr_offset(wr_offset),.wr_data(wr_data),
+        .wr_strb(wr_strb),.rd_offset(rd_offset),.rd_data(rd_data)
+    );
+    custom_register_bank bank(
+        .clk(clk),.resetn(bus.resetn),.wr_en(wr_en),
+        .wr_offset(wr_offset),.wr_data(wr_data),.wr_strb(wr_strb),
+        .rd_offset(rd_offset),.rd_data(rd_data),
+        .busy_i(1'b0),.done_i(1'b0),.error_i(1'b0),
+        .irq_done_event_i(1'b0),.irq_error_event_i(1'b0),
+        .data_out_i(32'h12345678),.enable_o(enable_o),
+        .mode_o(mode_o),.start_pulse_o(start_pulse_o),
+        .clear_pulse_o(clear_pulse_o),.data_in_o(data_in_o),
+        .irq_status_o(irq_status_o)
+    );
+    initial begin
+        uvm_config_db#(virtual axi21_if)::set(null,&quot;uvm_test_top.*&quot;,&quot;vif&quot;,bus);
+        run_test(&quot;axi21_test&quot;);
+    end
+    initial begin
+        #100000;
+        $fatal(1,&quot;CH21 GLOBAL_TIMEOUT&quot;);
+    end
+endmodule
+</code></pre></div><h3>핵심 코드 풀이</h3><p><code>axi21_reg.build()</code>는 32비트 필드를 만들고, <code>axi21_block.build()</code>는 오프셋별 모델을 배치합니다. <code>reg2bus()</code>는 UVM 레지스터 요청을 버스 거래로 변환합니다. <code>write_one()</code>은 AW/W를 모두 수락시킨 뒤 B 응답을 받고, <code>read_one()</code>은 AR 수락 뒤 R 데이터를 수신합니다. <code>predictor.bus_in</code>은 완료 거래로 모델의 Mirror를 갱신합니다.</p></section><section class="section" id="s05"><h2><span class="num">05</span>2교시 ② · 실행 및 예상 출력 (90~105분)</h2><p>Ubuntu에서 <code>bash scripts/run_ch21.sh</code>를 실행합니다. Verilator(베릴레이터, SystemVerilog 시뮬레이터)와 UVM(범용 검증 방법론) 소스가 필요합니다. <code>UVM_HOME</code>은 설치된 UVM 소스 루트를 가리킵니다. 실행 파일과 로그는 <code>.build/ch21/</code>에만 생성됩니다.</p><div class="codeblock"><div class="codebar"><span>scripts/run_ch21.sh · Bash · 전체 코드 · 실행 전</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# CH21: UVM RAL frontdoor simulation; no changes to source RTL.
+set -euo pipefail
+ROOT=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)/..&quot; &amp;&amp; pwd)&quot;
+RTL=&quot;${RTL_DIR:-$ROOT/reference_rtl}&quot;
+OUT=&quot;$ROOT/.build/ch21&quot;
+for f in axi4lite_slave_adapter.v custom_register_bank.v; do
+  if [[ ! -f &quot;$RTL/$f&quot; ]]; then echo &quot;NOT_RUN: missing $RTL/$f&quot; &gt;&amp;2; exit 2; fi
+done
+if ! command -v verilator &gt;/dev/null 2&gt;&amp;1; then
+  echo &quot;NOT_RUN: Verilator unavailable&quot; &gt;&amp;2; exit 2
+fi
+if [[ -z &quot;${UVM_HOME:-}&quot; || ! -f &quot;$UVM_HOME/src/uvm_pkg.sv&quot; ]]; then
+  echo &quot;NOT_RUN: UVM_HOME/src/uvm_pkg.sv unavailable&quot; &gt;&amp;2; exit 2
+fi
+mkdir -p &quot;$OUT&quot;
+verilator --version &gt; &quot;$OUT/verilator_version.txt&quot;
+verilator --binary --timing --assert -Wno-fatal \
+  --top-module tb_axi_uvm_ral --Mdir &quot;$OUT/obj_dir&quot; \
+  +incdir+&quot;$UVM_HOME/src&quot; &quot;$UVM_HOME/src/uvm_pkg.sv&quot; \
+  &quot;$RTL/axi4lite_slave_adapter.v&quot; &quot;$RTL/custom_register_bank.v&quot; \
+  &quot;$ROOT/tb/ch21/tb_axi_uvm_ral.sv&quot; 2&gt;&amp;1 | tee &quot;$OUT/build.log&quot;
+(cd &quot;$OUT&quot; &amp;&amp; ./obj_dir/Vtb_axi_uvm_ral +UVM_TESTNAME=axi21_test | tee simulation.log)
+grep -q 'PASS CH21 RAL frontdoor reads=4 writes=2' &quot;$OUT/simulation.log&quot;
+if grep -Eq 'UVM_(ERROR|FATAL)' &quot;$OUT/simulation.log&quot;; then
+  echo &quot;FAIL: UVM ERROR/FATAL in log&quot; &gt;&amp;2; exit 1
+fi
+echo &quot;PASS CH21 SUITE&quot;
+</code></pre></div><h3>예상 출력 — 실제 실행 결과 아님</h3><div class="codeblock"><div class="codebar"><span>예상 로그 · Text · 전체 코드 · 실행 전</span></div><pre tabindex="0"><code>UVM_INFO ... CH21 ... PASS CH21 RAL frontdoor reads=4 writes=2\nPASS CH21 SUITE</code></pre></div><p>PASS 문구는 실행 성공과 응답값 비교가 모두 만족될 때만 표시됩니다. 현재 제작 환경에서는 시뮬레이터 실행 증거가 없어 <strong>RTL_SIM=NOT_RUN</strong>입니다.</p></section><section class="section" id="s06"><h2><span class="num">06</span>2교시 ③ · 검증·장애 분석 (105~120분)</h2><table><tr><th>현상</th><th>점검 항목</th></tr><tr><td>NO_VIF</td><td><code>uvm_config_db</code>에 <code>axi21_if</code> 전달 여부</td></tr><tr><td>AW_W timeout</td><td><code>awvalid/awready</code>, <code>wvalid/wready</code>, 리셋 해제</td></tr><tr><td>B/R timeout</td><td><code>bvalid/bready</code>, <code>rvalid/rready</code> 유지 조건</td></tr><tr><td>Mirror 불일치</td><td><code>predictor.map</code>, <code>predictor.adapter</code>, <code>completed_ap</code> 연결</td></tr><tr><td>VERSION/ID 불일치</td><td>원본 주소 0x18/0x1C와 상수값, read 응답</td></tr></table><p>정적 점검에서는 실제 포트와 RAL 주소, 신호 이름, 파일 링크, 현재 PART06 → CHAPTER21 → SECTION 메뉴 구성, 모바일 버튼·Escape 지원 코드를 확인합니다. 실제 시뮬레이션과 브라우저 화면 검증은 별도 실행 전까지 NOT_RUN으로 유지합니다.</p></section><div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH21 · RTL_SIM NOT_RUN</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v01.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v01.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v02.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v02.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v01.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v02.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v02.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v01.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v01.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v01.html"},{"id":"ch14","number":14,"title":"FIFO 및 흐름 제어","file":"ch14_fifo_flow_control_v01.html"},{"id":"ch15","number":15,"title":"AXI4-Lite 레지스터 검증","file":"ch15_axi4lite_register_verification_v01.html"},{"id":"ch16","number":16,"title":"MAC·NPU 정수 연산 검증","file":"ch16_mac_npu_integer_verification_v01.html"},{"id":"ch17","number":17,"title":"최소 UVM 환경","file":"ch17_minimal_uvm_environment_v01.html"},{"id":"ch18","number":18,"title":"Sequence에서 Driver까지","file":"ch18_sequence_driver_v01.html"},{"id":"ch19","number":19,"title":"Monitor·Agent·Scoreboard","file":"ch19_monitor_agent_scoreboard_v02.html"},{"id":"ch20","number":20,"title":"Factory·Config·Objection","file":"ch20_factory_config_objection_v01.html"},{"id":"ch21","number":21,"title":"UVM 레지스터 추상화","file":"ch21_uvm_register_abstraction_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
