@@ -1,10 +1,10 @@
 # RTL Testbench · SystemVerilog · UVM 검증 학습안내서
 
 - **전체 편성:** 독립 6부, 총 24장/48시간, 한 장은 60분 × 2회로 진행
-- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [제09장](ch09_reference_model_scoreboard_v02.html) / [제10장](ch10_corner_reset_timeout_v02.html) / [제11장](ch11_temporal_assertions_v01.html) / [제12장](ch12_functional_coverage_v01.html) / [제13장](ch13_uart_stream_verification_v01.html) / [제14장](ch14_fifo_flow_control_v01.html) / [제15장](ch15_axi4lite_register_verification_v01.html) / [제16장](ch16_mac_npu_integer_verification_v01.html) / [제17장](ch17_minimal_uvm_environment_v01.html) / [제18장](ch18_sequence_driver_v01.html) / [제19장](ch19_monitor_agent_scoreboard_v02.html) / [전체 편성](CURRICULUM.md)
+- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [제09장](ch09_reference_model_scoreboard_v02.html) / [제10장](ch10_corner_reset_timeout_v02.html) / [제11장](ch11_temporal_assertions_v01.html) / [제12장](ch12_functional_coverage_v01.html) / [제13장](ch13_uart_stream_verification_v01.html) / [제14장](ch14_fifo_flow_control_v01.html) / [제15장](ch15_axi4lite_register_verification_v01.html) / [제16장](ch16_mac_npu_integer_verification_v01.html) / [제17장](ch17_minimal_uvm_environment_v01.html) / [제18장](ch18_sequence_driver_v01.html) / [제19장](ch19_monitor_agent_scoreboard_v02.html) / [제20장](ch20_factory_config_objection_v01.html) / [전체 편성](CURRICULUM.md)
 - **검증용 RTL:** 기존 원본의 읽기 전용 복사본을 `reference_rtl/`에서 참조합니다. UART Echo·PWM·AXI4-Lite·MAC/FIFO 등은 해당 장별 `source_manifest.md`를 확인합니다.
 - **목표:** 문법 → Testbench → Self-checking → SVA/Coverage → UVM → Regression/CI
-- **상태:** 제01~19장 배포용 HTML·테스트벤치·실행 스크립트 발행. 제19장 **RTL_SIM=NOT_RUN**, 브라우저 실측·GitHub Pages 실접속 미검증.
+- **상태:** 제01~20장 배포용 HTML·테스트벤치·실행 스크립트 발행. 제20장 정적 점검 완료, **RTL_SIM=NOT_RUN** (실제 UVM 시뮬레이션 미수행).
 
 ## 규칙
 - 정본 [rule_md](https://github.com/Yuul-Jung/rule_md) / [HTML STANDARD](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/STANDARD.md)
@@ -101,3 +101,12 @@ DUT_PATH=/실제/RTL/경로/pwm_core.v bash scripts/run_ch03.sh
 - 실행: `UVM_HOME=/실제/UVM/경로 bash scripts/run_ch19.sh` (Verilator/UVM 라이브러리 및 호환 버전 필요).
 - Monitoring(관찰)은 `pwm19_monitor`, 예상값 판정은 `pwm19_scoreboard`, 재사용 단위는 `pwm19_agent`로 분리한다.
 - 실제 실행 전까지 PASS 문자열은 예상 메시지이며, RTL 시뮬레이션 결과가 아니다.
+
+## 제20장 Factory·Config DB·Objection
+- [제20장 HTML v01](ch20_factory_config_objection_v01.html) · [제20장 검증기록](docs/CH20_VALIDATION_v01.md)
+- 검증 소스: `tb/ch20/tb_pwm_factory_config_objection.sv` · 실행: `scripts/run_ch20.sh`.
+- `pwm20_driver::type_id::set_type_override()`로 Driver를 교체하지만 기존 `pwm_core.v`는 수정하지 않는다.
+- `pwm20_cfg` 설정을 UVM Config DB로 Driver·Scoreboard에 제공한다.
+- `pwm20_test`의 Objection은 Sequence/Monitor/Scoreboard의 3개 거래 완료 후 내린다.
+- 설치된 UVM 라이브러리와 Verilator의 지원 여부를 확인한 뒤 `UVM_HOME=/실제/경로 bash scripts/run_ch20.sh`로 실행한다.
+- 실제 컴파일/시뮬레이션과 브라우저 공개 접속은 미검증. 예상 PASS 로그를 실측 결과로 간주하지 않는다.
