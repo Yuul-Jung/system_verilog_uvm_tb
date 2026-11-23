@@ -7,7 +7,7 @@
 - TB: tb/ch15/tb_axi4lite_registers.sv
 - 스크립트: scripts/run_ch15.sh
 - 검증 범위: AW 먼저, W 먼저, WSTRB 0101, B/R backpressure, CONTROL/RO, Reset
-- 기대: PASS CH15 commits=3 checks=9 (예상값, 실제 로그 아님)
+- 기대: PASS CH15 commits=3 checks=10 (예상값, 실제 로그 아님)
 - 정적 검토: 원본 모듈·포트·주소·비트·신호 이름, 7개 절, 파일 링크, 스크립트 경로
 - RTL_SIM: NOT_RUN (현재 실행 환경에 iverilog/vvp 없음)
 - BROWSER_VISUAL: NOT_RUN
