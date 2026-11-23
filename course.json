@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v14",
+  "version": "v15",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -103,6 +103,15 @@
       "slug": "ch11_temporal_assertions",
       "version": "v01",
       "source": "tb/ch11/tb_pwm_sva.sv"
+    },
+    {
+      "id": "ch12",
+      "number": 12,
+      "title": "기능 커버리지",
+      "subtitle": "PWM 설정 조합 covergroup·cross와 8클록 파형 검증",
+      "slug": "ch12_functional_coverage",
+      "version": "v01",
+      "source": "tb/ch12/tb_pwm_coverage.sv"
     }
   ]
 }
