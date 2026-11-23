@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v15",
+  "version": "v16",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -112,6 +112,15 @@
       "slug": "ch12_functional_coverage",
       "version": "v01",
       "source": "tb/ch12/tb_pwm_coverage.sv"
+    },
+    {
+      "id": "ch13",
+      "number": 13,
+      "title": "UART 스트림 검증",
+      "subtitle": "BFM·바이트 프레임·Backpressure·4상태 전파 검증",
+      "slug": "ch13_uart_stream_verification",
+      "version": "v01",
+      "source": "tb/ch13/tb_uart_stream.sv"
     }
   ]
 }
