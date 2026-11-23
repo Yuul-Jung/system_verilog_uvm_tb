@@ -1,0 +1,14 @@
+# 제13장 검증 기록
+- 배포: ch13_uart_stream_verification_v01.html
+- DUT: reference_rtl/uart_echo_controller.v
+- 원본 DUT Blob SHA: 28160c34522e47fbd961466651598da063bc74ae
+- 본문 기준: CURRICULUM.md Blob SHA 0d05ac8613a0d420d37961ede626ac7840617a19
+- 이전 INDEX Blob SHA: 219f82a06d2fbe12aa42ee8a4dde5b3c611722f5
+- 이전 course.json Blob SHA: e0c58c43915adc30ed095eab12e2701d9a8e26ed
+- DUT 포트 계약: rx_data_i/tx_data_o, rx_valid_i/tx_valid_o, tx_ready_i/rx_ready_o; 조합 연결
+- 검증 범위: A/Z/LF 3바이트, stall 0/2/1회, 4상태 X 전파, 자동 카운트
+- 정적 검사: HTML 섹션 7개·링크/신호명·스크립트 경로·코드 카운트 점검
+- RTL_SIM: NOT_RUN (이 실행에서 시뮬레이터 실행하지 않음)
+- BROWSER_VISUAL: NOT_RUN
+- 예상 출력: PASS CH13 accepted=3 checks=11 (실제 로그 아님)
+- 원본 RTL 변경: 없음
