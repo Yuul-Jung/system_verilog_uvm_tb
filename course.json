@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v27",
+  "version": "v28",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -202,6 +202,15 @@
       "slug": "ch22_multi_agent_vip",
       "version": "v02",
       "source": "tb/ch22/tb_axi_multiagent_irq.sv"
+    },
+    {
+      "id": "ch23",
+      "number": 23,
+      "title": "NPU 통합 정답 비교",
+      "subtitle": "4뉴런 NPU 독립 정수 모델·지연·편향·경계조건",
+      "slug": "ch23_npu_integrated_scoreboard",
+      "version": "v01",
+      "source": "tb/ch23/tb_npu_integrated.sv"
     }
   ]
 }
