@@ -33,7 +33,7 @@
 <tr><td><code>cfg_duty=8</code></td><td>항상 HIGH</td><td>100% 마지막 박자 계산 오류 검출</td></tr>
 <tr><td><code>cfg_enable=0</code></td><td>항상 LOW</td><td>출력 차단 우선순위 (기존 DUT 계약)</td></tr>
 <tr><td><code>resetn=0</code></td><td>즉시 LOW</td><td>출력 조합 게이트 기능 확인</td></tr></tbody></table>
-<p>이 장의 실행 시험은 <code>cfg_enable=1</code>, <code>cfg_polarity=0</code>으로 유지하여 0%와 100%의 기준값을 명확히 비교합니다. Enable/Pole 반전의 조합 시험은 제09장의 스코어보드 검증에서 다룹니다.</p>
+<p>이 장의 실행 시험은 <code>cfg_enable=1</code>, <code>cfg_polarity=0</code>으로 유지하여 0%와 100%의 기준값을 명확히 비교합니다. Enable·극성 반전의 조합 시험은 제09장의 스코어보드 검증에서 다룹니다.</p>
 <p>실제 신호 이름은 <code>cfg_apply</code>, <code>pending</code>, <code>active_duty</code>, <code>pwm_out</code>입니다. 새로운 설정은 <code>cfg_apply</code>를 상승 에지에 읽어 Shadow에 보관하고, 주기 경계에서 Active로 반영합니다.</p></section>
 <section class="section" id="s02"><h2><span class="num">02</span>1교시 ② · 적용 대기와 10클록 기한 (20~40분)</h2><p>설정 요청을 입력했다고 바로 <code>active_duty</code>를 검사하면 잘못된 실패가 발생합니다. 원본 PWM은 주기 경계에서 값을 반영하기 때문입니다. 그래서 테스트벤치의 <code>request_duty()</code>가 한 클록 동안 <code>cfg_apply</code>를 올린 다음, <code>check_constant_window()</code>가 <code>pending=0</code>과 <code>active_duty</code>의 목표값을 동시에 확인합니다.</p>
 <p>설정이 주기 8클록 안에 반영되어야 하므로 관찰에는 여유를 포함한 <strong>10번 상승 에지</strong>라는 제한을 둡니다. 이 기한이 지나도 기대 설정이 적용되지 않으면 <code>APPLY_TIMEOUT</code>으로 중단합니다. 전체 시뮬레이션에는 별도로 5000ns 제한을 두어 이벤트 대기로 무한히 멈추는 상황도 방지합니다.</p>
@@ -280,10 +280,10 @@ iverilog -g2012 -s tb_pwm_corner_reset_timeout -o &quot;$OUT/sim.vvp&quot; \
 if [[ -f &quot;$OUT/ch10_pwm_corner_reset_timeout.vcd&quot; ]]; then
   mv &quot;$OUT/ch10_pwm_corner_reset_timeout.vcd&quot; &quot;$OUT/normal.vcd&quot;
 fi
-grep -q '^PASS CH10 requests=3 checks=48
-  echo &quot;FAIL: 정상 사례가 기대한 48회 검사를 완료하지 못함&quot; &gt;&amp;2
+if ! grep -q '^PASS CH10 requests=3 checks=48$' &quot;$OUT/normal.log&quot;; then
+  echo &quot;FAIL: 정상 시험이 기대한 48회 검사를 완료하지 못함&quot; &gt;&amp;2
   exit 1
-}
+fi
 
 # ② 부정 시험: 관찰 경로의 PWM 값만 반전한다.
 # 반드시 비정상 종료 + 전용 진단 문자열을 동시에 확인해야 통과.
@@ -307,36 +307,6 @@ if (cd &quot;$OUT&quot; &amp;&amp; vvp ./sim.vvp +INJECT_TIMEOUT &gt;apply_timeo
 fi
 if [[ -f &quot;$OUT/ch10_pwm_corner_reset_timeout.vcd&quot; ]]; then
   mv &quot;$OUT/ch10_pwm_corner_reset_timeout.vcd&quot; &quot;$OUT/apply_timeout.vcd&quot;
-fi
-grep -q 'DETECTED_APPLY_TIMEOUT' &quot;$OUT/apply_timeout.log&quot; || {
-  echo &quot;FAIL: 적용 타임아웃 대신 다른 이유로 실패함&quot; &gt;&amp;2
-  exit 1
-}
-echo &quot;PASS HARNESS: 의도한 cfg_apply 누락 타임아웃 검출&quot;
-
-echo &quot;PASS CH10 SUITE: 정상 1회 + 의도된 오류 검출 2회&quot;
-echo &quot;로그: $OUT/{normal,fault_injection,apply_timeout}.log&quot;
- &quot;$OUT/normal.log&quot; || {
-  echo &quot;FAIL: 정상 사례가 기대한 48회 검사를 완료하지 못함&quot; &gt;&amp;2
-  exit 1
-}
-
-# ② 부정 시험: 관찰 경로의 PWM 값만 반전한다.
-# 반드시 비정상 종료 + 전용 진단 문자열을 동시에 확인해야 통과.
-if (cd &quot;$OUT&quot; &amp;&amp; vvp ./sim.vvp +INJECT_FAULT &gt;fault_injection.log 2&gt;&amp;1); then
-  echo &quot;FAIL: 주입한 PWM 관찰 오류를 검출하지 못함&quot; &gt;&amp;2
-  exit 1
-fi
-grep -q 'DETECTED_INJECTED_FAULT' &quot;$OUT/fault_injection.log&quot; || {
-  echo &quot;FAIL: PWM 관찰 오류 대신 다른 이유로 실패함&quot; &gt;&amp;2
-  exit 1
-}
-echo &quot;PASS HARNESS: 의도한 PWM 관찰 오류 검출&quot;
-
-# ③ 부정 시험: 듀티 8의 cfg_apply를 누락하여 적용 타임아웃을 검사한다.
-if (cd &quot;$OUT&quot; &amp;&amp; vvp ./sim.vvp +INJECT_TIMEOUT &gt;apply_timeout.log 2&gt;&amp;1); then
-  echo &quot;FAIL: 누락한 cfg_apply를 타임아웃으로 검출하지 못함&quot; &gt;&amp;2
-  exit 1
 fi
 grep -q 'DETECTED_APPLY_TIMEOUT' &quot;$OUT/apply_timeout.log&quot; || {
   echo &quot;FAIL: 적용 타임아웃 대신 다른 이유로 실패함&quot; &gt;&amp;2
