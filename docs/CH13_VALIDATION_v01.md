@@ -10,5 +10,5 @@
 - 정적 검사: HTML 섹션 7개·링크/신호명·스크립트 경로·코드 카운트 점검
 - RTL_SIM: NOT_RUN (이 실행에서 시뮬레이터 실행하지 않음)
 - BROWSER_VISUAL: NOT_RUN
-- 예상 출력: PASS CH13 accepted=3 checks=11 (실제 로그 아님)
+- 예상 출력: PASS CH13 accepted=3 checks=12 (실제 로그 아님)
 - 원본 RTL 변경: 없음
