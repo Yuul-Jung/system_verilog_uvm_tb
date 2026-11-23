@@ -1,0 +1,12 @@
+# 제18장 검증 기록
+- 발행: ch18_sequence_driver_v01.html
+- 원본 DUT: reference_rtl/pwm_core.v (Blob e813f3fb107bd327054d11e0b397817b8e7bd813)
+- 실제 DUT: pwm_core, 10ns clk, 동기식 resetn LOW, RESET_PERIOD=8, shadow/active boundary
+- TB: tb/ch18/tb_pwm_sequence_driver.sv
+- 실행: scripts/run_ch18.sh (Verilator + UVM_HOME 필요)
+- 검증 시나리오: duty 2/6/0의 3개 거래, pending/active_duty/pwm_out, objection 종료
+- 정적 검토: 7개 SECTION, 원본 7입력·6출력 포트, PART05→CH18→SECTION의 기존 site.js 구조, 상대 CSS/JS 경로, 모바일 버튼 및 aria, 코드/도식 신호 이름, 개인정보 문자열
+- 원본 RTL 및 공통 CSS/JS 수정 없음
+- RTL_SIM: NOT_RUN (이 작업 환경에 Verilator 없음)
+- BROWSER_VISUAL: NOT_RUN (실제 렌더링 미수행)
+- 예상 출력은 실제 로그 아님. PASS CH18 checks=3은 성공 예상 메시지일 뿐 실행 판정 아님.
