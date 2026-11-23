@@ -29,6 +29,13 @@
 - t=580ns 리셋 LOW 인가 시 PWM 출력은 다음 상승 에지 전에 LOW가 되어야 함.
 - 정상 종료 시 출력하도록 작성한 문자열은 `PASS CH09 score_cycles=72 scenarios=6`이나, **실제로 관측한 로그가 아님**.
 
+## 좌측 탐색 로직 모의 동작 검증 (추가)
+- 공개 PART: `PART 03 · 자동 검증·속성·커버리지` — 1회만 출력.
+- 해당 PART에서 현재 발행된 CHAPTER는 `CH09` 하나이며, 현재 장 강조 상태 확인.
+- 현재 CH09의 10개 SECTION이 CH09 바로 아래에 중첩됨.
+- 이전 장 `ch08_objects_constraints_v01.html`, 다음 버튼 `index.html`로 연결.
+- 모바일 메뉴 이벤트 및 코드 복사 로직은 유지. **모의 DOM 검증 통과**, 실제 브라우저 렌더링은 NOT_RUN.
+
 ## 실제 확인 절차
 ```bash
 cd system_verilog_uvm_tb
