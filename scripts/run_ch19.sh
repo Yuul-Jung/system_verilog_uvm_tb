@@ -35,11 +35,12 @@ verilator --binary --timing --assert --trace -Wno-fatal \
   +UVM_TESTNAME=pwm19_test | tee simulation.log)
 
 # 단순 종료 코드 외에 Scoreboard 완료 기록도 반드시 확인한다.
+# UVM 리포트의 "UVM_ERROR : 0"은 정상 요약이므로 오류로 보지 않는다.
 grep -q 'PASS CH19 requests=3 applied=3' "$OUT/simulation.log" || {
   echo "FAIL: Monitor 또는 Scoreboard 검증이 완료되지 않음" >&2
   exit 1
 }
-if grep -Eq 'UVM_(FATAL|ERROR)[[:space:]:]' "$OUT/simulation.log"; then
+if grep -Eq 'UVM_(FATAL|ERROR) @[[:space:]]*[0-9]+|UVM_(FATAL|ERROR)[[:space:]]*:[[:space:]]*[1-9]' "$OUT/simulation.log"; then
   echo "FAIL: UVM 오류 메시지 확인" >&2
   exit 1
 fi
