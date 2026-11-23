@@ -1,7 +1,7 @@
 # RTL Testbench → SystemVerilog → UVM → 실무 검증 · 6부 24장
 **기본 편성:** 총 48시간, 장별 2시간(60분 × 2), 신규 DUT 제작 최소화, 기존 RTL 검증.
 **교육 순서:** 검증 문법 → 자동 판정 → SystemVerilog → Assertion·Coverage → 인터페이스 검증 → UVM → 실무.
-**상태:** 제1~21장 발행 / 제22~24장 본문 미발행. 아래는 교육과정 편성안.
+**상태:** 제1~22장 발행 / 제23~24장 본문 미발행. 아래는 교육과정 편성안.
 
 ## 제1부 · Verilog 테스트벤치 기초
 파형 확인에서 자동 판정까지
@@ -59,7 +59,7 @@
 | 장 | 주제 | 핵심 문법·기술 | 기존 DUT 실습 |
 |---|---|---|---|
 | 21 | UVM 레지스터 추상화 | RAL·adapter·predictor | AXI 레지스터 자동 검증 |
-| 22 | 다중 Agent·VIP | virtual sequence·AXI VIP | AXI·Interrupt·Reset 연계 |
+| 22 | 다중 Agent·VIP | virtual sequence·교육용 VIP-style | AXI Agent + Reset/IRQ Agent·W1C·독립 Monitor |
 | 23 | NPU 통합 정답 비교 | 정수 모델·latency·corner case | NPU 입력·가중치·출력 검증 |
 | 24 | 회귀·CI·검증 보고 | seed·regression·coverage·bug report | 자동 반복 검증 및 보고서 |
 
