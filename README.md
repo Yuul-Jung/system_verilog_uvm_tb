@@ -1,10 +1,10 @@
 # RTL Testbench · SystemVerilog · UVM 검증 학습안내서
 
 - **전체 편성:** 독립 6부, 총 24장/48시간, 한 장은 60분 × 2회로 진행
-- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [제09장](ch09_reference_model_scoreboard_v02.html) / [전체 편성](CURRICULUM.md)
-- **검증용 RTL:** `reference_rtl/uart_echo_controller.v`(제01·05·06·07장), `reference_rtl/pwm_core.v`(제02~04장). 두 파일은 `amd_soc_rtl`에서 동일한 바이트로 복사한 읽기 전용 DUT 스냅샷입니다.
+- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [제09장](ch09_reference_model_scoreboard_v02.html) / [제10장](ch10_corner_reset_timeout_v02.html) / [전체 편성](CURRICULUM.md)
+- **검증용 RTL:** `reference_rtl/uart_echo_controller.v`(제01·05·06·07장), `reference_rtl/pwm_core.v`(제02~04·09~10장). 두 파일은 `amd_soc_rtl`에서 동일한 바이트로 복사한 읽기 전용 DUT 스냅샷입니다.
 - **목표:** 문법 → Testbench → Self-checking → SVA/Coverage → UVM → Regression/CI
-- **상태:** 제01~09장 배포용 HTML·TB·실행 스크립트 발행. 제09장은 14개 항목 정적 검증 완료, **RTL_SIM=NOT_RUN** (제작 환경에 Icarus Verilog 없음).
+- **상태:** 제01~10장 배포용 HTML·TB·실행 스크립트 발행. 제10장은 정적 검토 완료, **RTL_SIM=NOT_RUN** (제작 환경에 Icarus Verilog 없음).
 
 ## 규칙
 - 정본 [rule_md](https://github.com/Yuul-Jung/rule_md) / [HTML STANDARD](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/STANDARD.md)
@@ -23,7 +23,7 @@ cd system_verilog_uvm_tb
 
 이 과정은 **독립 저장소 루트**를 기준으로 동작합니다. `reference_rtl/`은 `amd_soc_rtl`에서 읽기 전용으로 복사한 **원본 동일 스냅샷**입니다. 다른 버전의 DUT 검증이 필요하면 `DUT_PATH`로 원본 파일을 직접 지정합니다.
 
-## 제01~09장 실행 (Ubuntu)
+## 제01~10장 실행 (Ubuntu)
 ```bash
 # 위 git clone 작업으로 이 폴더에 진입한 상태에서 실행
 # pwd로 현재 경로를 확인한다
@@ -42,6 +42,8 @@ bash scripts/run_ch07.sh
 bash scripts/run_ch08.sh
 # 제09장 PWM 참조 모델·스코어보드(iverilog 사용)
 bash scripts/run_ch09.sh
+# 제10장: 정상 시험 1회 + 오류 주입 검출 시험 2회
+bash scripts/run_ch10.sh
 ```
 
 별도 복제 저장소에서도 실행할 수 있습니다.
@@ -85,3 +87,10 @@ DUT_PATH=/실제/RTL/경로/pwm_core.v bash scripts/run_ch03.sh
 - 실제 실행 전까지 예상 로그와 PASS 문자열을 **검증 완료로 취급하지 않습니다**. `RTL_SIM=NOT_RUN`.
 
 - **제09장 검증 기록:** [docs/CH09_VALIDATION_v02.md](docs/CH09_VALIDATION_v02.md). 공개용 최신 HTML은 `ch09_reference_model_scoreboard_v02.html`입니다.
+
+### 제10장 오류 주입과 검출 검증
+- **학습안내서:** [제10장 v02](ch10_corner_reset_timeout_v02.html) · [검증 기록](docs/CH10_VALIDATION_v02.md).
+- **정상 시험:** 0%/100% 듀티 16클록씩, 중간 리셋, 재설정 → 총 48개 표본.
+- **의도된 부정 시험:** `+INJECT_FAULT`(관찰값만 반전), `+INJECT_TIMEOUT`(외부 `cfg_apply` 누락).
+- 실행 스크립트는 정상 시험 PASS와 부정 시험 2건의 비정상 종료·정확한 진단을 모두 확인해야 전체 PASS를 출력한다. 원본 RTL 자체에 결함을 주입하지 않는다.
+- 실제 시뮬레이션은 미실행: 결과는 `RTL_SIM=NOT_RUN`. `normal.log`, `fault_injection.log`, `apply_timeout.log`를 실행 후 확인한다.
