@@ -1,0 +1,72 @@
+{
+  "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
+  "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
+  "course_code": "SV UVM TB",
+  "version": "v08",
+  "total_planned_chapters": 24,
+  "chapters": [
+    {
+      "id": "ch01",
+      "number": 1,
+      "title": "테스트벤치의 첫 실행",
+      "subtitle": "UART Echo 테스트벤치 기초",
+      "slug": "ch01_testbench_basics",
+      "version": "v01",
+      "source": "tb/ch01/tb_uart_echo_basics.sv"
+    },
+    {
+      "id": "ch02",
+      "number": 2,
+      "title": "Clock·Reset·이벤트",
+      "subtitle": "기존 PWM 코어의 클록·리셋·주기 경계",
+      "slug": "ch02_clock_reset_events",
+      "version": "v01",
+      "source": "tb/ch02/tb_pwm_clock_reset.sv"
+    },
+    {
+      "id": "ch03",
+      "number": 3,
+      "title": "반복 자극과 작업 분리",
+      "subtitle": "기존 PWM에 task·function·repeat·for·wait 적용",
+      "slug": "ch03_reusable_stimulus",
+      "version": "v02",
+      "source": "tb/ch03/tb_pwm_reusable_stimulus.sv"
+    },
+    {
+      "id": "ch04",
+      "number": 4,
+      "title": "PASS/FAIL 자동 판정",
+      "subtitle": "기존 PWM 코어의 기대값·실제 출력 자동 비교",
+      "slug": "ch04_pass_fail_automation",
+      "version": "v02",
+      "source": "tb/ch04/tb_pwm_pass_fail.sv"
+    },
+    {
+      "id": "ch05",
+      "number": 5,
+      "title": "검증 자료형과 타입",
+      "subtitle": "logic·bit·enum·struct·typedef로 UART 데이터와 상태 모델링",
+      "slug": "ch05_verification_types",
+      "version": "v02",
+      "source": "tb/ch05/tb_uart_types.sv"
+    },
+    {
+      "id": "ch06",
+      "number": 6,
+      "title": "배열·큐·패키지",
+      "subtitle": "packed/unpacked 배열·queue·package로 UART 기대 데이터 관리",
+      "slug": "ch06_arrays_queues_packages",
+      "version": "v02",
+      "source": "tb/ch06/tb_uart_arrays_queues.sv"
+    },
+    {
+      "id": "ch07",
+      "number": 7,
+      "title": "인터페이스·타이밍 분리",
+      "subtitle": "interface·modport·clocking block 기반 UART Byte Stream 검증",
+      "slug": "ch07_interface_modport_clocking",
+      "version": "v01",
+      "source": "tb/ch07/tb_uart_interface.sv"
+    }
+  ]
+}
