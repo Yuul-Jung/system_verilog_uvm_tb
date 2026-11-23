@@ -143,3 +143,15 @@
 - **HTML:** `ch19_monitor_agent_scoreboard_v02.html` · 검증 기록 `docs/CH19_VALIDATION_v02.md`.
 - **범위 제한:** 현재 3개 입력은 순차 제출된다. 같은 설정 반복·동시 Apply/Boundary·중간 리셋까지 일반화하지 않았다.
 - **검증 상태:** 정적 검토 완료, 실제 RTL_SIM=NOT_RUN, 실제 브라우저/Pages 접속=NOT_RUN.
+
+## 제20장 · Factory·Config·Objection
+- **독립 저장소:** `Yuul-Jung/system_verilog_uvm_tb` 루트.
+- **원본 DUT:** `reference_rtl/pwm_core.v`, Git Blob `e813f3fb107bd327054d11e0b397817b8e7bd813`, 수정 없음.
+- **배포 페이지:** `ch20_factory_config_objection_v01.html`.
+- **TB:** `tb/ch20/tb_pwm_factory_config_objection.sv`; `pwm20_if`, `pwm20_cfg`, `pwm20_item`, `pwm20_sequence`, `pwm20_driver`, `pwm20_traced_driver`, `pwm20_monitor`, `pwm20_scoreboard`, `pwm20_agent`, `pwm20_env`, `pwm20_test`.
+- **Factory:** `pwm20_test.build_phase()`가 `pwm20_driver` → `pwm20_traced_driver` 타입 교체를 env 생성 전에 등록; `$cast`로 실제 타입을 확인.
+- **Config DB:** `pwm20_cfg`의 `duty_plan={2,6,0}`, `max_wait_cycles=12`, `max_apply_ns=80`, `expected_transactions=3` 공유.
+- **Objection:** `run_phase` 진입 시 raise, 3개 실제 Driver 거래와 Monitor/Scoreboard의 REQUEST/APPLIED 및 추적 카운트 확인 후 drop.
+- **실행 스크립트:** `scripts/run_ch20.sh` (Verilator+UVM_HOME, `--binary --timing --assert --trace`).
+- **검증 범위:** 단계적인 PWM 설정 3회, 이벤트 순서 및 구성 재사용. 중첩 적용 요청·다중 Agent·진정한 랜덤 시퀀스는 본 장 범위 제외.
+- **실행 결과:** RTL_SIM=NOT_RUN, BROWSER_VISUAL=NOT_RUN, PAGES_HTTP=NOT_RUN. 자세한 내용은 `docs/CH20_VALIDATION_v01.md`.
