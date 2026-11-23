@@ -1,0 +1,16 @@
+# 제24장 · 회귀·CI·검증 보고 · 검증 기록 v01
+- 발행 위치: Yuul-Jung/system_verilog_uvm_tb 저장소 루트
+- HTML: ch24_regression_ci_reporting_v01.html
+- DUT: reference_rtl/uart_echo_controller.v, Blob SHA `28160c34522e47fbd961466651598da063bc74ae`
+- 원본: Yuul-Jung/amd_soc_rtl/part03/common/rtl/uart_echo_controller.v (읽기 전용 스냅샷)
+- 원본 계약: 조합 6포트; tx_data_o←rx_data_i, tx_valid_o←rx_valid_i, rx_ready_o←tx_ready_i. 클록/리셋 없음
+- TB: tb/ch24/tb_uart_regression.sv; Python: scripts/run_ch24.py; Bash: scripts/run_ch24.sh
+- CI: .github/workflows/ch24-regression.yml
+- 시드: 1,7,42; 8 고정 + 24 의사난수 = 시드당 32건; 4개 valid/ready 상태
+- 음성 시험: +INJECT_FAULT에서 비정상 종료 및 DETECTED_INJECTED_FAULT case=9 마커 요구
+- 산출물: .build/ch24/report.json, report.md, seed_N.log, negative.log, compile.log (실행 시 생성)
+- 정적 점검: 원본 포트명 6개, HTML 7절, CSS/JS 참조, SECTION ID, INDEX/COURSE 연결, 코드 HTML 이스케이프, 민감정보 패턴
+- RTL_SIM: NOT_RUN (현재 실행 환경에 iverilog/vvp 없음)
+- CI_RUN: NOT_RUN (GitHub Actions 원격 실행 증거 없음)
+- BROWSER_VISUAL: NOT_RUN (실제 브라우저 렌더링 미수행)
+- 예상 출력은 실제 실행 로그가 아님. CI 워크플로는 작성만으로 PASS를 의미하지 않음
