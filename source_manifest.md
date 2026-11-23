@@ -125,3 +125,9 @@
 - DUT: reference_rtl/pwm_core.v (Blob e813f3fb107bd327054d11e0b397817b8e7bd813), 원본 수정 없음.
 - TB: tb/ch17/tb_pwm_uvm.sv; script: scripts/run_ch17.sh; HTML: ch17_minimal_uvm_environment_v01.html.
 - RTL_SIM NOT_RUN / BROWSER_VISUAL NOT_RUN; 상세: docs/CH17_VALIDATION_v01.md.
+
+## 제18장 · Sequence에서 Driver까지
+- DUT: reference_rtl/pwm_core.v (Blob e813f3fb107bd327054d11e0b397817b8e7bd813), 원본 변경 없음.
+- TB: tb/ch18/tb_pwm_sequence_driver.sv; 실행: scripts/run_ch18.sh; HTML: ch18_sequence_driver_v01.html.
+- 정적 점검: PART05→CH18→SECTION, 포트·신호·목차·상대 링크.
+- RTL_SIM NOT_RUN; BROWSER_VISUAL NOT_RUN. 자세한 내용: docs/CH18_VALIDATION_v01.md.
