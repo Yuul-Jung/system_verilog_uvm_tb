@@ -155,3 +155,9 @@
 - **실행 스크립트:** `scripts/run_ch20.sh` (Verilator+UVM_HOME, `--binary --timing --assert --trace`).
 - **검증 범위:** 단계적인 PWM 설정 3회, 이벤트 순서 및 구성 재사용. 중첩 적용 요청·다중 Agent·진정한 랜덤 시퀀스는 본 장 범위 제외.
 - **실행 결과:** RTL_SIM=NOT_RUN, BROWSER_VISUAL=NOT_RUN, PAGES_HTTP=NOT_RUN. 자세한 내용은 `docs/CH20_VALIDATION_v01.md`.
+
+## 제21장 · UVM 레지스터 추상화
+- DUT: reference_rtl/axi4lite_slave_adapter.v (Blob eadaf8d3580023bed0c9b06f3e9b2a99de0cf266), reference_rtl/custom_register_bank.v (Blob 49e5d0219574d1bcb9086dc99f259c191e35d82e); 원본 변경 없음.
+- TB: tb/ch21/tb_axi_uvm_ral.sv; 실행: scripts/run_ch21.sh; HTML: ch21_uvm_register_abstraction_v01.html.
+- RAL 4개 레지스터, Adapter, 완료 거래 기반 Predictor; 독립 AXI Monitor는 후속 확장.
+- RTL_SIM NOT_RUN, BROWSER_VISUAL NOT_RUN. docs/CH21_VALIDATION_v01.md.
