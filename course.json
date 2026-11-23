@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v16",
+  "version": "v17",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -121,6 +121,15 @@
       "slug": "ch13_uart_stream_verification",
       "version": "v01",
       "source": "tb/ch13/tb_uart_stream.sv"
+    },
+    {
+      "id": "ch14",
+      "number": 14,
+      "title": "FIFO 및 흐름 제어",
+      "subtitle": "실제 UART RX/TX FIFO 16바이트, ready/valid, backpressure 검증",
+      "slug": "ch14_fifo_flow_control",
+      "version": "v01",
+      "source": "tb/ch14/tb_uart_fifo_flow.sv"
     }
   ]
 }
