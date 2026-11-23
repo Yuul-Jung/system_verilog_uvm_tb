@@ -97,3 +97,9 @@
 - **검증 스크립트:** `scripts/run_ch10.sh`는 정상 시뮬레이션 종료 코드 0 및 48회 PASS 확인 후, 두 부정 시험이 정확한 이유로 비정상 종료한 것을 확인해야 성공한다.
 - **파형·로그:** `.build/ch10/normal.log`, `fault_injection.log`, `apply_timeout.log`; 사용 가능 시 각 `.vcd` 분리 기록.
 - **제작 검증:** 정적 소스/문서/포트/링크 분석 완료, 실제 RTL_SIM=NOT_RUN. 근거는 `docs/CH10_VALIDATION_v02.md`.
+
+## 제13장 · UART 스트림 검증
+- DUT: reference_rtl/uart_echo_controller.v (Blob 28160c34522e47fbd961466651598da063bc74ae), 원본 변경 없음.
+- TB: tb/ch13/tb_uart_stream.sv; 스크립트: scripts/run_ch13.sh; HTML: ch13_uart_stream_verification_v01.html.
+- 조합 6포트 검증, TB 가상 샘플 클록 10ns, 프레임은 바이트 시퀀스. 실제 직렬 UART 프레이밍 검증은 해당 없음.
+- RTL_SIM NOT_RUN, BROWSER_VISUAL NOT_RUN; 상세: docs/CH13_VALIDATION_v01.md.
