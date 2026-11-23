@@ -25,8 +25,9 @@ iverilog -g2012 -s tb_pwm_corner_reset_timeout -o "$OUT/sim.vvp" \
 
 # ① 정상 사례: 실제 DUT가 0%·100%·중간 리셋·재설정을 통과해야 함.
 (cd "$OUT" && vvp ./sim.vvp | tee normal.log)
-[[ -f "$OUT/ch10_pwm_corner_reset_timeout.vcd" ]] &&
+if [[ -f "$OUT/ch10_pwm_corner_reset_timeout.vcd" ]]; then
   mv "$OUT/ch10_pwm_corner_reset_timeout.vcd" "$OUT/normal.vcd"
+fi
 grep -q '^PASS CH10 requests=3 checks=48
   echo "FAIL: 정상 사례가 기대한 48회 검사를 완료하지 못함" >&2
   exit 1
@@ -38,8 +39,9 @@ if (cd "$OUT" && vvp ./sim.vvp +INJECT_FAULT >fault_injection.log 2>&1); then
   echo "FAIL: 주입한 PWM 관찰 오류를 검출하지 못함" >&2
   exit 1
 fi
-[[ ! -f "$OUT/ch10_pwm_corner_reset_timeout.vcd" ]] ||
+if [[ -f "$OUT/ch10_pwm_corner_reset_timeout.vcd" ]]; then
   mv "$OUT/ch10_pwm_corner_reset_timeout.vcd" "$OUT/fault_injection.vcd"
+fi
 grep -q 'DETECTED_INJECTED_FAULT' "$OUT/fault_injection.log" || {
   echo "FAIL: PWM 관찰 오류 대신 다른 이유로 실패함" >&2
   exit 1
@@ -51,8 +53,9 @@ if (cd "$OUT" && vvp ./sim.vvp +INJECT_TIMEOUT >apply_timeout.log 2>&1); then
   echo "FAIL: 누락한 cfg_apply를 타임아웃으로 검출하지 못함" >&2
   exit 1
 fi
-[[ ! -f "$OUT/ch10_pwm_corner_reset_timeout.vcd" ]] ||
+if [[ -f "$OUT/ch10_pwm_corner_reset_timeout.vcd" ]]; then
   mv "$OUT/ch10_pwm_corner_reset_timeout.vcd" "$OUT/apply_timeout.vcd"
+fi
 grep -q 'DETECTED_APPLY_TIMEOUT' "$OUT/apply_timeout.log" || {
   echo "FAIL: 적용 타임아웃 대신 다른 이유로 실패함" >&2
   exit 1
