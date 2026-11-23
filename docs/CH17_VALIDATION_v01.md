@@ -1,0 +1,13 @@
+# 제17장 검증 기록
+- 발행: ch17_minimal_uvm_environment_v01.html
+- 원본 DUT: reference_rtl/pwm_core.v (Blob e813f3fb107bd327054d11e0b397817b8e7bd813)
+- 출처: Yuul-Jung/amd_soc_rtl/part02_1/ch04/rtl/pwm_core.v
+- 규칙: Yuul-Jung/rule_md AGENTS.md, web/education-html/STANDARD.md, code/code-development-rules.md, common/code-style-rules.md, common/flowchart-rules.md
+- TB: tb/ch17/tb_pwm_uvm.sv; 스크립트: scripts/run_ch17.sh
+- 설정: RESET_PERIOD=8, 10ns clock, duty=4, period=8
+- 정적 검증: 원본 포트, 동기 reset, shadow/active 경계, HTML 절 7개, PART 05/CH17/SECTION 네비게이션, INDEX/course 등록
+- 시뮬레이터: 실행 환경에 Verilator 없음; UVM 라이브러리 미확인
+- RTL_SIM: NOT_RUN
+- BROWSER_VISUAL: NOT_RUN
+- 예상 출력: PASS CH17 checks=1 (실제 로그 아님)
+- 주의: UVM 라이브러리 버전 및 시뮬레이터별 컴파일 호환성은 미검증.
