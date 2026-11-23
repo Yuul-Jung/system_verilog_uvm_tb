@@ -20,4 +20,4 @@ iverilog -g2012 -s tb_axi4lite_registers -o sim \
   "$RTL/axi4lite_slave_adapter.v" "$RTL/custom_register_bank.v" \
   "$ROOT/tb/ch15/tb_axi4lite_registers.sv"
 vvp sim | tee simulation.log
-grep -q '^PASS CH15 commits=3 checks=9$' simulation.log
+grep -q '^PASS CH15 commits=3 checks=10$' simulation.log
