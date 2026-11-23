@@ -120,3 +120,8 @@
 - 바이트 동일 DUT 사본: reference_rtl/mac_core.v, reference_rtl/mac_pipeline_core.v.
 - TB: tb/ch16/tb_mac_integer.sv; Python: scripts/ch16_reference.py; 실행: scripts/run_ch16.sh.
 - HTML: ch16_mac_npu_integer_verification_v01.html; RTL_SIM NOT_RUN, BROWSER_VISUAL NOT_RUN.
+
+## 제17장 · 최소 UVM 환경
+- DUT: reference_rtl/pwm_core.v (Blob e813f3fb107bd327054d11e0b397817b8e7bd813), 원본 수정 없음.
+- TB: tb/ch17/tb_pwm_uvm.sv; script: scripts/run_ch17.sh; HTML: ch17_minimal_uvm_environment_v01.html.
+- RTL_SIM NOT_RUN / BROWSER_VISUAL NOT_RUN; 상세: docs/CH17_VALIDATION_v01.md.
