@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v10",
+  "version": "v11",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -83,7 +83,7 @@
       "title": "참조 모델·스코어보드",
       "subtitle": "독립 PWM 참조 모델과 사이클 단위 6출력 자동 비교",
       "slug": "ch09_reference_model_scoreboard",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch09/tb_pwm_scoreboard.sv"
     }
   ]
