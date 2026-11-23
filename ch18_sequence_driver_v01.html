@@ -1,0 +1,229 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="제18장 UVM Sequence·Sequencer·Driver 학습안내서"><title>제18장 · Sequence에서 Driver까지</title><link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch18"><a class="access-skip" href="#main-content">본문 바로가기</a><button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div><header class="hero"><div class="hero-inner"><p class="kicker">제5부 · UVM 검증 환경</p><h1>제18장 · Sequence에서 Driver까지</h1><p>거래 객체와 구동을 분리하여 기존 PWM RTL을 재사용 검증합니다.</p><div class="chips"><span class="chip">PART 05 · CHAPTER 18</span><span class="chip">1교시 60분 + 2교시 60분</span><span class="chip">원본 RTL 변경 없음</span></div></div></header><div class="wrap"><nav class="toc" id="course-nav" aria-label="부·장·절 탐색"></nav><main class="content" id="main-content"><section class="section" id="s00"><h2><span class="num">00</span>개요 · 거래와 신호 구동의 분리</h2><p>제17장은 <code>uvm_test</code>와 <code>uvm_env</code>의 생명주기를 익혔습니다. 제18장은 UVM(유니버설 검증 방법론)의 핵심인 <strong>Sequence(시퀀스, 거래 순서 생성) → Sequencer(시퀀서, 거래 전달) → Driver(드라이버, 실제 핀 구동)</strong>를 결합합니다. DUT(검증 대상 회로)는 기존 <code>pwm_core</code>이며 원본을 수정하지 않습니다.</p><table><tr><th>1교시 60분</th><td>0~20분 거래 객체 / 20~40분 Sequence·Sequencer / 40~60분 Driver·Handshake</td></tr><tr><th>2교시 60분</th><td>60~90분 전체 TB / 90~105분 실행 / 105~120분 코드 해석·장애 분석</td></tr></table><div style="overflow-x:auto"><svg viewBox="0 0 850 200" style="width:100%;min-width:640px" role="img" aria-label="UVM sequence가 sequencer를 통해 driver에 거래를 전달하고 driver가 pwm_if를 구동해 pwm_core에 설정을 적용하는 구조"><defs><marker id="arrow18" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#465b9d"/></marker></defs><rect x="12" y="24" width="824" height="151" rx="10" fill="#f8f9fc" stroke="#b4bfd0"/><text x="30" y="46" font-size="13">pwm18_test / pwm18_env</text><rect x="42" y="71" width="155" height="68" rx="7" fill="white" stroke="#465b9d"/><text x="119" y="99" text-anchor="middle" font-size="13">pwm18_sequence</text><rect x="247" y="71" width="155" height="68" rx="7" fill="white" stroke="#465b9d"/><text x="324" y="99" text-anchor="middle" font-size="13">pwm18_sequencer</text><rect x="452" y="71" width="155" height="68" rx="7" fill="white" stroke="#465b9d"/><text x="529" y="99" text-anchor="middle" font-size="13">pwm18_driver</text><rect x="658" y="71" width="155" height="68" rx="7" fill="white" stroke="#465b9d"/><text x="735" y="99" text-anchor="middle" font-size="13">pwm_core</text><text x="119" y="119" text-anchor="middle" font-size="11">pwm18_item</text><text x="324" y="119" text-anchor="middle" font-size="11">seq_item_export</text><text x="529" y="119" text-anchor="middle" font-size="11">cfg_apply / cfg_duty</text><text x="735" y="119" text-anchor="middle" font-size="11">active_duty / pwm_out</text><path d="M197 105H245 M402 105H450 M607 105H656" stroke="#465b9d" stroke-width="2" marker-end="url(#arrow18)"/><text x="424" y="158" text-anchor="middle" font-size="12">개념적 거래 흐름 · 실제 모듈·클래스 이름 사용</text></svg></div></section><section class="section" id="s01"><h2><span class="num">01</span>1교시 ① · 원본 PWM 포트·시간 계약 (0~20분)</h2><p>원본 <code>pwm_core</code>는 10ns 클록의 상승 에지에서 <code>cfg_apply</code>를 캡처해 <code>shadow_period</code>, <code>shadow_duty</code> 등에 설정을 보관합니다. 이후 <code>counter</code>가 주기 끝에 도달하면 <code>pending</code>을 내리고 <code>active_period</code>, <code>active_duty</code> 등을 갱신합니다. <code>resetn</code>은 동기식 활성 LOW 리셋입니다.</p><table><tr><th>입력</th><th>의미</th></tr><tr><td><code>clk</code> / <code>resetn</code></td><td>10ns 클록 / 동기식 리셋</td></tr><tr><td><code>cfg_apply</code></td><td>Shadow 설정 캡처 요청</td></tr><tr><td><code>cfg_period</code> / <code>cfg_duty</code></td><td>주기·HIGH 클록 수</td></tr><tr><td><code>cfg_enable</code> / <code>cfg_polarity</code></td><td>출력 허용·반전</td></tr><tr><td><code>pending</code> / <code>active_duty</code> / <code>pwm_out</code></td><td>대기 상태·실제 적용 듀티·출력</td></tr></table><p>TB는 <code>RESET_PERIOD=8</code>, <code>cfg_period=8</code>로 설정합니다. Duty 2·6·0은 각각 25%·75%·0%를 의미합니다. <strong>설정 요청 직후 즉시 출력이 바뀌는 회로가 아닙니다.</strong></p></section><section class="section" id="s02"><h2><span class="num">02</span>1교시 ② · sequence_item·Sequence·Sequencer (20~40분)</h2><p><code>pwm18_item</code>은 <code>duty</code>라는 설정값을 가진 거래 객체입니다. <code>rand</code>와 <code>constraint</code>는 0~8 범위의 무작위 입력으로 확장할 수 있도록 준비했지만, 이번 재현 가능한 실습에서는 2·6·0을 명시적으로 사용합니다. <code>pwm18_sequence</code>는 <code>start_item(req)</code>로 거래를 시작하고 값을 지정한 뒤 <code>finish_item(req)</code>으로 Driver에 넘깁니다.</p><p><code>pwm18_sequencer</code>는 거래를 전달하는 중개자이며 <code>cfg_duty</code> 핀을 직접 변경하지 않습니다. 이 분리는 나중에 다른 거래 순서로 동일 Driver를 재사용하기 위한 핵심 설계입니다.</p></section><section class="section" id="s03"><h2><span class="num">03</span>1교시 ③ · Driver의 수락·완료 계약 (40~60분)</h2><p><code>pwm18_driver</code>는 <code>seq_item_port.get_next_item(req)</code>로 거래를 수신합니다. 클록 하강 에지에 <code>cfg_duty</code>와 <code>cfg_apply</code>를 구동하고 다음 하강 에지에 요청을 해제합니다. <code>pending=1</code>을 확인한 뒤 주기 경계에서 <code>pending=0</code>과 <code>active_duty</code> 갱신을 기다립니다. 최종 확인 후 <code>item_done()</code>을 호출해야 다음 거래가 진행됩니다.</p><p>Driver의 <code>checks</code>는 완료된 거래 수입니다. 이번 장에서는 별도 Monitor·Scoreboard를 만들지 않고 Driver의 공개 출력 확인으로 최소 검증을 구성합니다. 독립 관찰과 스코어보드는 제19장에서 분리합니다.</p></section><section class="section" id="s04"><h2><span class="num">04</span>2교시 ① · 전체 SystemVerilog/UVM 코드 (60~90분)</h2><p>아래 전체 소스는 독립 TB 파일이며 원본 <code>pwm_core</code>를 인스턴스화합니다. <code>pwm18_env.connect_phase()</code>에서 Driver와 Sequencer를 연결하고 <code>pwm18_test.run_phase()</code>에서 Objection(오브젝션, 시뮬레이션 종료 보류)을 관리합니다.</p><div class="codeblock"><div class="codebar"><span>tb/ch18/tb_pwm_sequence_driver.sv · SystemVerilog · 전체 코드</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제18장: 원본 pwm_core를 수정하지 않고 Sequence -&gt; Sequencer -&gt; Driver로 설정 전달.
+// 검증은 공개 포트의 active_* 및 pwm_out을 사용한다.
+interface pwm18_if(input logic clk);
+    logic resetn = 0;
+    logic cfg_apply = 0;
+    logic [31:0] cfg_period = 8;
+    logic [31:0] cfg_duty = 0;
+    logic cfg_enable = 0;
+    logic cfg_polarity = 0;
+    wire pwm_out, pending;
+    wire [31:0] active_period, active_duty;
+    wire active_enable, active_polarity;
+endinterface
+
+package ch18_uvm_pkg;
+    import uvm_pkg::*;
+    `include &quot;uvm_macros.svh&quot;
+
+    // (추가) 한 번의 PWM 설정 요청을 나타내는 거래 객체.
+    class pwm18_item extends uvm_sequence_item;
+        rand bit [31:0] duty;
+        constraint duty_range { duty inside {[0:8]}; }
+        `uvm_object_utils(pwm18_item)
+
+        function new(string name=&quot;pwm18_item&quot;);
+            super.new(name);
+        endfunction
+    endclass
+
+    // (추가) 순서만 결정한다. DUT 신호는 직접 구동하지 않는다.
+    class pwm18_sequence extends uvm_sequence #(pwm18_item);
+        `uvm_object_utils(pwm18_sequence)
+        function new(string name=&quot;pwm18_sequence&quot;);
+            super.new(name);
+        endfunction
+
+        task body();
+            pwm18_item req;
+            for (int i=0; i&lt;3; i++) begin
+                req = pwm18_item::type_id::create($sformatf(&quot;req_%0d&quot;, i));
+                start_item(req);
+                case (i)
+                    0: req.duty = 32'd2;
+                    1: req.duty = 32'd6;
+                    default: req.duty = 32'd0;
+                endcase
+                finish_item(req);
+            end
+        endtask
+    endclass
+
+    class pwm18_sequencer extends uvm_sequencer #(pwm18_item);
+        `uvm_component_utils(pwm18_sequencer)
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+    endclass
+
+    // (추가) Driver만 인터페이스를 구동하고 수락·주기 경계를 기다린다.
+    class pwm18_driver extends uvm_driver #(pwm18_item);
+        `uvm_component_utils(pwm18_driver)
+        virtual pwm18_if vif;
+        int unsigned checks = 0;
+
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (!uvm_config_db#(virtual pwm18_if)::get(this, &quot;&quot;, &quot;vif&quot;, vif))
+                `uvm_fatal(&quot;NOVIF&quot;, &quot;pwm18_if missing&quot;)
+        endfunction
+
+        task drive_one(pwm18_item req);
+            int guard;
+            // negedge에서 입력 변경: 다음 posedge에서 cfg_apply를 캡처한다.
+            @(negedge vif.clk);
+            vif.cfg_period = 8;
+            vif.cfg_duty = req.duty;
+            vif.cfg_enable = 1;
+            vif.cfg_polarity = 0;
+            vif.cfg_apply = 1;
+            @(negedge vif.clk);
+            vif.cfg_apply = 0;
+            if (vif.pending !== 1'b1)
+                `uvm_fatal(&quot;PENDING&quot;, &quot;cfg_apply not captured&quot;)
+
+            // 원본은 주기 경계에서 shadow를 active로 복사한다.
+            guard = 0;
+            while (vif.pending !== 1'b0) begin
+                @(negedge vif.clk);
+                guard++;
+                if (guard &gt; 12)
+                    `uvm_fatal(&quot;TIMEOUT&quot;, &quot;PWM boundary not reached&quot;)
+            end
+            if (vif.active_period !== 32'd8 ||
+                vif.active_duty !== req.duty ||
+                vif.active_enable !== 1'b1 ||
+                vif.active_polarity !== 1'b0)
+                `uvm_fatal(&quot;ACTIVE&quot;, &quot;active configuration mismatch&quot;)
+
+            // 경계 직후 counter=0이므로 duty&gt;0이면 HIGH, 0이면 LOW.
+            if (vif.pwm_out !== (req.duty != 0))
+                `uvm_fatal(&quot;PWM&quot;, &quot;boundary output mismatch&quot;)
+            checks++;
+            `uvm_info(&quot;DRIVER&quot;, $sformatf(
+                &quot;APPLIED duty=%0d checks=%0d&quot;, req.duty, checks), UVM_LOW)
+        endtask
+
+        task run_phase(uvm_phase phase);
+            pwm18_item req;
+            forever begin
+                seq_item_port.get_next_item(req);
+                drive_one(req);
+                seq_item_port.item_done();
+            end
+        endtask
+    endclass
+
+    class pwm18_env extends uvm_env;
+        `uvm_component_utils(pwm18_env)
+        pwm18_sequencer sqr;
+        pwm18_driver drv;
+
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            sqr = pwm18_sequencer::type_id::create(&quot;sqr&quot;, this);
+            drv = pwm18_driver::type_id::create(&quot;drv&quot;, this);
+        endfunction
+
+        function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+            drv.seq_item_port.connect(sqr.seq_item_export);
+        endfunction
+    endclass
+
+    class pwm18_test extends uvm_test;
+        `uvm_component_utils(pwm18_test)
+        pwm18_env env;
+
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            env = pwm18_env::type_id::create(&quot;env&quot;, this);
+        endfunction
+
+        task run_phase(uvm_phase phase);
+            pwm18_sequence seq;
+            phase.raise_objection(this);
+            // 원본 PWM은 동기 리셋: posedge를 거쳐 초기화한다.
+            repeat (3) @(negedge env.drv.vif.clk);
+            if (env.drv.vif.active_period !== 32'd8 ||
+                env.drv.vif.active_duty !== 0 ||
+                env.drv.vif.pending !== 0)
+                `uvm_fatal(&quot;RESET&quot;, &quot;PWM reset contract violated&quot;)
+            env.drv.vif.resetn = 1;
+            seq = pwm18_sequence::type_id::create(&quot;seq&quot;);
+            seq.start(env.sqr);  // 모든 finish_item은 Driver item_done까지 대기
+            if (env.drv.checks != 3)
+                `uvm_fatal(&quot;CHECKS&quot;, &quot;Expected three completed transactions&quot;)
+            `uvm_info(&quot;RESULT&quot;, &quot;PASS CH18 checks=3&quot;, UVM_NONE)
+            phase.drop_objection(this);
+        endtask
+    endclass
+endpackage
+
+module tb_pwm_sequence_driver;
+    import uvm_pkg::*;
+    import ch18_uvm_pkg::*;
+    logic clk = 0;
+    always #5 clk = ~clk;
+    pwm18_if bus(clk);
+    pwm_core #(.RESET_PERIOD(8)) dut (
+        .clk(clk), .resetn(bus.resetn),
+        .cfg_apply(bus.cfg_apply), .cfg_period(bus.cfg_period),
+        .cfg_duty(bus.cfg_duty), .cfg_enable(bus.cfg_enable),
+        .cfg_polarity(bus.cfg_polarity), .pwm_out(bus.pwm_out),
+        .pending(bus.pending), .active_period(bus.active_period),
+        .active_duty(bus.active_duty),
+        .active_enable(bus.active_enable),
+        .active_polarity(bus.active_polarity)
+    );
+    initial begin
+        uvm_config_db#(virtual pwm18_if)::set(null, &quot;*&quot;, &quot;vif&quot;, bus);
+        run_test(&quot;pwm18_test&quot;);
+    end
+    initial begin
+        #2000;
+        $fatal(1, &quot;FAIL CH18 GLOBAL_TIMEOUT&quot;);
+    end
+endmodule
+</code></pre></div><h3>코드 풀이 — 실제 호출 관계</h3><p><code>seq.start(env.sqr)</code> → <code>start_item()</code> → <code>finish_item()</code> → <code>get_next_item()</code> → <code>drive_one()</code> → <code>item_done()</code> 순서로 한 거래가 완료됩니다. <code>get_next_item()</code>과 <code>item_done()</code> 사이에는 DUT의 Shadow 저장과 Active 적용 확인이 들어갑니다. <code>raise_objection()</code>은 Sequence 실행 전, <code>drop_objection()</code>은 세 거래 완료 후 호출됩니다.</p></section><section class="section" id="s05"><h2><span class="num">05</span>2교시 ② · 실행 명령과 예상 출력 (90~105분)</h2><p>UVM 라이브러리를 지원하는 Verilator(베릴레이터, RTL 시뮬레이터)와 <code>UVM_HOME</code> 경로가 필요합니다. 다음 명령은 프로젝트 루트에서 실행합니다. <code>bash scripts/run_ch18.sh</code>는 시뮬레이션 결과를 <code>.build/ch18/</code>에 저장하며 원본 RTL을 수정하지 않습니다.</p><div class="codeblock"><div class="codebar"><span>scripts/run_ch18.sh · Bash · 전체 코드</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 사용: UVM_HOME=/path/to/uvm bash scripts/run_ch18.sh
+# 원본 PWM RTL은 읽기 전용이며 실행 파일·로그는 .build/ch18에 저장.
+set -euo pipefail
+ROOT=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)/..&quot; &amp;&amp; pwd)&quot;
+RTL=&quot;${DUT_PATH:-$ROOT/reference_rtl/pwm_core.v}&quot;
+if [[ ! -f &quot;$RTL&quot; ]]; then
+  echo &quot;NOT_RUN: PWM DUT missing: $RTL&quot; &gt;&amp;2
+  exit 2
+fi
+if ! command -v verilator &gt;/dev/null 2&gt;&amp;1; then
+  echo &quot;NOT_RUN: Verilator not installed&quot; &gt;&amp;2
+  exit 2
+fi
+if [[ -z &quot;${UVM_HOME:-}&quot; || ! -f &quot;$UVM_HOME/src/uvm_pkg.sv&quot; ]]; then
+  echo &quot;NOT_RUN: UVM_HOME/src/uvm_pkg.sv missing&quot; &gt;&amp;2
+  exit 2
+fi
+mkdir -p &quot;$ROOT/.build/ch18&quot;
+verilator --binary --timing --assert -Wno-fatal \
+  --top-module tb_pwm_sequence_driver \
+  --Mdir &quot;$ROOT/.build/ch18/obj_dir&quot; \
+  +incdir+&quot;$UVM_HOME/src&quot; \
+  &quot;$UVM_HOME/src/uvm_pkg.sv&quot; &quot;$RTL&quot; \
+  &quot;$ROOT/tb/ch18/tb_pwm_sequence_driver.sv&quot;
+&quot;$ROOT/.build/ch18/obj_dir/Vtb_pwm_sequence_driver&quot; \
+  +UVM_TESTNAME=pwm18_test | tee &quot;$ROOT/.build/ch18/simulation.log&quot;
+grep -q 'PASS CH18 checks=3' &quot;$ROOT/.build/ch18/simulation.log&quot;
+</code></pre></div><h3>예상 출력 — 실제 실행 로그 아님</h3><div class="codeblock"><div class="codebar"><span>예상 출력 · text · 전체 코드</span></div><pre tabindex="0"><code>UVM_INFO ... APPLIED duty=2 checks=1\nUVM_INFO ... APPLIED duty=6 checks=2\nUVM_INFO ... APPLIED duty=0 checks=3\nUVM_INFO ... PASS CH18 checks=3</code></pre></div><p>실제 UVM 로그의 파일·라인 번호와 시간 표시는 도구에 따라 다릅니다. 위 출력은 성공 시 확인할 메시지 예시이며 실행 증거가 아닙니다.</p></section><section class="section" id="s06"><h2><span class="num">06</span>2교시 ③ · 오류 분석·검증 기준 (105~120분)</h2><table><tr><th>오류</th><th>확인 지점</th></tr><tr><td><code>NOVIF</code></td><td><code>uvm_config_db</code>의 가상 인터페이스 전달 경로</td></tr><tr><td><code>PENDING</code></td><td><code>cfg_apply</code>가 상승 에지를 통과했는지</td></tr><tr><td><code>TIMEOUT</code></td><td><code>counter</code> 주기 경계, <code>pending</code> 변화, resetn</td></tr><tr><td><code>ACTIVE</code></td><td>Shadow와 Active 적용 시점 및 <code>active_duty</code></td></tr><tr><td>Sequence 정지</td><td><code>connect_phase</code> 연결 및 <code>item_done()</code> 호출</td></tr></table><p>정적 검토는 원본 PWM 포트·동기 리셋·주기 경계, 클래스·신호 이름, HTML 링크, 좌측 PART 05 → CHAPTER 18 → SECTION 구조를 대상으로 합니다. 시뮬레이터와 실제 브라우저 실행 결과가 없으면 <strong>RTL_SIM=NOT_RUN, BROWSER_VISUAL=NOT_RUN</strong>으로 기록합니다.</p></section><div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH18 · RTL_SIM NOT_RUN</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v01.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v01.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v02.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v02.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v01.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v02.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v02.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v01.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v01.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v01.html"},{"id":"ch14","number":14,"title":"FIFO 및 흐름 제어","file":"ch14_fifo_flow_control_v01.html"},{"id":"ch15","number":15,"title":"AXI4-Lite 레지스터 검증","file":"ch15_axi4lite_register_verification_v01.html"},{"id":"ch16","number":16,"title":"MAC·NPU 정수 연산 검증","file":"ch16_mac_npu_integer_verification_v01.html"},{"id":"ch17","number":17,"title":"최소 UVM 환경","file":"ch17_minimal_uvm_environment_v01.html"},{"id":"ch18","number":18,"title":"Sequence에서 Driver까지","file":"ch18_sequence_driver_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
