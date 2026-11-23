@@ -2,7 +2,7 @@
 
 - **전체 편성:** 독립 6부, 총 24장/48시간, 한 장은 60분 × 2회로 진행
 - **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [전체 편성](CURRICULUM.md)
-- **원본 RTL:** 제01장은 `part03/common/rtl/uart_echo_controller.v`, 제02~03장은 `part02_1/ch04/rtl/pwm_core.v`를 읽기 전용 DUT로 사용
+- **검증용 RTL:** `reference_rtl/uart_echo_controller.v`(제01·05·06·07장), `reference_rtl/pwm_core.v`(제02~04장). 두 파일은 `amd_soc_rtl`에서 동일한 바이트로 복사한 읽기 전용 DUT 스냅샷입니다.
 - **목표:** 문법 → Testbench → Self-checking → SVA/Coverage → UVM → Regression/CI
 - **상태:** 제01~07장 배포용 HTML·TB·실행 스크립트 발행. 제07장은 정적 분석 완료, **RTL_SIM=NOT_RUN** (실행 환경에 Verilator 없음).
 
@@ -63,6 +63,8 @@ DUT_PATH=/실제/RTL/경로/pwm_core.v bash scripts/run_ch03.sh
 - 실제 컴파일·시뮬레이션 성공이 확인되기 전에는 PASS로 기록하지 않는다.
 
 ## 발행 위치
+
+- **이전 검증 기록:** [docs/MIGRATION_v01.md](docs/MIGRATION_v01.md)
 
 - **정본(배포·커밋 대상):** `Yuul-Jung/system_velirog_uvm_tb` 저장소 **최상위 루트**.
 - **참고(과거 잘못 작성한 사본):** `Yuul-Jung/amd_soc_rtl/system_verilog_uvm_tb/`. 이 경로에 신규 커밋하지 않습니다.
