@@ -1,10 +1,10 @@
 # RTL Testbench · SystemVerilog · UVM 검증 학습안내서
 
 - **전체 편성:** 독립 6부, 총 24장/48시간, 한 장은 60분 × 2회로 진행
-- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [제09장](ch09_reference_model_scoreboard_v01.html) / [전체 편성](CURRICULUM.md)
+- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [제09장](ch09_reference_model_scoreboard_v02.html) / [전체 편성](CURRICULUM.md)
 - **검증용 RTL:** `reference_rtl/uart_echo_controller.v`(제01·05·06·07장), `reference_rtl/pwm_core.v`(제02~04장). 두 파일은 `amd_soc_rtl`에서 동일한 바이트로 복사한 읽기 전용 DUT 스냅샷입니다.
 - **목표:** 문법 → Testbench → Self-checking → SVA/Coverage → UVM → Regression/CI
-- **상태:** 제01~09장 배포용 HTML·TB·실행 스크립트 발행. 제09장은 정적 검토 완료, **RTL_SIM=NOT_RUN** (제작 환경에 Icarus Verilog 없음).
+- **상태:** 제01~09장 배포용 HTML·TB·실행 스크립트 발행. 제09장은 14개 항목 정적 검증 완료, **RTL_SIM=NOT_RUN** (제작 환경에 Icarus Verilog 없음).
 
 ## 규칙
 - 정본 [rule_md](https://github.com/Yuul-Jung/rule_md) / [HTML STANDARD](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/STANDARD.md)
@@ -83,3 +83,5 @@ DUT_PATH=/실제/RTL/경로/pwm_core.v bash scripts/run_ch03.sh
 - `reference_rtl/pwm_core.v`를 수정하지 않고 `tb/ch09/pwm_reference_model.sv`와 `tb/ch09/tb_pwm_scoreboard.sv`를 함께 컴파일합니다.
 - `bash scripts/run_ch09.sh`로 매 상승 에지 DUT 6출력과 참조 모델을 자동 비교합니다.
 - 실제 실행 전까지 예상 로그와 PASS 문자열을 **검증 완료로 취급하지 않습니다**. `RTL_SIM=NOT_RUN`.
+
+- **제09장 검증 기록:** [docs/CH09_VALIDATION_v02.md](docs/CH09_VALIDATION_v02.md). 공개용 최신 HTML은 `ch09_reference_model_scoreboard_v02.html`입니다.
