@@ -103,3 +103,9 @@
 - TB: tb/ch13/tb_uart_stream.sv; 스크립트: scripts/run_ch13.sh; HTML: ch13_uart_stream_verification_v01.html.
 - 조합 6포트 검증, TB 가상 샘플 클록 10ns, 프레임은 바이트 시퀀스. 실제 직렬 UART 프레이밍 검증은 해당 없음.
 - RTL_SIM NOT_RUN, BROWSER_VISUAL NOT_RUN; 상세: docs/CH13_VALIDATION_v01.md.
+
+## 제14장 · FIFO 및 흐름 제어
+- 원본: amd_soc_rtl/part03/common/rtl/{uart_core.v,uart_rx.v,uart_tx.v}; 바이트 동일 사본은 reference_rtl/에 보관.
+- 원본 Blob: 5390c312b186c27abb2b2818f76ec76d164c75f1, f0d2f9fcdf84aec913720103fb373738417bf7d1, dfcb0cf10293a2a66ab7d704621a5219144673eb.
+- TB: tb/ch14/tb_uart_fifo_flow.sv; 스크립트: scripts/run_ch14.sh; HTML: ch14_fifo_flow_control_v01.html.
+- 실제 UART 직렬 TX/RX 및 16바이트 FIFO 포트 검증. RTL_SIM NOT_RUN, BROWSER_VISUAL NOT_RUN.
