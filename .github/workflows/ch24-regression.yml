@@ -1,0 +1,26 @@
+name: CH24 UART regression
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tb/ch24/**'
+      - 'scripts/run_ch24.py'
+      - 'scripts/run_ch24.sh'
+      - 'reference_rtl/uart_echo_controller.v'
+      - '.github/workflows/ch24-regression.yml'
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Run deterministic and negative regression
+        run: bash scripts/run_ch24.sh
+      - name: Preserve report on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ch24-regression-report
+          path: .build/ch24/
+          if-no-files-found: warn
