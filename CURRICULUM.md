@@ -1,7 +1,7 @@
 # RTL Testbench → SystemVerilog → UVM → 실무 검증 · 6부 24장
 **기본 편성:** 총 48시간, 장별 2시간(60분 × 2), 신규 DUT 제작 최소화, 기존 RTL 검증.
 **교육 순서:** 검증 문법 → 자동 판정 → SystemVerilog → Assertion·Coverage → 인터페이스 검증 → UVM → 실무.
-**상태:** 제1~19장 발행 / 제20~24장 본문 미발행. 아래는 교육과정 편성안.
+**상태:** 제1~20장 발행 / 제21~24장 본문 미발행. 아래는 교육과정 편성안.
 
 ## 제1부 · Verilog 테스트벤치 기초
 파형 확인에서 자동 판정까지
@@ -51,7 +51,7 @@
 | 17 | 최소 UVM 환경 | uvm_test·uvm_env·phase | PWM 최소 UVM 프로젝트 |
 | 18 | Sequence에서 Driver까지 | sequence_item·sequence·sequencer·driver | 트랜잭션 구동 |
 | 19 | Monitor·Agent·Scoreboard | analysis_port·analysis_imp·Agent | PWM 요청·반영 관찰 분리 및 독립 스코어보드 |
-| 20 | Factory·Config·Objection | factory·config_db·objection | 테스트 구성 재사용 |
+| 20 | Factory·Config·Objection | factory override·config_db·objection | PWM Driver 구현 교체·설정 공유·3거래 완료 확인 |
 
 ## 제6부 · 실무 회귀 검증
 버스·시스템·지속 검증
