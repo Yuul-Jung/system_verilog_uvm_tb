@@ -1,0 +1,15 @@
+# CH21 정적 검증 기록
+- 저장소: Yuul-Jung/system_verilog_uvm_tb (루트만)
+- DUT: reference_rtl/axi4lite_slave_adapter.v, Blob eadaf8d3580023bed0c9b06f3e9b2a99de0cf266
+- DUT: reference_rtl/custom_register_bank.v, Blob 49e5d0219574d1bcb9086dc99f259c191e35d82e
+- 원본: Yuul-Jung/amd_soc_rtl, 읽기 전용 / 기존 파일 수정 없음
+- TB: tb/ch21/tb_axi_uvm_ral.sv
+- 스크립트: scripts/run_ch21.sh
+- HTML: ch21_uvm_register_abstraction_v01.html
+- 범위: RAL CONTROL/DATA_IN/VERSION/ID, Frontdoor, Adapter, completion-based Predictor
+- 한계: Predictor 입력은 독립 AXI Monitor가 아닌 Driver 완료 이벤트이며, 부분 쓰기·W1C·W1P 모델은 후속 확장.
+- 정적 검토: DUT 원본 포트·주소, 7개 절, 1교시/2교시, 신호명·상대경로, 기존 site.js의 PART06→CH21→SECTION DOM 생성 코드, 모바일 메뉴/ESC/복사 코드.
+- RTL_SIM: NOT_RUN (실제 Verilator/UVM 컴파일·실행 증거 없음)
+- BROWSER_VISUAL: NOT_RUN
+- PAGES_HTTP: NOT_RUN
+- 예상 출력은 실행 로그가 아님.
