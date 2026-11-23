@@ -1,10 +1,10 @@
 # RTL Testbench · SystemVerilog · UVM 검증 학습안내서
 
 - **전체 편성:** 독립 6부, 총 24장/48시간, 한 장은 60분 × 2회로 진행
-- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [제09장](ch09_reference_model_scoreboard_v02.html) / [제10장](ch10_corner_reset_timeout_v02.html) / [제11장](ch11_temporal_assertions_v01.html) / [제12장](ch12_functional_coverage_v01.html) / [제13장](ch13_uart_stream_verification_v01.html) / [제14장](ch14_fifo_flow_control_v01.html) / [제15장](ch15_axi4lite_register_verification_v01.html) / [제16장](ch16_mac_npu_integer_verification_v01.html) / [제17장](ch17_minimal_uvm_environment_v01.html) / [제18장](ch18_sequence_driver_v01.html) / [제19장](ch19_monitor_agent_scoreboard_v02.html) / [제20장](ch20_factory_config_objection_v01.html) / [제21장](ch21_uvm_register_abstraction_v01.html) / [제22장](ch22_multi_agent_vip_v01.html) / [전체 편성](CURRICULUM.md)
+- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [제09장](ch09_reference_model_scoreboard_v02.html) / [제10장](ch10_corner_reset_timeout_v02.html) / [제11장](ch11_temporal_assertions_v01.html) / [제12장](ch12_functional_coverage_v01.html) / [제13장](ch13_uart_stream_verification_v01.html) / [제14장](ch14_fifo_flow_control_v01.html) / [제15장](ch15_axi4lite_register_verification_v01.html) / [제16장](ch16_mac_npu_integer_verification_v01.html) / [제17장](ch17_minimal_uvm_environment_v01.html) / [제18장](ch18_sequence_driver_v01.html) / [제19장](ch19_monitor_agent_scoreboard_v02.html) / [제20장](ch20_factory_config_objection_v01.html) / [제21장](ch21_uvm_register_abstraction_v01.html) / [제22장](ch22_multi_agent_vip_v02.html) / [전체 편성](CURRICULUM.md)
 - **검증용 RTL:** 기존 원본의 읽기 전용 복사본을 `reference_rtl/`에서 참조합니다. UART Echo·PWM·AXI4-Lite·MAC/FIFO 등은 해당 장별 `source_manifest.md`를 확인합니다.
 - **목표:** 문법 → Testbench → Self-checking → SVA/Coverage → UVM → Regression/CI
-- **상태:** 제01~22장 HTML·TB·실행 스크립트 발행. 제22장은 정적 검토 완료, **RTL_SIM=NOT_RUN** (실제 Verilator/UVM 빌드 미수행).
+- **상태:** 제01~22장 HTML·TB·실행 스크립트 발행. 제22장은 Config DB 범위 오류 수정 후 정적 검토 완료, **RTL_SIM=NOT_RUN** (실제 Verilator/UVM 빌드 미수행).
 
 ## 규칙
 - 정본 [rule_md](https://github.com/Yuul-Jung/rule_md) / [HTML STANDARD](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/STANDARD.md)
@@ -112,10 +112,12 @@ DUT_PATH=/실제/RTL/경로/pwm_core.v bash scripts/run_ch03.sh
 - 실제 컴파일/시뮬레이션과 브라우저 공개 접속은 미검증. 예상 PASS 로그를 실측 결과로 간주하지 않는다.
 
 ## 제22장 · 다중 Agent·VIP
-- 배포 안내서: [제22장 v01](ch22_multi_agent_vip_v01.html) · [검증 기록](docs/CH22_VALIDATION_v01.md).
+- 배포 안내서: [제22장 v01](ch22_multi_agent_vip_v02.html) · [검증 기록](docs/CH22_VALIDATION_v01.md).
 - 소스: `tb/ch22/tb_axi_multiagent_irq.sv`. 실행: `bash scripts/run_ch22.sh`.
 - **교육용 VIP-style 구현**: AXI4-Lite Master Driver·Sequencer·독립 Monitor를 직접 작성했으며 **상용 AMD AXI VIP는 포함하지 않는다**.
 - 두 Agent: `axi22_bus_agent`와 `irq22_event_agent`. Virtual Sequence가 AXI/Reset/IRQ 거래를 순서대로 수행한다.
 - 통합 Scoreboard: AXI 쓰기 4회, 읽기 11회, 하드웨어 IRQ 이벤트 2회, 초기·중간 리셋 2회의 예정 결과 비교.
 - 두 원본 RTL(`axi4lite_slave_adapter.v`, `custom_register_bank.v`)은 읽기 전용; 새로운 검증 소스는 TB와 스크립트뿐이다.
 - 실제 RTL/UVM 시뮬레이션·화면 렌더링·GitHub Pages 접속 검증은 미수행. 예상 로그를 실측 PASS로 취급하지 않는다.
+
+- **제22장 정적 검증:** [CH22_VALIDATION_v02.md](docs/CH22_VALIDATION_v02.md). UVM 최상위 Test와 하위 Agent에 모두 VIF를 전달하도록 `uvm_test_top*` 범위를 사용합니다.
