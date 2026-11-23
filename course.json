@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v26",
+  "version": "v27",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -200,7 +200,7 @@
       "title": "다중 Agent·VIP",
       "subtitle": "AXI4-Lite 및 Reset/IRQ Agent·Virtual Sequence·독립 Monitor·Scoreboard",
       "slug": "ch22_multi_agent_vip",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch22/tb_axi_multiagent_irq.sv"
     }
   ]
