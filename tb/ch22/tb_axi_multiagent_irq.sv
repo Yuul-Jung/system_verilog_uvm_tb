@@ -622,9 +622,9 @@ module tb_axi_multiagent_irq;
         $dumpfile("ch22_multiagent_axi_irq.vcd");
         $dumpvars(0,tb_axi_multiagent_irq);
         uvm_config_db#(virtual axi22_if)::set(
-            null,"uvm_test_top.*","vif",axi_bus);
+            null,"uvm_test_top*","vif",axi_bus);
         uvm_config_db#(virtual irq22_if)::set(
-            null,"uvm_test_top.*","vif",irq_bus);
+            null,"uvm_test_top*","vif",irq_bus);
         run_test("axi22_test");
     end
     initial begin
