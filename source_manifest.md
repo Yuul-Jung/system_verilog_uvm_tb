@@ -131,3 +131,15 @@
 - TB: tb/ch18/tb_pwm_sequence_driver.sv; 실행: scripts/run_ch18.sh; HTML: ch18_sequence_driver_v01.html.
 - 정적 점검: PART05→CH18→SECTION, 포트·신호·목차·상대 링크.
 - RTL_SIM NOT_RUN; BROWSER_VISUAL NOT_RUN. 자세한 내용: docs/CH18_VALIDATION_v01.md.
+
+## 제19장 · Monitor·Agent·Scoreboard
+- **기준 저장소:** `Yuul-Jung/system_verilog_uvm_tb` 루트.
+- **DUT:** `reference_rtl/pwm_core.v`, 원본 Blob SHA `e813f3fb107bd327054d11e0b397817b8e7bd813`. 원본 변경 없음.
+- **TB:** `tb/ch19/tb_pwm_monitor_agent_scoreboard.sv` (interface `pwm19_if`, Sequence·Sequencer·Driver·Monitor·Agent·Environment·Scoreboard·Test).
+- **실습:** 요청 듀티 2→6→0을 제18장과 같은 순서로 진행한다. `pwm19_monitor`는 `PWM19_REQUEST`/ `PWM19_APPLIED` 이벤트를 관찰하여 `ap.write()`로 보낸다.
+- **독립 판정:** `pwm19_scoreboard`는 고정된 `planned_duty[3]`와 요청·적용 관찰을 비교하고, 80ns의 적용 시간 한계·출력 조건을 확인한다. DUT 내부 hierarchical path를 사용하지 않는다.
+- **연결:** `pwm19_agent`가 `sqr`·`drv`·`mon`을 생성하고, `pwm19_env`가 `ag.mon.ap.connect(sb.analysis_export)`를 수행한다.
+- **실행:** `scripts/run_ch19.sh` (Verilator + UVM_HOME, `--binary --timing --assert --trace`).
+- **HTML:** `ch19_monitor_agent_scoreboard_v02.html` · 검증 기록 `docs/CH19_VALIDATION_v02.md`.
+- **범위 제한:** 현재 3개 입력은 순차 제출된다. 같은 설정 반복·동시 Apply/Boundary·중간 리셋까지 일반화하지 않았다.
+- **검증 상태:** 정적 검토 완료, 실제 RTL_SIM=NOT_RUN, 실제 브라우저/Pages 접속=NOT_RUN.
