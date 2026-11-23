@@ -61,7 +61,7 @@
 - **판정:** 포트·HTML·링크·실습 계획 정적 점검 완료. RTL_SIM **NOT_RUN** (실행 도구 미설치).
 
 ## 2026-11-23 · 독립 저장소 이전
-- 정본 저장 위치: `Yuul-Jung/system_velirog_uvm_tb/`의 루트.
+- 정본 저장 위치: `Yuul-Jung/system_verilog_uvm_tb/`의 루트.
 - 원본 스냅샷: `reference_rtl/uart_echo_controller.v` (Blob `28160c34522e47fbd961466651598da063bc74ae`), `reference_rtl/pwm_core.v` (Blob `e813f3fb107bd327054d11e0b397817b8e7bd813`).
 - 두 RTL 파일은 원본과 바이트 단위로 동일하게 보존하며 `scripts/run_chXX.sh`의 기본 `DUT_PATH`는 `reference_rtl/`을 사용.
 - `amd_soc_rtl/system_verilog_uvm_tb/`는 이전에 잘못 작성된 사본이며 앞으로 신규 작업 대상이 아님.
@@ -74,3 +74,13 @@
 - **실행 상태:** RTL_SIM=NOT_RUN (작성 환경에 Verilator 없음). 예상 출력은 무작위 바이트 예시이며 실제 로그 아님.
 - **정적 검토:** 파일 존재, DUT 실제 6포트, 코드/도식 신호, HTML 상대 링크, 좌측 PART02→CH08→SECTION 구조 소스 점검. 실브라우저 렌더링은 NOT_RUN.
 - **규칙:** `Yuul-Jung/rule_md`의 AGENTS.md, HTML STANDARD, code-development-rules, code-style-rules, flowchart-rules를 읽고 반영.
+
+## 제09장 · 참조 모델·스코어보드
+- **검증 DUT:** `reference_rtl/pwm_core.v` (원본 Blob SHA `e813f3fb107bd327054d11e0b397817b8e7bd813`), 읽기 전용.
+- **참조 모델:** `tb/ch09/pwm_reference_model.sv`; DUT 내부 신호를 사용하지 않는 별도 `phase`, `queued_*`, `ref_*` 상태.
+- **테스트벤치:** `tb/ch09/tb_pwm_scoreboard.sv`; DUT의 `pwm_out/pending/active_period/active_duty/active_enable/active_polarity`를 매 상승 에지 `#1` 후 참조값과 비교.
+- **실행 스크립트:** `scripts/run_ch09.sh` (`iverilog -g2012` + `vvp`, `.build/ch09/` 출력).
+- **발행 HTML:** `ch09_reference_model_scoreboard_v01.html`.
+- **시나리오:** 25% → 75% → 주기 경계/Apply 겹침 → 반전 → 출력 차단 → 100% → 동작 중 리셋 → 0%. 여섯 `cfg_apply` 요청.
+- **클록·리셋:** `RESET_PERIOD=8`, 10ns 클록, 내부 레지스터는 posedge 동기 리셋, `pwm_out`은 resetn의 조합 게이팅.
+- **검증 상태:** GitHub 파일·PORT·INDEX 정적 점검 중, RTL_SIM **NOT_RUN**. 예상 결과는 실제 로그 아님.
