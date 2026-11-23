@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v20",
+  "version": "v21",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -157,6 +157,15 @@
       "slug": "ch17_minimal_uvm_environment",
       "version": "v01",
       "source": "tb/ch17/tb_pwm_uvm.sv"
+    },
+    {
+      "id": "ch18",
+      "number": 18,
+      "title": "Sequence에서 Driver까지",
+      "subtitle": "pwm18_item·Sequence·Sequencer·Driver로 기존 PWM 설정 거래 구동",
+      "slug": "ch18_sequence_driver",
+      "version": "v01",
+      "source": "tb/ch18/tb_pwm_sequence_driver.sv"
     }
   ]
 }
