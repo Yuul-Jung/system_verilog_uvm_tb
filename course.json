@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v11",
+  "version": "v12",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -85,6 +85,15 @@
       "slug": "ch09_reference_model_scoreboard",
       "version": "v02",
       "source": "tb/ch09/tb_pwm_scoreboard.sv"
+    },
+    {
+      "id": "ch10",
+      "number": 10,
+      "title": "경계조건·오류 주입",
+      "subtitle": "PWM 0%·100%·동작 중 리셋·타임아웃",
+      "slug": "ch10_corner_reset_timeout",
+      "version": "v01",
+      "source": "tb/ch10/tb_pwm_corner_reset_timeout.sv"
     }
   ]
 }
