@@ -1,0 +1,625 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="제20장 UVM Factory·Config DB·Objection 학습안내서"><title>제20장 · Factory·Config·Objection · UVM 학습안내서</title><link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch20"><a class="access-skip" href="#main-content">본문 바로가기</a><button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div><header class="hero"><div class="hero-inner"><p class="kicker">제5부 · UVM 검증 환경</p><h1>제20장 · Factory·Config·Objection</h1><p>Factory·Config DB·Objection으로 기존 UVM 검증 환경의 구성·설정·종료 정책을 분리합니다.</p><div class="chips"><span class="chip">PART 05 · CHAPTER 20</span><span class="chip">1교시 60분 + 2교시 60분</span><span class="chip">원본 RTL 변경 없음</span></div></div></header><div class="wrap"><nav class="toc" id="course-nav" aria-label="부·장·절 탐색"></nav><main class="content" id="main-content"><section class="section" id="s00"><h2><span class="num">00</span>개요 · 검증 로직을 고치지 않고 구성만 바꾸기</h2><p>제19장에서는 Monitor(모니터, 신호 관찰), Agent(에이전트, 검증 컴포넌트 묶음), Scoreboard(스코어보드, 결과 비교)를 분리했습니다. 제20장에서는 이 검증 환경을 <strong>Factory(팩토리, 컴포넌트 구현 교체)</strong>, <strong>Config DB(컨피그 디비, 설정 전달)</strong>, <strong>Objection(옵젝션, 검증 종료 시점 제어)</strong>으로 관리합니다.</p><div style="overflow-x:auto;border:1px solid #d8d9df;background:#fafaf8;padding:14px;margin:15px 0"><svg viewBox="0 0 960 296" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="pwm20_test가 Factory Override, Config DB, Objection을 관리한다. Config DB의 settings는 env 아래 driver와 scoreboard에 전달된다. Factory가 pwm20_driver의 구현을 pwm20_traced_driver로 교체하고, sequencer가 거래를 driver로 보낸다. Monitor는 DUT 출력을 관찰하여 scoreboard로 전송한다." style="width:100%;min-width:690px;height:auto">
+<defs><marker id="arrow20" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#4635B1"/></marker></defs>
+<rect x="12" y="15" width="936" height="266" rx="7" fill="#f7f7fa" stroke="#a8a6bf"/><text x="27" y="37" font-size="16" font-weight="700" fill="#312282">pwm20_test · 검증 정책</text>
+<rect x="25" y="50" width="293" height="79" rx="5" fill="#edeafa" stroke="#4635B1"/><text x="171" y="75" text-anchor="middle" font-size="14" font-weight="700" fill="#302482">Factory Override</text><text x="171" y="97" font-size="12" text-anchor="middle">pwm20_driver → pwm20_traced_driver</text><text x="171" y="115" font-size="11" text-anchor="middle">원본 Driver·DUT 수정 없이 구현 교체</text>
+<rect x="332" y="50" width="300" height="79" rx="5" fill="#edeafa" stroke="#4635B1"/><text x="482" y="75" text-anchor="middle" font-size="14" font-weight="700" fill="#302482">Config DB · pwm20_cfg</text><text x="482" y="97" font-size="12" text-anchor="middle">duty_plan=[2,6,0]</text><text x="482" y="115" font-size="11" text-anchor="middle">max_wait_cycles · max_apply_ns</text>
+<rect x="648" y="50" width="286" height="79" rx="5" fill="#edeafa" stroke="#4635B1"/><text x="791" y="75" text-anchor="middle" font-size="14" font-weight="700" fill="#302482">Objection · run_phase</text><text x="791" y="97" font-size="12" text-anchor="middle">raise → 시퀀스·판정 → drop</text><text x="791" y="115" font-size="11" text-anchor="middle">검증 도중 종료 방지</text>
+<rect x="26" y="173" width="156" height="76" rx="5" fill="white" stroke="#757191"/><text x="104" y="201" text-anchor="middle" font-size="14" font-weight="700">pwm20_sequencer</text><text x="104" y="222" text-anchor="middle" font-size="11">거래 전달</text>
+<rect x="212" y="173" width="178" height="76" rx="5" fill="white" stroke="#757191"/><text x="301" y="201" text-anchor="middle" font-size="14" font-weight="700">pwm20_traced_driver</text><text x="301" y="222" text-anchor="middle" font-size="11">cfg_apply · cfg_duty 구동</text>
+<rect x="420" y="173" width="148" height="76" rx="5" fill="white" stroke="#626976"/><text x="494" y="201" text-anchor="middle" font-size="14" font-weight="700">pwm_core</text><text x="494" y="222" text-anchor="middle" font-size="11">원본 DUT</text>
+<rect x="599" y="173" width="146" height="76" rx="5" fill="white" stroke="#757191"/><text x="672" y="201" text-anchor="middle" font-size="14" font-weight="700">pwm20_monitor</text><text x="672" y="222" text-anchor="middle" font-size="11">입력·출력 관찰</text>
+<rect x="776" y="173" width="157" height="76" rx="5" fill="#f4f1ff" stroke="#4635B1"/><text x="854" y="201" text-anchor="middle" font-size="14" font-weight="700">pwm20_scoreboard</text><text x="854" y="222" text-anchor="middle" font-size="11">계획값·적용값 비교</text>
+<path d="M182 211H204M390 211H412M568 211H591M745 211H768" stroke="#4635B1" stroke-width="2.2" fill="none" marker-end="url(#arrow20)"/>
+<path d="M171 129V155H301V169M482 129V157H854V169M791 129V151" stroke="#7f72b5" stroke-width="1.5" stroke-dasharray="5 4" fill="none"/>
+<text x="479" y="273" text-anchor="middle" font-size="11" fill="#656775">점선: 설정·구현·검증 정책 / 실선: 신호·관찰 거래 전달 (교육용 연결 구조)</text>
+</svg></div>
+<table><thead><tr><th>시간</th><th>교시</th><th>진행 내용</th></tr></thead><tbody>
+<tr><td>0~60분</td><td>1교시</td><td>Factory Override·Config DB·Objection의 필요성, 계층 연결과 수명주기</td></tr>
+<tr><td>60~120분</td><td>2교시</td><td>기존 PWM RTL 연결, 전체 UVM 소스, 실행 스크립트, 판정과 장애 분석</td></tr></tbody></table>
+<p>DUT(디유티, 검증 대상 회로)는 기존 <code>reference_rtl/pwm_core.v</code>입니다. 8클록 PWM 주기, 듀티 2→6→0 설정, 10ns 클록을 그대로 사용합니다. 이번 변경은 모두 <code>tb/ch20/</code>의 UVM 검증 계층에서 이루어집니다.</p></section>
+<section class="section" id="s01"><h2><span class="num">01</span>1교시 ① · Factory는 기존 Driver의 구현만 교체한다 (0~20분)</h2><p>Driver 코드를 직접 편집해 로그를 추가하면 원래 Driver가 단순 구동만 담당한다는 원칙이 무너집니다. UVM Factory Override(팩토리 오버라이드, 등록된 클래스의 실제 생성 타입 교체)는 기존 <code>pwm20_driver</code>의 <code>type_id::create()</code> 호출을 바꾸지 않은 상태에서 <code>pwm20_traced_driver</code>가 생성되게 합니다.</p>
+<div class="codeblock"><div class="codebar"><span>Factory Override 핵심 코드 · SystemVerilog · 실제 소스 발췌</span></div><pre tabindex="0"><code>// pwm20_test.build_phase: env 생성 전에 등록
+pwm20_driver::type_id::set_type_override(
+    pwm20_traced_driver::get_type());
+
+// pwm20_agent.build_phase: 기존 생성 코드는 그대로 유지
+drv = pwm20_driver::type_id::create(&quot;drv&quot;, this);
+
+// pwm20_test.run_phase: 실제 객체 타입 검증
+if (!$cast(traced, env.ag.drv))
+    `uvm_fatal(&quot;FACTORY&quot;, &quot;Driver type override was ignored&quot;)</code></pre></div>
+<p>기존 기반 클래스 <code>pwm20_driver</code>에는 <code>virtual task drive_one()</code>이 있습니다. 파생 클래스가 이를 오버라이드하여 로그를 남기고 <code>super.drive_one(req)</code>로 원래 구동 기능을 실행합니다. 따라서 <strong>기본 동작 유지 + 관찰 기능 추가</strong>가 가능합니다.</p>
+<p>주의할 점은 <strong>Factory 등록 시점</strong>입니다. <code>env</code>가 하위 컴포넌트를 생성하기 전에 Override를 등록해야 하므로 <code>pwm20_test.build_phase()</code>에서 설정합니다.</p></section>
+<section class="section" id="s02"><h2><span class="num">02</span>1교시 ② · Config DB로 검증 설정을 공유한다 (20~40분)</h2><p>제19장의 듀티 계획과 타임아웃은 Scoreboard 또는 Driver에 직접 적혀 있었습니다. 제20장에서는 <code>pwm20_cfg</code> 설정 객체 하나에 <code>duty_plan</code>, <code>max_wait_cycles</code>, <code>max_apply_ns</code>, <code>expected_transactions</code>, <code>enable_trace</code>를 모읍니다.</p>
+<table><thead><tr><th>설정 변수</th><th>기준값</th><th>사용하는 곳</th></tr></thead><tbody>
+<tr><td><code>duty_plan[3]</code></td><td>2, 6, 0</td><td>Sequence 입력 계획 · Scoreboard 기대값</td></tr>
+<tr><td><code>max_wait_cycles</code></td><td>12</td><td>Driver의 Pending 대기 제한</td></tr>
+<tr><td><code>max_apply_ns</code></td><td>80ns</td><td>Scoreboard의 요청→적용 기한</td></tr>
+<tr><td><code>expected_transactions</code></td><td>3</td><td>Sequence 반복·최종 완료 검사</td></tr>
+<tr><td><code>enable_trace</code></td><td>1</td><td>교체된 Driver의 진단 로그</td></tr></tbody></table>
+<div class="codeblock"><div class="codebar"><span>Config DB의 설정/조회 · SystemVerilog · 실제 소스 발췌</span></div><pre tabindex="0"><code>// Test가 env 아래의 컴포넌트에 전달
+settings = pwm20_cfg::type_id::create(&quot;settings&quot;);
+uvm_config_db#(pwm20_cfg)::set(this, &quot;env.*&quot;, &quot;cfg&quot;, settings);
+
+// Driver와 Scoreboard의 build_phase에서 각각 조회
+if (!uvm_config_db#(pwm20_cfg)::get(this, &quot;&quot;, &quot;cfg&quot;, cfg))
+    `uvm_fatal(&quot;NO_CFG&quot;, &quot;Configuration was not found&quot;)</code></pre></div>
+<p><code>set()</code>는 하위 계층에 설정을 등록하고 <code>get()</code>은 자신에게 맞는 설정을 읽습니다. <code>vif</code>는 최상위에서 별도의 <code>uvm_config_db#(virtual pwm20_if)</code> 항목으로 전달하므로, <strong>하드웨어 신호 접근 경로와 테스트 정책</strong>이 혼동되지 않습니다.</p>
+<p>Sequence는 컴포넌트가 아닌 객체이므로 이번 예제에서는 생성 후 <code>seq.cfg = settings</code>로 같은 설정 핸들을 명시적으로 전달합니다. 이는 Config DB가 Sequence 내부에서 자동 조회된다는 뜻이 아닙니다.</p></section>
+<section class="section" id="s03"><h2><span class="num">03</span>1교시 ③ · Objection은 종료 허가를 관리한다 (40~60분)</h2><p>UVM의 <code>run_phase()</code>는 여러 컴포넌트에서 병렬로 수행됩니다. 아무도 Objection을 올리지 않으면 DUT 검사가 끝나기 전에 런타임 단계가 종료될 수 있습니다. Test는 검증 업무가 시작될 때 <code>phase.raise_objection(this)</code>를 호출하고, 입력 3개·관찰 3개·Factory 타입 확인까지 끝난 뒤 <code>phase.drop_objection(this)</code>를 호출합니다.</p>
+<div style="overflow-x:auto;background:#fafaf8;border:1px solid #dedee5;padding:14px;margin:12px 0"><svg viewBox="0 0 930 185" role="img" aria-label="run_phase에서 objection을 올린 다음 reset 동작을 확인하고, Sequence 시작으로 세 요청을 전달한다. Monitor가 요청과 적용 이벤트를 전달한 뒤 Scoreboard가 세 적용을 확인하면 Objection을 내린다." xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:660px;height:auto"><text x="15" y="24" font-size="14" font-weight="700" fill="#312282">Objection 수명주기 · 작업 단계 (실제 시간 비례 아님)</text><path d="M45 86H887" stroke="#716e8b" stroke-width="2.2"/><path d="M887 86l-10 -6v12Z" fill="#716e8b"/>
+<circle cx="105" cy="86" r="6" fill="#4635B1"/><path d="M105 80V51" stroke="#a79bd0" stroke-dasharray="4 3"/><text x="105" y="45" font-size="13" font-weight="700" text-anchor="middle" fill="#302882">raise</text><text x="105" y="61" font-size="11.5" text-anchor="middle" fill="#505566">검증 진행 선언</text><circle cx="291" cy="86" r="6" fill="#4635B1"/><path d="M291 94V117" stroke="#a79bd0" stroke-dasharray="4 3"/><text x="291" y="135" font-size="13" font-weight="700" text-anchor="middle" fill="#302882">reset 확인</text><text x="291" y="155" font-size="11.5" text-anchor="middle" fill="#505566">3클록 대기</text><circle cx="484" cy="86" r="6" fill="#4635B1"/><path d="M484 80V51" stroke="#a79bd0" stroke-dasharray="4 3"/><text x="484" y="45" font-size="13" font-weight="700" text-anchor="middle" fill="#302882">seq.start()</text><text x="484" y="61" font-size="11.5" text-anchor="middle" fill="#505566">3개 거래 구동</text><circle cx="669" cy="86" r="6" fill="#4635B1"/><path d="M669 94V117" stroke="#a79bd0" stroke-dasharray="4 3"/><text x="669" y="135" font-size="13" font-weight="700" text-anchor="middle" fill="#302882">Scoreboard</text><text x="669" y="155" font-size="11.5" text-anchor="middle" fill="#505566">적용 3회 검사</text><circle cx="851" cy="86" r="6" fill="#4635B1"/><path d="M851 80V51" stroke="#a79bd0" stroke-dasharray="4 3"/><text x="851" y="45" font-size="13" font-weight="700" text-anchor="middle" fill="#302882">drop</text><text x="851" y="61" font-size="11.5" text-anchor="middle" fill="#505566">검증 종료 허용</text>
+</svg></div>
+<div class="codeblock"><div class="codebar"><span>Objection 완료 조건 · SystemVerilog · 실제 소스 발췌</span></div><pre tabindex="0"><code>phase.raise_objection(this);
+seq.start(env.ag.sqr);
+repeat (2) @(negedge vif.clk);
+if (env.ag.drv.driven != settings.expected_transactions ||
+    traced.trace_count != settings.expected_transactions ||
+    env.sb.requests != settings.expected_transactions ||
+    env.sb.applied != settings.expected_transactions)
+    `uvm_fatal(&quot;COUNTS&quot;, &quot;Factory/Monitor/Scoreboard count mismatch&quot;)
+phase.drop_objection(this);</code></pre></div>
+<p><strong>Objection은 성공 판정을 대신하지 않습니다.</strong> DUT가 틀린 값을 내면 Scoreboard에서 <code>uvm_fatal</code>을 실행하고 테스트는 실패합니다. 반대로 Objection을 내리기 전에 실제 처리 건수를 확인해야 정상 종료를 PASS로 오인하지 않습니다. 파일에는 별도 2000ns 전역 타임아웃도 두었습니다.</p></section>
+<section class="section" id="s04"><h2><span class="num">04</span>2교시 ① · PWM 검증 환경의 전체 구성 코드 (60~90분)</h2><p><code>pwm20_if</code> → <code>pwm20_cfg</code> → 거래 객체·Sequence → 기본 Driver/교체 Driver → Monitor → Scoreboard → Agent → Environment → Test → Top 순으로 읽습니다. 최상위는 기존 PWM 포트 연결, 클록, 인터페이스 전달만 담당합니다.</p>
+<div class="codeblock"><div class="codebar"><span>tb/ch20/tb_pwm_factory_config_objection.sv · SystemVerilog · 전체 UVM 테스트벤치 · 실제 실행 전</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제20장: Factory Override + Config DB + Objection의 역할을 분리한다.
+// DUT는 읽기 전용 reference_rtl/pwm_core.v, 원본 포트만 연결한다.
+// PART 05의 제18~19장과 동일하게 듀티 2 → 6 → 0을 검증한다.
+interface pwm20_if(input logic clk);
+    logic        resetn = 1'b0;
+    logic        cfg_apply = 1'b0;
+    logic [31:0] cfg_period = 32'd8;
+    logic [31:0] cfg_duty = 32'd0;
+    logic        cfg_enable = 1'b0;
+    logic        cfg_polarity = 1'b0;
+    wire         pwm_out, pending, active_enable, active_polarity;
+    wire [31:0]  active_period, active_duty;
+endinterface
+
+package ch20_uvm_pkg;
+    import uvm_pkg::*;
+    `include &quot;uvm_macros.svh&quot;
+
+    // (추가) Config DB에서 공유할 검증 설정 객체.
+    // DUT 출력에서 기대값을 복사하지 않고 테스트의 계약을 저장한다.
+    class pwm20_cfg extends uvm_object;
+        `uvm_object_utils(pwm20_cfg)
+        bit [31:0] duty_plan[3];
+        int unsigned max_wait_cycles;
+        time max_apply_ns;
+        int unsigned expected_transactions;
+        bit enable_trace;
+        function new(string name=&quot;pwm20_cfg&quot;);
+            super.new(name);
+            duty_plan[0] = 32'd2;
+            duty_plan[1] = 32'd6;
+            duty_plan[2] = 32'd0;
+            max_wait_cycles = 12;
+            max_apply_ns = 80;
+            expected_transactions = 3;
+            enable_trace = 1'b1;
+        endfunction
+    endclass
+
+    class pwm20_item extends uvm_sequence_item;
+        `uvm_object_utils(pwm20_item)
+        bit [31:0] duty;
+        function new(string name=&quot;pwm20_item&quot;);
+            super.new(name);
+        endfunction
+    endclass
+
+    class pwm20_sequence extends uvm_sequence #(pwm20_item);
+        `uvm_object_utils(pwm20_sequence)
+        pwm20_cfg cfg;
+        function new(string name=&quot;pwm20_sequence&quot;);
+            super.new(name);
+        endfunction
+        task body();
+            pwm20_item req;
+            if (cfg == null)
+                `uvm_fatal(&quot;SEQ_CFG&quot;, &quot;Sequence config not provided&quot;)
+            for (int i=0; i&lt;int'(cfg.expected_transactions); i++) begin
+                req = pwm20_item::type_id::create($sformatf(&quot;req_%0d&quot;, i));
+                start_item(req);
+                req.duty = cfg.duty_plan[i];
+                finish_item(req);
+            end
+        endtask
+    endclass
+
+    class pwm20_sequencer extends uvm_sequencer #(pwm20_item);
+        `uvm_component_utils(pwm20_sequencer)
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+    endclass
+
+    // (추가) 기본 Driver: 객체·인터페이스·설정만으로 일반적 구동을 수행.
+    // 동작 변경이나 로그 추가는 원본 DUT가 아니라 Factory Override로 처리.
+    class pwm20_driver extends uvm_driver #(pwm20_item);
+        `uvm_component_utils(pwm20_driver)
+        virtual pwm20_if vif;
+        pwm20_cfg cfg;
+        int unsigned driven = 0;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (!uvm_config_db#(virtual pwm20_if)::get(this, &quot;&quot;, &quot;vif&quot;, vif))
+                `uvm_fatal(&quot;NOVIF&quot;, &quot;pwm20_if not configured&quot;)
+            if (!uvm_config_db#(pwm20_cfg)::get(this, &quot;&quot;, &quot;cfg&quot;, cfg))
+                `uvm_fatal(&quot;NO_CFG&quot;, &quot;Driver config not found&quot;)
+        endfunction
+        virtual task drive_one(pwm20_item req);
+            int unsigned guard;
+            @(negedge vif.clk);
+            vif.cfg_period = 32'd8;
+            vif.cfg_duty = req.duty;
+            vif.cfg_enable = 1'b1;
+            vif.cfg_polarity = 1'b0;
+            vif.cfg_apply = 1'b1;
+            @(negedge vif.clk);
+            vif.cfg_apply = 1'b0;
+
+            // 이 Driver는 다음 입력을 보낼 타이밍만 제어한다.
+            // 요청·적용 데이터의 정답은 Scoreboard가 별도로 검사한다.
+            guard = 0;
+            while (vif.pending !== 1'b0) begin
+                @(negedge vif.clk);
+                guard++;
+                if (guard &gt; cfg.max_wait_cycles)
+                    `uvm_fatal(&quot;DRV_TIMEOUT&quot;, &quot;Pending did not clear&quot;)
+            end
+            driven++;
+        endtask
+        task run_phase(uvm_phase phase);
+            pwm20_item req;
+            forever begin
+                seq_item_port.get_next_item(req);
+                drive_one(req);
+                seq_item_port.item_done();
+            end
+        endtask
+    endclass
+
+    // (추가) 기본 Driver를 수정하지 않고 로깅만 덧붙이는 교체 구현.
+    class pwm20_traced_driver extends pwm20_driver;
+        `uvm_component_utils(pwm20_traced_driver)
+        int unsigned trace_count = 0;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+        virtual task drive_one(pwm20_item req);
+            if (cfg.enable_trace)
+                `uvm_info(&quot;FACTORY_TRACE&quot;,
+                    $sformatf(&quot;DRIVE duty=%0d&quot;, req.duty), UVM_LOW)
+            super.drive_one(req);
+            trace_count++;
+        endtask
+    endclass
+
+    typedef enum {PWM20_REQUEST, PWM20_APPLIED} pwm20_kind_e;
+    class pwm20_sample extends uvm_sequence_item;
+        `uvm_object_utils(pwm20_sample)
+        pwm20_kind_e kind;
+        logic [31:0] duty, period;
+        logic enable, polarity, pending, pwm;
+        time sampled_at;
+        function new(string name=&quot;pwm20_sample&quot;);
+            super.new(name);
+        endfunction
+    endclass
+
+    // (유지/확장) Monitor: 공개 입력과 출력을 관찰만 하며 구동하지 않는다.
+    class pwm20_monitor extends uvm_monitor;
+        `uvm_component_utils(pwm20_monitor)
+        virtual pwm20_if vif;
+        uvm_analysis_port #(pwm20_sample) ap;
+        bit previous_pending = 1'b0;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+            ap = new(&quot;ap&quot;, this);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (!uvm_config_db#(virtual pwm20_if)::get(this, &quot;&quot;, &quot;vif&quot;, vif))
+                `uvm_fatal(&quot;NOVIF&quot;, &quot;Monitor interface missing&quot;)
+        endfunction
+        task run_phase(uvm_phase phase);
+            pwm20_sample s;
+            forever begin
+                @(posedge vif.clk);
+                #1; // 상승 에지의 비차단 대입 완료 이후 읽는다.
+                if (!vif.resetn) begin
+                    previous_pending = 1'b0;
+                end else begin
+                    if (vif.cfg_apply === 1'b1) begin
+                        s = pwm20_sample::type_id::create(&quot;req_sample&quot;);
+                        s.kind = PWM20_REQUEST;
+                        s.duty = vif.cfg_duty;
+                        s.period = vif.cfg_period;
+                        s.enable = vif.cfg_enable;
+                        s.polarity = vif.cfg_polarity;
+                        s.pending = vif.pending;
+                        s.pwm = vif.pwm_out;
+                        s.sampled_at = $time;
+                        ap.write(s);
+                    end
+                    if (previous_pending &amp;&amp; vif.pending === 1'b0) begin
+                        s = pwm20_sample::type_id::create(&quot;applied_sample&quot;);
+                        s.kind = PWM20_APPLIED;
+                        s.duty = vif.active_duty;
+                        s.period = vif.active_period;
+                        s.enable = vif.active_enable;
+                        s.polarity = vif.active_polarity;
+                        s.pending = vif.pending;
+                        s.pwm = vif.pwm_out;
+                        s.sampled_at = $time;
+                        ap.write(s);
+                    end
+                    previous_pending = (vif.pending === 1'b1);
+                end
+            end
+        endtask
+    endclass
+
+    // (추가) Scoreboard는 Config DB 설정을 읽어 계획값과 비교한다.
+    class pwm20_scoreboard extends uvm_scoreboard;
+        `uvm_component_utils(pwm20_scoreboard)
+        uvm_analysis_imp #(pwm20_sample, pwm20_scoreboard) analysis_export;
+        pwm20_cfg cfg;
+        int unsigned requests = 0, applied = 0;
+        time request_time[3];
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+            analysis_export = new(&quot;analysis_export&quot;, this);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (!uvm_config_db#(pwm20_cfg)::get(this, &quot;&quot;, &quot;cfg&quot;, cfg))
+                `uvm_fatal(&quot;NO_CFG&quot;, &quot;Scoreboard config not found&quot;)
+        endfunction
+        function void write(pwm20_sample s);
+            if (s.kind == PWM20_REQUEST) begin
+                if (requests &gt;= cfg.expected_transactions)
+                    `uvm_fatal(&quot;EXTRA_REQUEST&quot;, &quot;More requests than configured&quot;)
+                if (s.period !== 32'd8 ||
+                    s.duty !== cfg.duty_plan[requests] ||
+                    s.enable !== 1'b1 || s.polarity !== 1'b0 ||
+                    s.pending !== 1'b1)
+                    `uvm_fatal(&quot;REQ_MISMATCH&quot;, &quot;Request was not as configured&quot;)
+                request_time[requests] = s.sampled_at;
+                requests++;
+                `uvm_info(&quot;SCOREBOARD&quot;,
+                    $sformatf(&quot;REQUEST %0d&quot;, requests), UVM_LOW)
+            end else if (s.kind == PWM20_APPLIED) begin
+                if (applied &gt;= requests || applied &gt;= cfg.expected_transactions)
+                    `uvm_fatal(&quot;APPLY_ORDER&quot;, &quot;Applied event without request&quot;)
+                if (s.period !== 32'd8 ||
+                    s.duty !== cfg.duty_plan[applied] ||
+                    s.enable !== 1'b1 || s.polarity !== 1'b0 ||
+                    s.pending !== 1'b0 ||
+                    s.pwm !== (cfg.duty_plan[applied] != 0))
+                    `uvm_fatal(&quot;APPLY_MISMATCH&quot;, &quot;PWM active setting mismatch&quot;)
+                if (s.sampled_at &lt; request_time[applied] ||
+                    s.sampled_at - request_time[applied] &gt; cfg.max_apply_ns)
+                    `uvm_fatal(&quot;APPLY_LATENCY&quot;, &quot;Applied after allowed deadline&quot;)
+                applied++;
+                `uvm_info(&quot;SCOREBOARD&quot;,
+                    $sformatf(&quot;APPLIED %0d&quot;, applied), UVM_LOW)
+            end else begin
+                `uvm_fatal(&quot;UNKNOWN_EVENT&quot;, &quot;Unexpected monitor event kind&quot;)
+            end
+        endfunction
+    endclass
+
+    // (유지) Agent는 Driver를 기반 클래스 타입으로 factory 생성한다.
+    // 실제 객체는 Test의 Override 정책에 따라 traced_driver가 된다.
+    class pwm20_agent extends uvm_agent;
+        `uvm_component_utils(pwm20_agent)
+        pwm20_sequencer sqr;
+        pwm20_driver drv;
+        pwm20_monitor mon;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            sqr = pwm20_sequencer::type_id::create(&quot;sqr&quot;, this);
+            drv = pwm20_driver::type_id::create(&quot;drv&quot;, this);
+            mon = pwm20_monitor::type_id::create(&quot;mon&quot;, this);
+        endfunction
+        function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+            drv.seq_item_port.connect(sqr.seq_item_export);
+        endfunction
+    endclass
+
+    class pwm20_env extends uvm_env;
+        `uvm_component_utils(pwm20_env)
+        pwm20_agent ag;
+        pwm20_scoreboard sb;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            ag = pwm20_agent::type_id::create(&quot;ag&quot;, this);
+            sb = pwm20_scoreboard::type_id::create(&quot;sb&quot;, this);
+        endfunction
+        function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+            ag.mon.ap.connect(sb.analysis_export);
+        endfunction
+    endclass
+
+    // (추가) Factory/Config/Objection의 책임은 Test에 집중한다.
+    class pwm20_test extends uvm_test;
+        `uvm_component_utils(pwm20_test)
+        pwm20_cfg settings;
+        virtual pwm20_if vif;
+        pwm20_env env;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            settings = pwm20_cfg::type_id::create(&quot;settings&quot;);
+            if (!uvm_config_db#(virtual pwm20_if)::get(this, &quot;&quot;, &quot;vif&quot;, vif))
+                `uvm_fatal(&quot;NOVIF&quot;, &quot;Test interface missing&quot;)
+
+            // Factory Override는 env.build_phase() 실행 이전에 등록한다.
+            pwm20_driver::type_id::set_type_override(
+                pwm20_traced_driver::get_type());
+
+            // Config DB는 구성 값을 계층 아래에 공유한다.
+            uvm_config_db#(pwm20_cfg)::set(this, &quot;env.*&quot;, &quot;cfg&quot;, settings);
+            env = pwm20_env::type_id::create(&quot;env&quot;, this);
+        endfunction
+
+        task run_phase(uvm_phase phase);
+            pwm20_sequence seq;
+            pwm20_traced_driver traced;
+
+            // (추가) Objection을 올려 UVM이 Sequence 도중 종료되지 않게 한다.
+            phase.raise_objection(this);
+            repeat (3) @(negedge vif.clk);
+            if (vif.active_period !== 32'd8 ||
+                vif.active_duty !== 32'd0 || vif.pending !== 1'b0)
+                `uvm_fatal(&quot;RESET&quot;, &quot;PWM sync reset not confirmed&quot;)
+            vif.resetn = 1'b1;
+
+            // 실제 생성 객체가 Override된 타입인지 런타임에 확인.
+            if (!$cast(traced, env.ag.drv))
+                `uvm_fatal(&quot;FACTORY&quot;, &quot;Driver type override was ignored&quot;)
+
+            seq = pwm20_sequence::type_id::create(&quot;seq&quot;);
+            seq.cfg = settings;
+            seq.start(env.ag.sqr);
+            repeat (2) @(negedge vif.clk);
+
+            // 입력 3건과 Monitor·Scoreboard 적용 관찰 3건을 모두 확인.
+            if (env.ag.drv.driven != settings.expected_transactions ||
+                traced.trace_count != settings.expected_transactions ||
+                env.sb.requests != settings.expected_transactions ||
+                env.sb.applied != settings.expected_transactions)
+                `uvm_fatal(&quot;COUNTS&quot;, &quot;Factory/Monitor/Scoreboard count mismatch&quot;)
+            `uvm_info(&quot;RESULT&quot;,
+                &quot;PASS CH20 factory=traced config=3 applied=3&quot;, UVM_NONE)
+
+            // 모든 판정을 마친 뒤 Objection을 내려 종료를 허용한다.
+            phase.drop_objection(this);
+        endtask
+    endclass
+endpackage
+
+module tb_pwm_factory_config_objection;
+    import uvm_pkg::*;
+    import ch20_uvm_pkg::*;
+    logic clk = 1'b0;
+    always #5 clk = ~clk;
+    pwm20_if bus(clk);
+
+    pwm_core #(.RESET_PERIOD(32'd8)) dut (
+        .clk(clk), .resetn(bus.resetn),
+        .cfg_apply(bus.cfg_apply), .cfg_period(bus.cfg_period),
+        .cfg_duty(bus.cfg_duty), .cfg_enable(bus.cfg_enable),
+        .cfg_polarity(bus.cfg_polarity), .pwm_out(bus.pwm_out),
+        .pending(bus.pending), .active_period(bus.active_period),
+        .active_duty(bus.active_duty),
+        .active_enable(bus.active_enable),
+        .active_polarity(bus.active_polarity)
+    );
+
+    initial begin
+        $dumpfile(&quot;ch20_pwm_factory_config_objection.vcd&quot;);
+        $dumpvars(0, tb_pwm_factory_config_objection);
+        uvm_config_db#(virtual pwm20_if)::set(null, &quot;*&quot;, &quot;vif&quot;, bus);
+        run_test(&quot;pwm20_test&quot;);
+    end
+    initial begin
+        #2000;
+        $fatal(1, &quot;FAIL CH20 GLOBAL_TIMEOUT&quot;);
+    end
+endmodule
+</code></pre></div>
+<h3>코드 풀이 — 세 가지 기술이 만나는 지점</h3>
+<p><code>pwm20_agent.build_phase()</code>는 여전히 <code>pwm20_driver::type_id::create("drv", this)</code>로 구동기를 생성합니다. 하지만 Test에서 Factory Override가 등록되었으므로 파생 타입이 선택됩니다. <code>pwm20_test.run_phase()</code>의 <code>$cast</code>로 실제 생성 타입도 확인합니다.</p>
+<p>이후 Sequence는 설정 객체의 듀티 2→6→0을 생성하고, Driver가 입력을 구동합니다. Monitor는 <code>PWM20_REQUEST</code>와 <code>PWM20_APPLIED</code> 두 이벤트를 <code>ap.write()</code>로 Scoreboard에 전달합니다. Scoreboard는 Config DB에서 받은 계획과 실제 출력을 비교합니다.</p></section>
+<section class="section" id="s05"><h2><span class="num">05</span>2교시 ② · Ubuntu에서 빌드·실행하기 (90~105분)</h2><p>제17~19장과 동일한 UVM 실행 환경을 사용합니다. Verilator(베릴레이터, SystemVerilog 시뮬레이터)와 호환되는 UVM 라이브러리 소스가 설치되어 있어야 합니다. 설치된 버전의 지원 범위는 실제 컴파일 결과로 확인해야 합니다.</p>
+<div class="codeblock"><div class="codebar"><span>Ubuntu 실행 순서 · Bash · 실습 명령 · 실제 실행 미수행</span></div><pre tabindex="0"><code># 1. GitHub 독립 저장소 루트로 이동
+cd /path/to/system_verilog_uvm_tb
+
+# 2. Verilator 버전 확인
+verilator --version
+
+# 3. 연결된 UVM 라이브러리 소스 존재 확인
+test -f &quot;$UVM_HOME/src/uvm_pkg.sv&quot;
+
+# 4. 원본 RTL + UVM 테스트벤치 컴파일·실행
+bash scripts/run_ch20.sh
+
+# 5. Factor/Scoreboard/최종 성공 메시지 검색
+grep -E 'FACTORY_TRACE|SCOREBOARD|PASS CH20' .build/ch20/simulation.log</code></pre></div>
+<div class="codeblock"><div class="codebar"><span>scripts/run_ch20.sh · Bash · 실행 스크립트 전문 · 미실행</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 제20장 UVM Factory/Config/Objection 검증. DUT 원본 수정 금지.
+set -euo pipefail
+ROOT=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)/..&quot; &amp;&amp; pwd)&quot;
+DUT_PATH=&quot;${DUT_PATH:-$ROOT/reference_rtl/pwm_core.v}&quot;
+TB_PATH=&quot;$ROOT/tb/ch20/tb_pwm_factory_config_objection.sv&quot;
+OUT=&quot;$ROOT/.build/ch20&quot;
+
+if [[ ! -f &quot;$DUT_PATH&quot; || ! -f &quot;$TB_PATH&quot; ]]; then
+  echo &quot;NOT_RUN: PWM DUT 또는 제20장 테스트벤치 파일이 없습니다.&quot; &gt;&amp;2
+  exit 2
+fi
+if ! command -v verilator &gt;/dev/null 2&gt;&amp;1; then
+  echo &quot;NOT_RUN: Verilator가 설치되지 않았습니다.&quot; &gt;&amp;2
+  exit 2
+fi
+if [[ -z &quot;${UVM_HOME:-}&quot; || ! -f &quot;$UVM_HOME/src/uvm_pkg.sv&quot; ]]; then
+  echo &quot;NOT_RUN: UVM_HOME/src/uvm_pkg.sv를 찾지 못했습니다.&quot; &gt;&amp;2
+  exit 2
+fi
+
+mkdir -p &quot;$OUT&quot;
+verilator --version | tee &quot;$OUT/verilator_version.txt&quot;
+
+# --binary 실행 파일, --timing 지연/이벤트, --assert 검증,
+# --trace VCD 파형 지원, -Wno-fatal 경고만으로 빌드 중단하지 않음.
+verilator --binary --timing --assert --trace -Wno-fatal \
+  --top-module tb_pwm_factory_config_objection \
+  --Mdir &quot;$OUT/obj_dir&quot; +incdir+&quot;$UVM_HOME/src&quot; \
+  &quot;$UVM_HOME/src/uvm_pkg.sv&quot; &quot;$DUT_PATH&quot; &quot;$TB_PATH&quot; \
+  2&gt;&amp;1 | tee &quot;$OUT/build.log&quot;
+
+(cd &quot;$OUT&quot; &amp;&amp; ./obj_dir/Vtb_pwm_factory_config_objection \
+  +UVM_TESTNAME=pwm20_test | tee simulation.log)
+
+# 성공 종료에 더해 Trace Driver의 실행과 Scoreboard 완료를 확인한다.
+if ! grep -q 'PASS CH20 factory=traced config=3 applied=3' &quot;$OUT/simulation.log&quot;; then
+  echo &quot;FAIL: Factory·Config·Scoreboard 판정이 완료되지 않았습니다.&quot; &gt;&amp;2
+  exit 1
+fi
+if ! grep -q 'FACTORY_TRACE.*DRIVE duty=2' &quot;$OUT/simulation.log&quot;; then
+  echo &quot;FAIL: Traced Driver의 실제 작동 증거가 없습니다.&quot; &gt;&amp;2
+  exit 1
+fi
+if grep -Eq 'UVM_(FATAL|ERROR) @[[:space:]]*[0-9]+|UVM_(FATAL|ERROR)[[:space:]]*:[[:space:]]*[1-9]' &quot;$OUT/simulation.log&quot;; then
+  echo &quot;FAIL: UVM 오류 메시지가 기록되었습니다.&quot; &gt;&amp;2
+  exit 1
+fi
+echo &quot;PASS CH20 SUITE: factory override + config DB + 3 applied transactions&quot;
+echo &quot;빌드 로그: $OUT/build.log&quot;
+echo &quot;실행 로그: $OUT/simulation.log&quot;
+</code></pre></div>
+<p>실행 스크립트는 먼저 DUT 파일, Verilator 설치, <code>UVM_HOME</code> 경로를 확인합니다. <code>--binary</code>는 실행 파일을, <code>--timing</code>은 지연 제어를, <code>--assert</code>는 속성 검증 기능을 활성화하고 <code>--trace</code>는 VCD 출력을 위한 기능을 준비합니다. 실제 UVM 버전별 지원 차이로 빌드 오류가 발생하면 원인을 확인한 후 호환되는 버전을 사용합니다.</p></section>
+<section class="section" id="s06"><h2><span class="num">06</span>2교시 ③ · 예상 로그와 성공 조건 (105~112분)</h2><p>아래는 코드의 실행 순서를 기준으로 정리한 <strong>예상 출력</strong>입니다. 실제 시뮬레이터에서 수집한 로그가 아니며, 정확한 전체 UVM 메시지 형식은 도구와 라이브러리 버전에 따라 달라질 수 있습니다.</p>
+<div class="codeblock"><div class="codebar"><span>simulation.log 예상 핵심 메시지 · TEXT · 예상 출력 · RTL_SIM=NOT_RUN</span></div><pre tabindex="0"><code>UVM_INFO ... [FACTORY_TRACE] DRIVE duty=2
+UVM_INFO ... [SCOREBOARD] REQUEST 1
+UVM_INFO ... [SCOREBOARD] APPLIED 1
+UVM_INFO ... [FACTORY_TRACE] DRIVE duty=6
+UVM_INFO ... [SCOREBOARD] REQUEST 2
+UVM_INFO ... [SCOREBOARD] APPLIED 2
+UVM_INFO ... [FACTORY_TRACE] DRIVE duty=0
+UVM_INFO ... [SCOREBOARD] REQUEST 3
+UVM_INFO ... [SCOREBOARD] APPLIED 3
+UVM_INFO ... [RESULT] PASS CH20 factory=traced config=3 applied=3
+PASS CH20 SUITE: factory override + config DB + 3 applied transactions</code></pre></div>
+<table><thead><tr><th>검증 대상</th><th>확인 사항</th></tr></thead><tbody>
+<tr><td>Factory</td><td><code>pwm20_traced_driver</code> 객체 확인과 <code>FACTORY_TRACE</code> 로그 발생</td></tr>
+<tr><td>Config DB</td><td><code>pwm20_cfg</code> 설정이 Driver·Scoreboard에 전달되고 3개 거래에 사용됨</td></tr>
+<tr><td>Monitor/Scoreboard</td><td>REQUEST 3회, APPLIED 3회, 듀티·지연 시간 모두 일치</td></tr>
+<tr><td>Objection</td><td>작업이 끝날 때까지 유지되고 집계 검사 뒤 내려감</td></tr>
+<tr><td>전체 완료</td><td><code>PASS CH20 factory=traced config=3 applied=3</code> 및 실행 성공 확인</td></tr></tbody></table></section>
+<section class="section" id="s07"><h2><span class="num">07</span>2교시 ④ · 주요 오류 점검 (112~118분)</h2><table><thead><tr><th>진단</th><th>원인과 점검 사항</th></tr></thead><tbody>
+<tr><td><code>NO_CFG</code></td><td>Config DB 전달 범위 <code>env.*</code> 또는 설정 타입 불일치</td></tr>
+<tr><td><code>NOVIF</code></td><td>최상위에서 가상 인터페이스가 제대로 등록되지 않음</td></tr>
+<tr><td><code>FACTORY</code></td><td>Override 등록 시점·대상 타입 또는 create 호출 방식 확인</td></tr>
+<tr><td><code>DRV_TIMEOUT</code></td><td>Pending 해제가 12번 대기보다 늦거나 DUT 설정 요청이 잘못됨</td></tr>
+<tr><td><code>REQ_MISMATCH</code></td><td>전달된 요청이 듀티 계획·Enable·Period와 다름</td></tr>
+<tr><td><code>APPLY_MISMATCH</code></td><td>적용된 Active 설정이나 PWM 출력이 기대값과 다름</td></tr>
+<tr><td><code>COUNTS</code></td><td>입력·관찰·교체 Driver 처리 건수가 일치하지 않음</td></tr>
+<tr><td><code>GLOBAL_TIMEOUT</code></td><td>Objection 또는 이벤트 대기로 전체 종료가 막힘</td></tr></tbody></table>
+<p>실습을 변형한다면 듀티 계획을 먼저 변경하고, Base Driver를 건드리지 않은 채 추적 로그를 끄거나 다른 파생 Driver로 교체해 볼 수 있습니다. 단, 같은 Sequence·Scoreboard 설정을 공유하므로 기대값을 DUT 출력에서 직접 생성하지는 않습니다.</p></section>
+<section class="section" id="s08"><h2><span class="num">08</span>2교시 ⑤ · 정리 및 다음 단계 (118~120분)</h2><p><strong>Factory</strong>는 실제 컴포넌트 타입을 교체하고, <strong>Config DB</strong>는 계층 사이의 설정을 공유하며, <strong>Objection</strong>은 검증 수명주기의 종료를 제어합니다. 세 기능은 서로 다른 문제를 해결하지만 하나의 Test에서 정책을 함께 관리할 수 있습니다.</p>
+<p>지금까지 제17장 최소 UVM → 제18장 Sequence/Driver → 제19장 Monitor/Agent/Scoreboard → 제20장 Factory/Config/Objection으로 제5부 검증 환경을 완성했습니다. 실제 실행·파형·PASS 여부는 검증 도구 설치 환경에서 별도로 확정해야 합니다. 현재 제작 환경의 실행 상태는 <strong>RTL_SIM=NOT_RUN</strong>입니다.</p>
+<p><strong>다음 제21장:</strong> RAL(알에이엘, 레지스터 추상화 계층)을 적용하여 AXI4-Lite 레지스터의 읽기·쓰기·예상값 갱신을 모델 기반으로 자동 검증합니다.</p></section>
+<section class="section" id="s09"><h2><span class="num">09</span>참고 · 검증 대상 pwm_core 원본 RTL</h2><p>아래는 이번 장에서도 수정하지 않은 PWM 원본 RTL입니다. Factory·Config DB·Objection 기능은 모두 테스트벤치 영역에만 있으며, DUT에서는 <code>cfg_apply</code>, <code>cfg_duty</code>, <code>pending</code>, <code>active_duty</code>, <code>pwm_out</code> 등의 공개 포트를 사용합니다.</p>
+<div class="codeblock"><div class="codebar"><span>reference_rtl/pwm_core.v · Verilog · 기존 원본 · Blob SHA e813f3fb107bd327054d11e0b397817b8e7bd813</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// P2-04: 보드와 무관한 단일 채널 범용 PWM 코어.
+// (추가) period와 duty는 클록 횟수 단위. 0%/100%는 지속 LOW/HIGH.
+// (추가) 설정은 주기 마지막 경계에서만 활성값으로 반영.
+module pwm_core #(
+    parameter [31:0] RESET_PERIOD = 32'd100000
+)(
+    input  wire        clk,
+    input  wire        resetn,
+    input  wire        cfg_apply,
+    input  wire [31:0] cfg_period,
+    input  wire [31:0] cfg_duty,
+    input  wire        cfg_enable,
+    input  wire        cfg_polarity,
+    output wire        pwm_out,
+    output reg         pending,
+    output reg [31:0] active_period,
+    output reg [31:0] active_duty,
+    output reg         active_enable,
+    output reg         active_polarity
+);
+    reg [31:0] counter;
+    reg [31:0] shadow_period;
+    reg [31:0] shadow_duty;
+    reg        shadow_enable;
+    reg        shadow_polarity;
+
+    wire boundary = (counter &gt;= active_period - 32'd1);
+    wire duty_high = (counter &lt; active_duty);
+
+    // (주의) enable=0이면 polarity와 관계없이 LOW로 차단.
+    // (설명) 기본 polarity에서 active_duty=0이면 항상 LOW,
+    //         active_duty=active_period이면 항상 HIGH.
+    assign pwm_out = resetn &amp;&amp; active_enable &amp;&amp;
+                     (active_polarity ? !duty_high : duty_high);
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            counter         &lt;= 32'd0;
+            active_period   &lt;= RESET_PERIOD;
+            active_duty     &lt;= 32'd0;
+            active_enable   &lt;= 1'b0;
+            active_polarity &lt;= 1'b0;
+            shadow_period   &lt;= RESET_PERIOD;
+            shadow_duty     &lt;= 32'd0;
+            shadow_enable   &lt;= 1'b0;
+            shadow_polarity &lt;= 1'b0;
+            pending         &lt;= 1'b0;
+        end else begin
+            if (boundary) begin
+                counter &lt;= 32'd0;
+                if (pending) begin
+                    active_period   &lt;= shadow_period;
+                    active_duty     &lt;= shadow_duty;
+                    active_enable   &lt;= shadow_enable;
+                    active_polarity &lt;= shadow_polarity;
+                    pending         &lt;= 1'b0;
+                end
+            end else begin
+                counter &lt;= counter + 32'd1;
+            end
+            // (추가) 경계와 APPLY가 겹치면 새 값은 다음 경계에 적용.
+            // 여러 APPLY가 겹치면 최종 요청값을 우선하는 단일 Shadow 구조.
+            if (cfg_apply) begin
+                shadow_period   &lt;= cfg_period;
+                shadow_duty     &lt;= cfg_duty;
+                shadow_enable   &lt;= cfg_enable;
+                shadow_polarity &lt;= cfg_polarity;
+                pending         &lt;= 1'b1;
+            end
+        end
+    end
+endmodule
+</code></pre></div>
+<p>원본의 동기 리셋, Shadow→Active 전환, 주기 경계 적용은 제17~19장과 같은 계약입니다. DUT 내부 <code>counter</code>·<code>shadow_duty</code>를 Scoreboard의 정답으로 사용하지 않습니다.</p></section><div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH18 · RTL_SIM NOT_RUN</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v01.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v01.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v02.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v02.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v01.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v02.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v02.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v01.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v01.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v01.html"},{"id":"ch14","number":14,"title":"FIFO 및 흐름 제어","file":"ch14_fifo_flow_control_v01.html"},{"id":"ch15","number":15,"title":"AXI4-Lite 레지스터 검증","file":"ch15_axi4lite_register_verification_v01.html"},{"id":"ch16","number":16,"title":"MAC·NPU 정수 연산 검증","file":"ch16_mac_npu_integer_verification_v01.html"},{"id":"ch17","number":17,"title":"최소 UVM 환경","file":"ch17_minimal_uvm_environment_v01.html"},{"id":"ch18","number":18,"title":"Sequence에서 Driver까지","file":"ch18_sequence_driver_v01.html"},{"id":"ch19","number":19,"title":"Monitor·Agent·Scoreboard","file":"ch19_monitor_agent_scoreboard_v02.html"},{"id":"ch20","number":20,"title":"Factory·Config·Objection","file":"ch20_factory_config_objection_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
