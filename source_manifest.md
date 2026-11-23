@@ -174,3 +174,9 @@
 - **검증 상태:** UVM Config DB 범위 오류 수정, 정적 검사 및 목차 연결 확인. RTL_SIM=NOT_RUN, BROWSER_VISUAL=NOT_RUN, PAGES_HTTP=NOT_RUN. `docs/CH22_VALIDATION_v01.md` 참고.
 
 - **제22장 교정:** 최상위 Test·하위 Agent를 모두 포함하도록 가상 Interface Config DB 경로를 `uvm_test_top*`로 수정. HTML v02의 코드·구조도 함께 갱신.
+
+## 제24장 · 회귀·CI·검증 보고
+- DUT: reference_rtl/uart_echo_controller.v (Blob 28160c34522e47fbd961466651598da063bc74ae); 원본 변경 없음.
+- TB: tb/ch24/tb_uart_regression.sv; 실행: scripts/run_ch24.py, scripts/run_ch24.sh; CI: .github/workflows/ch24-regression.yml.
+- HTML: ch24_regression_ci_reporting_v01.html; 기록: docs/CH24_VALIDATION_v01.md.
+- 시드 1/7/42, 각 32건, 4개 상태, 음성 시험, JSON/Markdown 보고. RTL_SIM NOT_RUN, CI_RUN NOT_RUN, BROWSER_VISUAL NOT_RUN.
