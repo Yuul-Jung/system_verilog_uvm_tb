@@ -165,10 +165,12 @@
 ## 제22장 · 다중 Agent·VIP
 - **독립 저장소:** `Yuul-Jung/system_verilog_uvm_tb` 루트.
 - **원본 RTL:** `reference_rtl/axi4lite_slave_adapter.v` (Blob `eadaf8d3580023bed0c9b06f3e9b2a99de0cf266`), `reference_rtl/custom_register_bank.v` (Blob `49e5d0219574d1bcb9086dc99f259c191e35d82e`). 변경 없음.
-- **배포 HTML:** `ch22_multi_agent_vip_v01.html`. 소스: `tb/ch22/tb_axi_multiagent_irq.sv`. 실행: `scripts/run_ch22.sh`.
+- **배포 HTML:** `ch22_multi_agent_vip_v02.html`. 소스: `tb/ch22/tb_axi_multiagent_irq.sv`. 실행: `scripts/run_ch22.sh`.
 - **AXI Agent:** `axi22_bus_agent` 아래 Sequencer·Master Driver·독립 AXI Handshake Monitor. B/R Backpressure 2클록 확인.
 - **IRQ Agent:** `irq22_event_agent`가 resetn, irq_done_event_i, irq_error_event_i를 구동하고 실제 irq_status_o를 관찰.
 - **Virtual Sequence:** `axi22_system_sequence`가 `axi22_virtual_sequencer`의 bus_sqr/evt_sqr 두 하위 Sequencer를 조정.
 - **Scoreboard:** `uvm_analysis_imp_bus`·`uvm_analysis_imp_irq` 두 경로로 실제 AXI 거래와 하드웨어 이벤트를 받아 CONTROL/DATA_IN/IRQ_STATUS/W1C/RO 값을 검증.
 - **시나리오:** 정상 AXI W=4 / R=11, 하드웨어 IRQ=2, 리셋 관찰=2. AW/W 독립 수락·B/R 유지 검증. 동시 다중 Master 및 상용 AMD AXI VIP 직접 연동은 범위 제외.
-- **검증 상태:** 정적 검사 및 목차 연결 확인. RTL_SIM=NOT_RUN, BROWSER_VISUAL=NOT_RUN, PAGES_HTTP=NOT_RUN. `docs/CH22_VALIDATION_v01.md` 참고.
+- **검증 상태:** UVM Config DB 범위 오류 수정, 정적 검사 및 목차 연결 확인. RTL_SIM=NOT_RUN, BROWSER_VISUAL=NOT_RUN, PAGES_HTTP=NOT_RUN. `docs/CH22_VALIDATION_v01.md` 참고.
+
+- **제22장 교정:** 최상위 Test·하위 Agent를 모두 포함하도록 가상 Interface Config DB 경로를 `uvm_test_top*`로 수정. HTML v02의 코드·구조도 함께 갱신.
