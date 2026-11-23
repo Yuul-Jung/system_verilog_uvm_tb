@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="제08장 SystemVerilog class·new·extends·rand·constraint로 UART Echo 검증"><title>제08장 · 객체와 제약 기반 입력 · RTL 검증 학습안내서</title><link rel="stylesheet" href="assets/site.css"></head>
+<body data-chapter="ch08"><a class="access-skip" href="#main-content" style="position:absolute;left:-9999px;top:0">본문 바로가기</a><button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div>
+<header class="hero"><div class="hero-inner"><p class="kicker">제2부 · SYSTEMVERILOG 문법</p><h1>제08장 · 객체와 제약 기반 입력</h1><p>class · new · extends · rand · constraint로 검증 입력을 생성하고 원본 UART Echo와 자동 비교합니다.</p><div class="chips"><span class="chip">제2부 · 제08장</span><span class="chip">1교시 60분 + 2교시 60분</span><span class="chip">기존 RTL 변경 없음</span></div></div></header>
+<div class="wrap"><nav class="toc" id="course-nav" aria-label="부·장·절 탐색"></nav><main class="content" id="main-content"><section class="section" id="s00"><h2><span class="num">00</span>학습 개요 · 반복 입력을 객체로 관리한다</h2><p>제07장에서는 신호 묶음과 관찰 시점을 정리했습니다. 제08장에서는 <strong>하나의 입력 사례를 객체로 표현</strong>하여 수십·수백 개의 검증 사례로 확장하는 기반을 마련합니다. class(클래스, 객체 설계도), new(뉴, 객체 생성), extends(익스텐즈, 상속), rand(랜드, 무작위 변수), constraint(컨스트레인트, 허용 범위 제한)를 사용합니다.</p><table><thead><tr><th>구간</th><th>시간</th><th>실습</th></tr></thead><tbody><tr><td>1교시</td><td>0~60분</td><td>클래스·객체·상속·제약·난수 실패 이해</td></tr><tr><td>2교시</td><td>60~120분</td><td>UART 원본 연결, 4사례 자동 검사, 실행·오류 분석</td></tr></tbody></table><p>이번 DUT는 <code>uart_echo_controller</code>입니다. UART 직렬 프레임을 해석하는 장치가 아니라 <strong>8비트 Ready/Valid 조합 전달 회로</strong>입니다. 입력 <code>rx_data_i</code>는 <code>tx_data_o</code>, <code>rx_valid_i</code>는 <code>tx_valid_o</code>, <code>tx_ready_i</code>는 <code>rx_ready_o</code>로 그대로 전달됩니다. 클록·리셋은 없습니다.</p></section><section class="section" id="s01"><h2><span class="num">01</span>1교시 ① · class와 new (0~20분)</h2><p><code>uart_txn</code> 클래스는 데이터와 유효·준비 신호를 하나의 <em>트랜잭션(거래 단위)</em>으로 묶습니다. <code>uart_txn normal;</code>은 아직 객체를 생성하지 않은 핸들이고, <code>normal = new();</code>를 실행하면 실제 객체가 만들어집니다. 클래스 선언만으로 신호가 자동 구동되지는 않습니다.</p><div class="codeblock"><div class="codebar"><span>객체 생성 · SystemVerilog</span></div><pre tabindex="0"><code>uart_txn normal;
+normal = new();
+normal.data = 8'h41;
+normal.valid = 1'b1;
+normal.ready = 1'b1;</code></pre></div><p>핸들은 객체를 가리키는 변수입니다. <code>normal.data</code>는 실제 하드웨어 포트가 아니라 객체 내부 값이므로, 별도 구동 코드가 DUT 입력으로 복사해야 합니다.</p></section><section class="section" id="s02"><h2><span class="num">02</span>1교시 ② · rand와 constraint (20~40분)</h2><p><code>rand</code>는 <code>randomize()</code> 호출 시 변경 가능한 필드입니다. <code>constraint c_printable</code>은 데이터를 16진수 20~7E(출력 가능한 ASCII 범위)로 제한합니다. 제한 없는 무작위 입력보다 재현·해석이 쉬운 유효 입력을 생성합니다.</p><div class="codeblock"><div class="codebar"><span>제약 조건 · 실제 TB 발췌</span></div><pre tabindex="0"><code>rand bit [7:0] data;
+rand bit valid;
+rand bit ready;
+constraint c_printable { data inside {[8'h20:8'h7e]}; }
+
+if (!normal.randomize() with { valid == 0; ready == 1; })
+    $fatal(1, &quot;RANDOMIZE_FAIL IDLE&quot;);</code></pre></div><p><code>randomize() with</code>는 이번 호출에서만 추가 제약을 부여합니다. 만족 가능한 조합이 없으면 0을 반환하므로 반드시 실패를 검사해야 합니다. 무작위 생성값은 시드와 시뮬레이터에 따라 달라지며, 특정 바이트를 고정된 출력처럼 가정하면 안 됩니다.</p></section><section class="section" id="s03"><h2><span class="num">03</span>1교시 ③ · extends와 다형성 (40~60분)</h2><p><code>uart_stall_txn extends uart_txn</code>은 부모의 필드·메서드·출력 가능 문자 제약을 물려받습니다. 여기에 <code>valid=1</code>과 <code>ready=0</code> 조건을 추가하면 데이터가 존재하지만 상대가 받을 수 없는 <strong>전송 정지</strong> 상황만 생성합니다.</p><div class="codeblock"><div class="codebar"><span>상속 제약 · 실제 TB 발췌</span></div><pre tabindex="0"><code>class uart_stall_txn extends uart_txn;
+    constraint c_stall { valid == 1'b1; ready == 1'b0; }
+endclass</code></pre></div><p><code>apply_and_check(input uart_txn tr, ...)</code>는 부모 타입을 인자로 받지만 자식 객체도 전달할 수 있습니다. 공통 검사 함수를 재사용하면서 자식의 입력 정책만 달라집니다. 이는 UVM(유니버설 검증 방법론)의 sequence item(시퀀스 아이템, 검증 거래 객체) 설계로 이어집니다.</p></section><section class="section" id="s04"><h2><span class="num">04</span>2교시 ① · 실제 DUT와 테스트벤치 구조 (60~70분)</h2><p>구현 구조는 <strong>객체 생성 → 제약 무작위 생성 → 포트 구동 → 1ns 안정 대기 → DUT 출력 비교</strong>입니다. 여기서 1ns는 테스트벤치 관찰 지연이지 DUT의 물리적 지연이 아닙니다.</p><div class="figure-wrap" style="border:1px solid #dddfd8;background:#fafaf8;padding:14px;overflow-x:auto"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 175" role="img" aria-label="uart_txn과 uart_stall_txn 객체가 apply_and_check를 통해 uart_echo_controller에 입력을 전달하고 출력 비교로 PASS 또는 FAIL을 결정하는 구성" style="width:100%;min-width:660px;height:auto"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#4d4593"/></marker></defs><rect x="8" y="35" width="210" height="92" rx="8" fill="#f0edfc" stroke="#6654a5"/><text x="113" y="67" text-anchor="middle" font-size="15">uart_txn / uart_stall_txn</text><text x="113" y="91" text-anchor="middle" font-size="13">randomize() · constraint</text><rect x="255" y="35" width="205" height="92" rx="8" fill="#fff" stroke="#6654a5"/><text x="357" y="67" text-anchor="middle" font-size="15">apply_and_check()</text><text x="357" y="91" text-anchor="middle" font-size="13">입력 구동 · 기대값 보관</text><rect x="497" y="35" width="206" height="92" rx="8" fill="#f1f1ef" stroke="#666"/><text x="600" y="67" text-anchor="middle" font-size="15">uart_echo_controller</text><text x="600" y="91" text-anchor="middle" font-size="13">원본 RTL · 6개 포트</text><rect x="740" y="35" width="202" height="92" rx="8" fill="#f0edfc" stroke="#6654a5"/><text x="841" y="67" text-anchor="middle" font-size="15">4상태 출력 비교</text><text x="841" y="91" text-anchor="middle" font-size="13">PASS / $fatal(FAIL)</text><path d="M218 81 H253 M460 81 H495 M703 81 H738" fill="none" stroke="#4d4593" stroke-width="2" marker-end="url(#arrow)"/><text x="10" y="157" font-size="12" fill="#555">개념 구조도 · DUT 포트: rx_data_i, rx_valid_i, tx_ready_i → tx_data_o, tx_valid_o, rx_ready_o</text></svg></div></section><section class="section" id="s05"><h2><span class="num">05</span>2교시 ② · 전체 테스트벤치 코드 (70~100분)</h2><p>아래 코드는 독립 파일 <code>tb/ch08/tb_uart_objects.sv</code>의 전체 내용입니다. 네 사례는 직접 지정 A, 제약 IDLE, 상속 정지, 부모 타입을 통한 자식 재사용입니다. 모든 사례는 원본 DUT의 조합 전달 계약과 비교합니다.</p><div class="codeblock"><div class="codebar"><span>tb/ch08/tb_uart_objects.sv · SystemVerilog · 전체 소스 · RTL_SIM NOT_RUN</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제08장: 원본 UART Echo의 6개 포트를 변경하지 않고 객체 기반 입력을 검증한다.
+// class, new, extends, rand, constraint, randomize()를 직접 실습한다.
+
+class uart_txn;
+    rand bit [7:0] data;
+    rand bit       valid;
+    rand bit       ready;
+
+    // (추가) 출력 가능한 ASCII(아스키) 문자 범위로 데이터를 제한한다.
+    constraint c_printable { data inside {[8'h20:8'h7e]}; }
+
+    function new();
+        data = 8'h41;
+        valid = 1'b1;
+        ready = 1'b1;
+    endfunction
+
+    function string describe();
+        return $sformatf(&quot;data=%02h valid=%0b ready=%0b&quot;,
+                         data, valid, ready);
+    endfunction
+endclass
+
+// (추가) 부모의 데이터 범위 제약을 물려받고 정지 조건을 추가한다.
+class uart_stall_txn extends uart_txn;
+    constraint c_stall { valid == 1'b1; ready == 1'b0; }
+endclass
+
+module tb_uart_objects;
+    logic [7:0] rx_data_i;
+    logic       rx_valid_i;
+    wire        rx_ready_o;
+    wire [7:0]  tx_data_o;
+    wire        tx_valid_o;
+    logic       tx_ready_i;
+
+    integer checked = 0;
+    uart_txn normal;
+    uart_stall_txn stalled;
+
+    // 원본 DUT: 데이터/유효/준비를 그대로 전달하는 조합회로이다.
+    uart_echo_controller dut (
+        .rx_data_i(rx_data_i),
+        .rx_valid_i(rx_valid_i),
+        .rx_ready_o(rx_ready_o),
+        .tx_data_o(tx_data_o),
+        .tx_valid_o(tx_valid_o),
+        .tx_ready_i(tx_ready_i)
+    );
+
+    // (추가) 객체의 속성을 DUT 포트에 적용하고 4상태 비교로 확인한다.
+    task automatic apply_and_check(input uart_txn tr, input string label_name);
+        begin
+            rx_data_i  = tr.data;
+            rx_valid_i = tr.valid;
+            tx_ready_i = tr.ready;
+            #1; // 조합 출력이 안정되도록 TB에서만 기다린다. DUT 지연이 아니다.
+            if ((tx_data_o !== tr.data) ||
+                (tx_valid_o !== tr.valid) ||
+                (rx_ready_o !== tr.ready))
+                $fatal(1, &quot;FAIL %s expected %s got %02h/%b/%b&quot;,
+                       label_name, tr.describe(), tx_data_o,
+                       tx_valid_o, rx_ready_o);
+            checked++;
+            $display(&quot;PASS %s %s&quot;, label_name, tr.describe());
+        end
+    endtask
+
+    initial begin
+        $display(&quot;=== CH08 OBJECT / CONSTRAINT START ===&quot;);
+        normal = new();
+        stalled = new();
+
+        // (추가) 부모 객체에 특정 값을 넣어 기준 동작부터 확인한다.
+        normal.data = 8'h41;
+        normal.valid = 1'b1;
+        normal.ready = 1'b1;
+        apply_and_check(normal, &quot;DIRECT_A&quot;);
+
+        // (추가) 인라인 제약으로 유효한 IDLE 사례를 생성한다.
+        if (!normal.randomize() with { valid == 0; ready == 1; })
+            $fatal(1, &quot;RANDOMIZE_FAIL IDLE&quot;);
+        apply_and_check(normal, &quot;RANDOM_IDLE&quot;);
+
+        // (추가) 상속된 제약은 데이터 범위를 유지하고 정지를 강제한다.
+        if (!stalled.randomize()) $fatal(1, &quot;RANDOMIZE_FAIL STALL&quot;);
+        if (!(stalled.data &gt;= 8'h20 &amp;&amp; stalled.data &lt;= 8'h7e &amp;&amp;
+              stalled.valid == 1'b1 &amp;&amp; stalled.ready == 1'b0))
+            $fatal(1, &quot;CONSTRAINT_FAIL STALL&quot;);
+        apply_and_check(stalled, &quot;RANDOM_STALL&quot;);
+
+        // (추가) 부모 클래스 핸들로 자식 객체를 넘겨 다형성을 실습한다.
+        apply_and_check(stalled, &quot;POLYMORPHIC_STALL&quot;);
+        if (checked != 4) $fatal(1, &quot;COUNT_FAIL %0d&quot;, checked);
+        $display(&quot;CH08 PASS: %0d cases checked&quot;, checked);
+        $finish;
+    end
+
+    initial begin
+        #100;
+        $fatal(1, &quot;CH08 TIMEOUT&quot;);
+    end
+endmodule
+</code></pre></div><h3>코드 풀이 — 입력과 검사</h3><p><code>new()</code>에서 초기 필드 값을 설정하고, <code>randomize()</code>를 호출한 경우에만 무작위 제약을 적용합니다. <code>apply_and_check()</code>는 객체 필드를 DUT 입력으로 복사하고 <code>#1</code> 후 실제 출력과 비교합니다. <code>!==</code>는 X·Z까지 구분하는 4상태 비교이므로 예상하지 않은 미정 값을 숨기지 않습니다.</p><p><code>checked++</code>는 실제 검사 함수가 통과한 횟수를 셉니다. 마지막에 4회를 확인하고, 어느 검사든 실패하면 <code>$fatal</code>로 비정상 종료합니다. <code>RANDOM_STALL</code>과 <code>POLYMORPHIC_STALL</code>은 같은 자식 객체를 두 번 검사하므로 서로 독립적인 난수 사례 두 개가 아닙니다.</p></section><section class="section" id="s06"><h2><span class="num">06</span>2교시 ③ · Ubuntu 실행과 도구 지원 (100~110분)</h2><p>클래스 제약 무작위화는 도구별 지원 수준이 다릅니다. Icarus Verilog(아이카루스 베릴로그)는 이 장의 전체 기능을 보장하지 않으므로 Verilator(베릴레이터, SystemVerilog 시뮬레이터) 5.x의 최신 지원 버전 또는 상용 시뮬레이터를 사용합니다. 버전에 따라 외부 제약 해결기 설치가 필요할 수 있습니다.</p><div class="codeblock"><div class="codebar"><span>scripts/run_ch08.sh · Bash · 전체 실행 스크립트</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 제08장: 클래스/상속/제약 무작위 입력을 기존 UART Echo RTL에 적용한다.
+set -euo pipefail
+ROOT=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)/..&quot; &amp;&amp; pwd)&quot;
+DUT_PATH=&quot;${DUT_PATH:-$ROOT/reference_rtl/uart_echo_controller.v}&quot;
+TB_PATH=&quot;$ROOT/tb/ch08/tb_uart_objects.sv&quot;
+OUT=&quot;$ROOT/.build/ch08&quot;
+if ! command -v verilator &gt;/dev/null 2&gt;&amp;1; then
+  echo &quot;ERROR: Verilator 미설치. Ubuntu: sudo apt update &amp;&amp; sudo apt install verilator g++ make&quot;
+  exit 2
+fi
+if [[ ! -f &quot;$DUT_PATH&quot; ]]; then echo &quot;ERROR: DUT 파일 없음: $DUT_PATH&quot;; exit 2; fi
+mkdir -p &quot;$OUT&quot;
+verilator --version | tee &quot;$OUT/tool_version.txt&quot;
+# Verilator 5.x의 randomize/constraint 지원 및 solver 설치 여부를 확인한다.
+verilator --binary --timing --sv --top-module tb_uart_objects \
+  --Mdir &quot;$OUT/obj_dir&quot; &quot;$DUT_PATH&quot; &quot;$TB_PATH&quot; 2&gt;&amp;1 | tee &quot;$OUT/build.log&quot;
+(cd &quot;$OUT&quot; &amp;&amp; ./obj_dir/Vtb_uart_objects | tee output.log)
+echo &quot;실행 기록: $OUT/output.log&quot;
+</code></pre></div><p><code>sudo apt update</code>는 Ubuntu 패키지 목록을 갱신하고, <code>sudo apt install verilator g++ make</code>는 시뮬레이터와 C++ 빌드 도구를 설치합니다. <code>bash scripts/run_ch08.sh</code>는 프로젝트 루트에서 실행합니다. <code>--binary</code>는 실행 파일 빌드, <code>--timing</code>은 시간 지연 처리, <code>--sv</code>는 SystemVerilog 해석을 지정합니다. <code>set -euo pipefail</code>은 빌드·실행 오류를 성공으로 숨기지 않습니다.</p></section><section class="section" id="s07"><h2><span class="num">07</span>2교시 ④ · 예상 출력과 오류 분석 (110~118분)</h2><p><strong>다음은 예상 출력 형식이며 실제 실행 로그가 아닙니다.</strong> 무작위 데이터는 예시이며 매 실행 달라질 수 있습니다.</p><div class="codeblock"><div class="codebar"><span>예상 출력 · 예시 값 · 실제 시뮬레이션 미실행</span></div><pre tabindex="0"><code>=== CH08 OBJECT / CONSTRAINT START ===
+PASS DIRECT_A data=41 valid=1 ready=1
+PASS RANDOM_IDLE data=32 valid=0 ready=1
+PASS RANDOM_STALL data=5a valid=1 ready=0
+PASS POLYMORPHIC_STALL data=5a valid=1 ready=0
+CH08 PASS: 4 cases checked</code></pre></div><table><thead><tr><th>증상</th><th>점검</th></tr></thead><tbody><tr><td>randomize 컴파일 오류</td><td>Verilator 버전과 제약 해결기 지원 확인. 미지원이면 지원되는 시뮬레이터로 실행</td></tr><tr><td>RANDOMIZE_FAIL</td><td>상속된 제약과 인라인 제약이 서로 모순되는지 확인</td></tr><tr><td>FAIL 데이터 불일치</td><td>6개 포트 이름·연결 방향과 1ns 샘플 시점 확인</td></tr><tr><td>시뮬레이션 종료 코드 0인데 로그 누락</td><td>실행 파일·파이프 오류 처리 및 4개 PASS와 최종 카운트 확인</td></tr></tbody></table></section><section class="section" id="s08"><h2><span class="num">08</span>마무리 · 다음 단계 (118~120분)</h2><p><strong>class</strong>는 입력의 구조, <strong>extends</strong>는 재사용과 확장, <strong>constraint</strong>는 유효 입력 공간을 표현합니다. 제08장은 데이터를 생성하고 원본 RTL과 비교하는 최소 객체 기반 검증을 다루며, UVM 프레임워크 자체를 실행한 장은 아닙니다. 제09장에서는 이 비교를 참조 모델·스코어보드로 분리합니다.</p><p><strong>검증 판정:</strong> 문서·포트 계약 정적 검토, RTL_SIM=<strong>NOT_RUN</strong> (제작 환경에 Verilator가 없음), 실제 브라우저 렌더링=<strong>NOT_RUN</strong>. 시뮬레이션 로그가 확보되기 전에는 실제 PASS로 표기하지 않습니다.</p><p>참고: <a href="https://www.accellera.org/downloads/standards/systemverilog">Accellera SystemVerilog 표준</a>, <a href="https://verilator.org/guide/latest/">Verilator 공식 문서</a>.</p></section><div class="chapter-links" id="chapter-links"></div></main></div>
+<footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · 제08장 · NOT_RUN</footer>
+<script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v01.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v01.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v02.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v02.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
