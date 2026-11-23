@@ -45,11 +45,11 @@ module tb_pwm_scoreboard;
             (active_duty     !== ref_duty)     ||
             (active_enable   !== ref_enable)   ||
             (active_polarity !== ref_polarity)) begin
-            $display("EXPECTED t=%0t pwm=%b pend=%b period=%0d duty=%0d en=%b pol=%b",
+            $display("EXPECTED t=%0d pwm=%b pend=%b period=%0d duty=%0d en=%b pol=%b",
                 $time, ref_pwm, ref_pending, ref_period,
                 ref_duty, ref_enable, ref_polarity);
             $fatal(1,
-                "FAIL t=%0t pwm=%b pend=%b period=%0d duty=%0d en=%b pol=%b",
+                "FAIL t=%0d pwm=%b pend=%b period=%0d duty=%0d en=%b pol=%b",
                 $time, pwm_out, pending, active_period,
                 active_duty, active_enable, active_polarity);
         end
@@ -69,7 +69,7 @@ module tb_pwm_scoreboard;
             cfg_polarity = inverted;
             cfg_apply    = 1'b1;
             scenarios = scenarios + 1;
-            $display("REQUEST case=%0d t=%0t duty=%0d en=%b pol=%b",
+            $display("REQUEST case=%0d t=%0d duty=%0d en=%b pol=%b",
                 case_id, $time, duty_ticks, enabled, inverted);
             @(negedge clk);
             cfg_apply = 1'b0;
@@ -114,7 +114,7 @@ module tb_pwm_scoreboard;
         #1;
         if ((pwm_out !== 1'b0) || (ref_pwm !== 1'b0))
             $fatal(1, "FAIL RESET_GATE: 출력 즉시 LOW 실패");
-        $display("RESET_GATE PASS t=%0t", $time);
+        $display("RESET_GATE PASS t=%0d", $time);
 
         repeat (2) @(negedge clk); // t=600ns 리셋 해제
         resetn = 1'b1;
