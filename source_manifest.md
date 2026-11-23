@@ -65,3 +65,12 @@
 - 원본 스냅샷: `reference_rtl/uart_echo_controller.v` (Blob `28160c34522e47fbd961466651598da063bc74ae`), `reference_rtl/pwm_core.v` (Blob `e813f3fb107bd327054d11e0b397817b8e7bd813`).
 - 두 RTL 파일은 원본과 바이트 단위로 동일하게 보존하며 `scripts/run_chXX.sh`의 기본 `DUT_PATH`는 `reference_rtl/`을 사용.
 - `amd_soc_rtl/system_verilog_uvm_tb/`는 이전에 잘못 작성된 사본이며 앞으로 신규 작업 대상이 아님.
+
+## 제08장 · 객체와 제약 기반 입력
+- **DUT:** `reference_rtl/uart_echo_controller.v`, 원본 Blob SHA `28160c34522e47fbd961466651598da063bc74ae`.
+- **포트 계약:** `rx_data_i→tx_data_o`, `rx_valid_i→tx_valid_o`, `tx_ready_i→rx_ready_o`. 클록·리셋 없는 조합회로.
+- **신규 파일:** `tb/ch08/tb_uart_objects.sv`, `scripts/run_ch08.sh`, `ch08_objects_constraints_v01.html`.
+- **검증 내용:** class/new, 상속, rand, printable ASCII 제약, 인라인 IDLE 제약, STALL 제약, 4상태 출력 비교 및 4회 검사.
+- **실행 상태:** RTL_SIM=NOT_RUN (작성 환경에 Verilator 없음). 예상 출력은 무작위 바이트 예시이며 실제 로그 아님.
+- **정적 검토:** 파일 존재, DUT 실제 6포트, 코드/도식 신호, HTML 상대 링크, 좌측 PART02→CH08→SECTION 구조 소스 점검. 실브라우저 렌더링은 NOT_RUN.
+- **규칙:** `Yuul-Jung/rule_md`의 AGENTS.md, HTML STANDARD, code-development-rules, code-style-rules, flowchart-rules를 읽고 반영.
