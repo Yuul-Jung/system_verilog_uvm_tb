@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v17",
+  "version": "v18",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -130,6 +130,15 @@
       "slug": "ch14_fifo_flow_control",
       "version": "v01",
       "source": "tb/ch14/tb_uart_fifo_flow.sv"
+    },
+    {
+      "id": "ch15",
+      "number": 15,
+      "title": "AXI4-Lite 레지스터 검증",
+      "subtitle": "독립 AW/W, B/R backpressure, WSTRB, 원본 레지스터 맵",
+      "slug": "ch15_axi4lite_register_verification",
+      "version": "v01",
+      "source": "tb/ch15/tb_axi4lite_registers.sv"
     }
   ]
 }
