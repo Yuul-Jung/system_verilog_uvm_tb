@@ -13,4 +13,4 @@ mkdir -p "$ROOT/.build/ch13"
 cd "$ROOT/.build/ch13"
 iverilog -g2012 -s tb_uart_stream -o sim "$DUT" "$TB"
 vvp sim | tee simulation.log
-grep -q '^PASS CH13 accepted=3 checks=11$' simulation.log
+grep -q '^PASS CH13 accepted=3 checks=12$' simulation.log
