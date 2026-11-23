@@ -192,7 +192,7 @@ module tb_axi4lite_registers;
         @(negedge clk);
         read_expect(32'h10,32'h00000000);
         read_expect(32'h00,32'h00000000);
-        if(commits!=3 || checks!=9)
+        if(commits!=3 || checks!=10)
             $fatal(1,"FAIL COUNTS commits=%0d checks=%0d",commits,checks);
         $display("T4_RESET_PASS");
         $display("PASS CH15 commits=%0d checks=%0d",commits,checks);
