@@ -80,7 +80,9 @@
 - **참조 모델:** `tb/ch09/pwm_reference_model.sv`; DUT 내부 신호를 사용하지 않는 별도 `phase`, `queued_*`, `ref_*` 상태.
 - **테스트벤치:** `tb/ch09/tb_pwm_scoreboard.sv`; DUT의 `pwm_out/pending/active_period/active_duty/active_enable/active_polarity`를 매 상승 에지 `#1` 후 참조값과 비교.
 - **실행 스크립트:** `scripts/run_ch09.sh` (`iverilog -g2012` + `vvp`, `.build/ch09/` 출력).
-- **발행 HTML:** `ch09_reference_model_scoreboard_v01.html`.
+- **발행 HTML:** `ch09_reference_model_scoreboard_v02.html`.
 - **시나리오:** 25% → 75% → 주기 경계/Apply 겹침 → 반전 → 출력 차단 → 100% → 동작 중 리셋 → 0%. 여섯 `cfg_apply` 요청.
 - **클록·리셋:** `RESET_PERIOD=8`, 10ns 클록, 내부 레지스터는 posedge 동기 리셋, `pwm_out`은 resetn의 조합 게이팅.
-- **검증 상태:** GitHub 파일·PORT·INDEX 정적 점검 중, RTL_SIM **NOT_RUN**. 예상 결과는 실제 로그 아님.
+- **검증 상태:** GitHub 파일·포트·INDEX 정적 검증 완료, RTL_SIM **NOT_RUN**. 예상 결과는 실제 로그 아님.
+
+- **제09장 검증 근거:** `docs/CH09_VALIDATION_v02.md`. 이론상 score_cycles=72이나 실제 RTL_SIM은 NOT_RUN.
