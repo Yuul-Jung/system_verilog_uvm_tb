@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증: 6부 24장 48시간, 1시간 단위 실습",
   "course_code": "SV UVM TB",
-  "version": "v28",
+  "version": "v29",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -211,6 +211,15 @@
       "slug": "ch23_npu_integrated_scoreboard",
       "version": "v01",
       "source": "tb/ch23/tb_npu_integrated.sv"
+    },
+    {
+      "id": "ch24",
+      "number": 24,
+      "title": "회귀·CI·검증 보고",
+      "subtitle": "시드 반복·음성 시험·커버리지·JSON 보고·GitHub Actions",
+      "slug": "ch24_regression_ci_reporting",
+      "version": "v01",
+      "source": "tb/ch24/tb_uart_regression.sv"
     }
   ]
 }
