@@ -109,3 +109,8 @@
 - 원본 Blob: 5390c312b186c27abb2b2818f76ec76d164c75f1, f0d2f9fcdf84aec913720103fb373738417bf7d1, dfcb0cf10293a2a66ab7d704621a5219144673eb.
 - TB: tb/ch14/tb_uart_fifo_flow.sv; 스크립트: scripts/run_ch14.sh; HTML: ch14_fifo_flow_control_v01.html.
 - 실제 UART 직렬 TX/RX 및 16바이트 FIFO 포트 검증. RTL_SIM NOT_RUN, BROWSER_VISUAL NOT_RUN.
+
+## 제15장 · AXI4-Lite 레지스터 검증
+- DUT: reference_rtl/axi4lite_slave_adapter.v (Blob eadaf8d3580023bed0c9b06f3e9b2a99de0cf266), reference_rtl/custom_register_bank.v (Blob 49e5d0219574d1bcb9086dc99f259c191e35d82e), 원본과 바이트 동일.
+- TB: tb/ch15/tb_axi4lite_registers.sv; script: scripts/run_ch15.sh; HTML: ch15_axi4lite_register_verification_v01.html.
+- RTL_SIM NOT_RUN, BROWSER_VISUAL NOT_RUN. 상세: docs/CH15_VALIDATION_v01.md.
