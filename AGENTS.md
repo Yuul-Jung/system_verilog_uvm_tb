@@ -19,9 +19,9 @@
 - 이전/다음 장 이동, INDEX 복귀, 모바일 서랍, 절 스크롤 강조, 코드 복사는 계속 유지한다. 새 장 제작 후 좌측 **PART 한 개·동일 부 CHAPTER·현재 장 SECTION**을 함께 검증한다.
 
 ## 독립 저장소 위치(2026-11-23 확정)
-- **모든 신규 커밋·푸시는 `Yuul-Jung/system_velirog_uvm_tb` 저장소 최상위 루트에만 수행한다.**
+- **모든 신규 커밋·푸시는 `Yuul-Jung/system_verilog_uvm_tb` 저장소 최상위 루트에만 수행한다.**
 - `Yuul-Jung/amd_soc_rtl/system_verilog_uvm_tb/`는 과거 잘못 작성한 사본이며 신규 쓰기 금지.
 - 원본 RTL은 현재 저장소의 `reference_rtl/` 스냅샷으로 읽되, 다른 버전이 필요하면 `DUT_PATH`로 외부 RTL을 참조한다.
 - 기존 원본 두 파일은 변경하지 않는다. Blob SHA가 source_manifest.md와 일치하는지 검증한다.
 - PART(부) → CHAPTER(장) → SECTION(절)의 좌측 계층, 6부 24장, 정본 rule_md 규칙을 유지한다.
-- 원격 저장소 이름은 현재 `system_velirog_uvm_tb`(철자 주의). 사용자 의도는 `system_verilog_uvm_tb`이다.
+- 원격 저장소 이름과 과정 폴더는 `system_verilog_uvm_tb`로 동일하게 사용한다.
