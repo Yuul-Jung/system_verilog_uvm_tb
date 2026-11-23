@@ -30,6 +30,12 @@ module tb_pwm_corner_reset_timeout;
     );
     always #5 clk = ~clk;
 
+    // (추가) 세 가지 실행 모드 각각의 파형을 해당 실행 폴더에 저장한다.
+    initial begin
+        $dumpfile("ch10_pwm_corner_reset_timeout.vcd");
+        $dumpvars(0, tb_pwm_corner_reset_timeout);
+    end
+
     // 실패 시 무한 대기하지 않도록 전체 시뮬레이션에 상한을 둔다.
     initial begin
         #5000;
