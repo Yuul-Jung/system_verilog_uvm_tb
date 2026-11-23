@@ -12,6 +12,14 @@ module tb_pwm_corner_reset_timeout;
     integer checks = 0;
     integer requests = 0;
 
+    // (추가) 관찰값 오류 및 설정 요청 누락을 DUT 외부에서 주입한다.
+    // +INJECT_FAULT: 측정 경로만 반전 → 스코어보드 검출 시험.
+    // +INJECT_TIMEOUT: 듀티 8 요청을 누락 → 적용 기한 검출 시험.
+    reg inject_fault = 1'b0;
+    reg inject_timeout = 1'b0;
+    reg corrupt_observation = 1'b0;
+    wire measured_pwm = pwm_out ^ corrupt_observation;
+
     pwm_core #(.RESET_PERIOD(32'd8)) dut (
         .clk(clk), .resetn(resetn), .cfg_apply(cfg_apply),
         .cfg_period(cfg_period), .cfg_duty(cfg_duty),
@@ -28,59 +36,94 @@ module tb_pwm_corner_reset_timeout;
         $fatal(1, "FAIL GLOBAL_TIMEOUT");
     end
 
-    // 모든 검사는 NBA 갱신 뒤 수행한다.
-    task check_outputs(input [31:0] expected_duty,
-                       input expected_pwm, input expected_pending);
+    // (변경) 상태 검사와 PWM 측정값 검사를 구별한다.
+    // 주입 시험에서 DUT 원본 pwm_out은 변경하지 않는다.
+    task automatic check_outputs(
+        input [31:0] expected_duty,
+        input expected_pwm,
+        input expected_pending
+    );
         begin
             if (active_period !== 32'd8 ||
                 active_duty !== expected_duty ||
                 active_enable !== 1'b1 ||
                 active_polarity !== 1'b0 ||
-                pending !== expected_pending ||
-                pwm_out !== expected_pwm)
-                $fatal(1, "FAIL t=%0t duty=%0d pwm=%b pending=%b",
-                       $time, active_duty, pwm_out, pending);
+                pending !== expected_pending) begin
+                $fatal(1, "FAIL STATE duty=%0d pending=%b", active_duty, pending);
+            end
+
+            if (measured_pwm !== expected_pwm) begin
+                if (corrupt_observation && (pwm_out === expected_pwm))
+                    $fatal(1, "DETECTED_INJECTED_FAULT dut=%b measured=%b",
+                        pwm_out, measured_pwm);
+                $fatal(1, "FAIL PWM actual=%b expected=%b",
+                    measured_pwm, expected_pwm);
+            end
             checks = checks + 1;
         end
     endtask
 
-    // 하강 에지에서 요청을 변경하여 상승 에지 경쟁을 피한다.
-    task request_duty(input [31:0] duty);
+    // (변경) +INJECT_TIMEOUT이면 DUT가 아니라 외부 cfg_apply를 누락한다.
+    task automatic request_duty(input [31:0] duty);
+        reg withhold_apply;
         begin
             @(negedge clk);
+            withhold_apply = inject_timeout && (duty == 32'd8);
             cfg_period = 32'd8;
             cfg_duty = duty;
             cfg_enable = 1'b1;
             cfg_polarity = 1'b0;
-            cfg_apply = 1'b1;
+            cfg_apply = !withhold_apply;
             @(negedge clk);
             cfg_apply = 1'b0;
             requests = requests + 1;
-            if (pending !== 1'b1)
+            if (!withhold_apply && pending !== 1'b1)
                 $fatal(1, "FAIL request not pending");
+            if (withhold_apply)
+                $display("INJECT: cfg_apply intentionally withheld");
         end
     endtask
 
-    // 주기 8클록, 듀티 0 또는 8에서 모든 샘플이 일정해야 한다.
-    task check_constant_window(input [31:0] duty,
-                               input expected_level);
+    // (변경) pending과 active_duty를 모두 확인한 뒤 전체 두 주기를 검사한다.
+    task automatic check_constant_window(
+        input [31:0] duty,
+        input expected_level
+    );
         integer i;
         begin
             request_duty(duty);
-            // pending은 다음 주기 경계에서 해제된다.
-            for (i = 0; i < 10 && pending !== 1'b0; i = i + 1) begin
-                @(posedge clk); #1;
+
+            // 최대 10클록 동안 새 설정의 실제 적용을 기다린다.
+            for (i = 0; i < 10 &&
+                 ((pending !== 1'b0) || (active_duty !== duty));
+                 i = i + 1) begin
+                @(posedge clk);
+                #1;
             end
-            if (pending !== 1'b0 || active_duty !== duty)
+
+            if (pending !== 1'b0 || active_duty !== duty) begin
+                if (inject_timeout && duty == 32'd8)
+                    $fatal(1, "DETECTED_APPLY_TIMEOUT duty=8 deadline=10clks");
                 $fatal(1, "FAIL APPLY_TIMEOUT duty=%0d", duty);
+            end
+
+            // (추가) DUT 출력은 손대지 않고 관찰 회로에서만 비트 반전.
+            corrupt_observation = inject_fault && (duty == 32'd8);
             for (i = 0; i < 16; i = i + 1) begin
-                @(posedge clk); #1;
+                @(posedge clk);
+                #1;
                 check_outputs(duty, expected_level, 1'b0);
             end
+            corrupt_observation = 1'b0;
         end
     endtask
 
     initial begin
+        inject_fault = $test$plusargs("INJECT_FAULT");
+        inject_timeout = $test$plusargs("INJECT_TIMEOUT");
+        if (inject_fault && inject_timeout)
+            $fatal(1, "FAIL: 동시에 두 오류 모드를 선택하지 마세요");
+
         // 동기 리셋: 첫 상승 에지 이후 초기 레지스터를 검사한다.
         @(posedge clk); #1;
         if (active_period !== 32'd8 || active_duty !== 0 ||
