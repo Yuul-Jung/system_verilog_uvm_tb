@@ -1,0 +1,14 @@
+# CH23 VALIDATION v01
+- 대상: 제23장 NPU 통합 정답 비교
+- 원본 저장소: Yuul-Jung/amd_soc_rtl (읽기 전용)
+- 원본 RTL: part03/mini_npu/rtl/npu_engine4.v, part03/mini_npu/rtl/npu_dsp_mac_lane.v, part03/ch02/rtl/dsp_multiplier.v
+- Blob SHA: 066218754ddfcc7807eff7333b308c207ab28175, a9dae4662d2aaa82cb6ba629597650217d30e0d9, 3dfb157f0e34dfb548fff7b3a6e5911ba664d504
+- TB: tb/ch23/tb_npu_integrated.sv
+- 실행: scripts/run_ch23.sh
+- HTML: ch23_npu_integrated_scoreboard_v01.html
+- 검증: 4개 클래스, bias 변경, 길이 1, 길이 3 미적재 오류
+- 시간 계약: READ/ISSUE 2*length 클록 + DRAIN1/DRAIN2/완료, 시작 이후 2*length+3
+- 정적 검토: 원본 모듈/포트/폭, 7개 section, CSS/JS 참조, chapter nav 23개, 개인정보 패턴, 인덱스 링크
+- RTL_SIM: NOT_RUN (실제 시뮬레이터 로그 없음)
+- BROWSER_VISUAL: NOT_RUN (실브라우저 렌더링 없음)
+- 예상 출력은 시뮬레이션 결과가 아님.
