@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v30",
+  "version": "v31",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -11,7 +11,7 @@
       "title": "테스트벤치의 첫 실행",
       "subtitle": "UART Echo 테스트벤치 기초",
       "slug": "ch01_testbench_basics",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch01/tb_uart_echo_basics.sv"
     },
     {
