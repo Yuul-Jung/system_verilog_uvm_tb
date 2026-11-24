@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 350" role="img" aria-labelledby="pwm-title pwm-desc">
+<title id="pwm-title">pwm_core 내부 구조</title><desc id="pwm-desc">설정값은 Shadow에 저장되고 주기 경계에서 Active로 반영된다. 카운터와 Active 설정으로 PWM 출력을 만든다.</desc>
+<defs><marker id="pwm-arrow" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L10 4 L0 8Z" fill="#5A1E1E"/></marker></defs>
+<rect width="960" height="350" fill="white"/>
+<g font-family="Noto Sans CJK KR, sans-serif" fill="#172439" text-anchor="middle">
+<rect x="215" y="24" width="600" height="290" rx="5" fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"/>
+<text x="515" y="49" font-size="19" font-weight="bold">pwm_core · 실제 내부 기능</text>
+<g fill="white" stroke="#1F3A5F" stroke-width="2"><rect x="241" y="84" width="200" height="84" rx="4"/><rect x="574" y="84" width="215" height="84" rx="4"/><rect x="241" y="211" width="200" height="76" rx="4"/><rect x="574" y="211" width="215" height="76" rx="4"/></g>
+<g font-size="16" font-weight="bold"><text x="341" y="109">Shadow 레지스터</text><text x="681.5" y="109">Active 레지스터</text><text x="341" y="236">counter</text><text x="681.5" y="236">출력 조합 논리</text></g>
+<g font-size="12"><text x="341" y="134">shadow_* · pending</text><text x="341" y="152">cfg_apply로 저장</text><text x="681.5" y="134">active_*</text><text x="681.5" y="152">boundary &amp;&amp; pending</text><text x="341" y="258">boundary 계산</text><text x="341" y="276">active_period 기준</text><text x="681.5" y="259">duty_high · polarity</text><text x="681.5" y="277">resetn · enable</text></g>
+<g fill="none" stroke="#5A1E1E" stroke-width="2.2" marker-end="url(#pwm-arrow)"><path d="M36 126 H241"/><path d="M441 126 H574"/><path d="M681.5 168 V211"/><path d="M441 249 H574"/><path d="M789 249 H930"/><path d="M574 150 H485 V199 H341 V211"/><path d="M441 225 H520 V183 H600 V168"/></g>
+<g font-size="12"><text x="126" y="72" font-weight="bold">TB 입력</text><text x="126" y="92">cfg_period · cfg_duty</text><text x="126" y="111">cfg_enable · cfg_polarity</text><text x="126" y="145">cfg_apply</text><text x="507" y="116">경계에서 반영</text><text x="507" y="239">counter 값</text><text x="875" y="238">pwm_out</text><text x="561" y="179">boundary</text><text x="410" y="195">active_period</text><text x="515" y="333">clk 상승 에지: 레지스터 갱신　|　resetn: 순차 초기화 + 조합 출력 차단</text></g>
+</g></svg>
