@@ -188,3 +188,7 @@
 ## 제01장 v03 · 독립 배포 및 도식 수정
 - ch01_testbench_basics_v03.html: 학생 본문에 원본 RTL/TB 전체 코드와 실행 경로 제공, 외부 원본 링크·SHA 제거, 실제 6포트 연결도 수정.
 - [검증 기록](docs/CH01_VALIDATION_v03.md). 수정 SVG 단독 Chromium 렌더링 및 좌표 확인, RTL_SIM/전체 페이지 렌더링 NOT_RUN.
+
+## 제02장 v02 · 설계 연계 및 관찰 환경 보완
+- amd_soc_npu 제2부 04.2장 02·06절과 원본 PWM 일치. DUT 수정 없음. TB 시간 표시와 VCD 조건부 기록 보완.
+- ch02_clock_reset_events_v02.html; [검증 기록](docs/CH02_VALIDATION_v02.md). 예상 상태 계산/두 SVG 단독 렌더링 완료, RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
