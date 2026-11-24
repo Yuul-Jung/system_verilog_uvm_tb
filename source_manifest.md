@@ -184,3 +184,7 @@
 ## 제01장 v02 · 학습안내서 개정
 - ch01_testbench_basics_v02.html: 원본 RTL·TB 전체 코드, SVG 도식·예상 파형, XSIM 절차 추가. RTL/TB 변경 없음.
 - [검증 기록](docs/CH01_VALIDATION_v02.md). RTL_SIM/BROWSER: NOT_RUN.
+
+## 제01장 v03 · 독립 배포 및 도식 수정
+- ch01_testbench_basics_v03.html: 학생 본문에 원본 RTL/TB 전체 코드와 실행 경로 제공, 외부 원본 링크·SHA 제거, 실제 6포트 연결도 수정.
+- [검증 기록](docs/CH01_VALIDATION_v03.md). 수정 SVG 단독 Chromium 렌더링 및 좌표 확인, RTL_SIM/전체 페이지 렌더링 NOT_RUN.
