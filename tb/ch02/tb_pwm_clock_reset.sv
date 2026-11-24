@@ -39,17 +39,20 @@ module tb_pwm_clock_reset;
     initial clk = 1'b0;
     always #5 clk = ~clk;
 
-    // 출력과 내부 신호를 VCD 파일에 기록한다.
+`ifdef VCD
+    // (변경) Icarus 실행에서만 VCD 시스템 태스크를 활성화한다.
     initial begin
         $dumpfile("ch02_pwm_clock_reset.vcd");
         $dumpvars(0, tb_pwm_clock_reset);
     end
+`endif
 
+    // (변경) %0d로 $time의 현재 모듈 시간 단위(ns)를 그대로 표시한다.
     // 상승 에지 이후 1ns를 기다려 비차단 대입 결과를 읽는다.
     // #1은 하드웨어 지연이 아니라 테스트벤치 관찰용 시간 이동이다.
     always @(posedge clk) begin
         #1;
-        $display("POS t=%0t ns rst=%b apply=%b pending=%b period=%0d duty=%0d en=%b pwm=%b",
+        $display("POS t=%0d ns rst=%b apply=%b pending=%b period=%0d duty=%0d en=%b pwm=%b",
             $time, resetn, cfg_apply, pending,
             active_period, active_duty, active_enable, pwm_out);
     end
@@ -80,7 +83,7 @@ module tb_pwm_clock_reset;
         resetn = 1'b0;
         #1;
         // 리셋 입력만 LOW로 바뀌어도 조합 출력은 즉시 LOW가 된다.
-        $display("EVENT t=%0t ns resetn=%b active_duty=%0d pwm=%b",
+        $display("EVENT t=%0d ns resetn=%b active_duty=%0d pwm=%b",
             $time, resetn, active_duty, pwm_out);
 
         // t=195ns 순차 레지스터 리셋, t=200ns 리셋 해제.
