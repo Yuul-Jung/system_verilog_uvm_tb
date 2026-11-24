@@ -26,7 +26,7 @@ fi
 mkdir -p "$OUT_DIR"
 
 # SystemVerilog 문법과 원본 PWM 회로를 함께 컴파일한다.
-iverilog -g2012 -s tb_pwm_clock_reset \
+iverilog -g2012 -DVCD -s tb_pwm_clock_reset \
   -o "$OUT_DIR/simulation.vvp" "$DUT_PATH" "$TB_PATH"
 
 # 실행 로그와 파형을 작업 폴더에 저장한다.
