@@ -1,0 +1,120 @@
+{
+  "version": 4,
+  "format": "soc-flow-pages",
+  "chapter": "CH01",
+  "activePage": 0,
+  "pages": [
+    {
+      "version": 3,
+      "chapter": "CH01",
+      "verification": "STATIC_SOURCE_REVIEW_ONLY",
+      "pageTitle": "TB 실행 흐름",
+      "title": "CH01 · 테스트벤치 실행 흐름",
+      "subtitle": "개념적 순서 · 실제 시뮬레이션 별도",
+      "width": 820,
+      "height": 245,
+      "settings": {
+        "fontMain": 18,
+        "fontSub": 16,
+        "stroke": 2,
+        "gap": 30,
+        "pad": 6,
+        "padY": 4,
+        "defaultPreset": "navy"
+      },
+      "nodes": [
+        {
+          "id": "stim",
+          "x": 144,
+          "y": 160,
+          "w": 220,
+          "h": 100,
+          "title": "initial",
+          "sub": "입력값 설정",
+          "fill": "none",
+          "autoFit": false,
+          "strokeColor": "#1F3A5F",
+          "strokeWidth": 2,
+          "textColor": "#172439",
+          "subTextColor": "#273e5e",
+          "fontMain": 18,
+          "fontSub": 16,
+          "pad": 6,
+          "padY": 4,
+          "textAlign": "center",
+          "preset": "navy"
+        },
+        {
+          "id": "dut",
+          "x": 394,
+          "y": 160,
+          "w": 220,
+          "h": 100,
+          "title": "dut",
+          "sub": "조합 출력 갱신",
+          "fill": "none",
+          "autoFit": false,
+          "strokeColor": "#1F3A5F",
+          "strokeWidth": 2,
+          "textColor": "#172439",
+          "subTextColor": "#273e5e",
+          "fontMain": 18,
+          "fontSub": 16,
+          "pad": 6,
+          "padY": 4,
+          "textAlign": "center",
+          "preset": "navy"
+        },
+        {
+          "id": "wait",
+          "x": 644,
+          "y": 160,
+          "w": 220,
+          "h": 100,
+          "title": "#10 / $display",
+          "sub": "시간 진행 후 관찰",
+          "fill": "none",
+          "autoFit": false,
+          "strokeColor": "#1F3A5F",
+          "strokeWidth": 2,
+          "textColor": "#172439",
+          "subTextColor": "#273e5e",
+          "fontMain": 18,
+          "fontSub": 16,
+          "pad": 6,
+          "padY": 4,
+          "textAlign": "center",
+          "preset": "navy"
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "stim",
+          "to": "dut",
+          "fp": "right",
+          "tp": "left",
+          "label": "",
+          "route": "auto",
+          "strokeColor": "#5A1E1E",
+          "strokeWidth": 2,
+          "arrowSize": 10,
+          "labelFont": 14
+        },
+        {
+          "id": "e2",
+          "from": "dut",
+          "to": "wait",
+          "fp": "right",
+          "tp": "left",
+          "label": "",
+          "route": "auto",
+          "strokeColor": "#5A1E1E",
+          "strokeWidth": 2,
+          "arrowSize": 10,
+          "labelFont": 14
+        }
+      ]
+    }
+  ]
+}
