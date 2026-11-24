@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 336" role="img" aria-labelledby="title desc">
+  <title id="title">UART Echo Controller 포트 연결도</title>
+  <desc id="desc">수신 데이터와 valid는 왼쪽에서 오른쪽으로, ready는 오른쪽에서 왼쪽으로 전달된다. 가운데 상자는 실제 DUT이고 좌우는 테스트벤치가 구동하거나 관찰하는 포트이다.</desc>
+  <defs><marker id="a" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L10 4 L0 8 Z" fill="#5A1E1E"/></marker></defs>
+  <rect width="960" height="336" fill="#fff"/>
+  <g font-family="Noto Sans CJK KR, sans-serif" fill="#172439" text-anchor="middle">
+    <text x="176" y="35" font-size="17" font-weight="700">TB · 수신 측</text>
+    <text x="784" y="35" font-size="17" font-weight="700">TB · 송신 측</text>
+    <rect x="320" y="50" width="320" height="240" rx="5" fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"/>
+    <text x="480" y="78" font-size="19" font-weight="700">uart_echo_controller</text>
+    <text x="480" y="104" font-size="13">DUT · 조합회로</text>
+    <g font-family="monospace" font-size="17">
+      <text x="176" y="125">rx_data_i [7:0]</text><text x="784" y="125">tx_data_o [7:0]</text>
+      <text x="176" y="190">rx_valid_i</text><text x="784" y="190">tx_valid_o</text>
+      <text x="176" y="255">rx_ready_o</text><text x="784" y="255">tx_ready_i</text>
+    </g>
+    <g font-size="15" font-family="monospace">
+      <text x="480" y="146">assign tx_data_o=rx_data_i;</text>
+      <text x="480" y="211">assign tx_valid_o=rx_valid_i;</text>
+      <text x="480" y="276">assign rx_ready_o=tx_ready_i;</text>
+    </g>
+    <g stroke="#5A1E1E" stroke-width="2.2" fill="none" marker-end="url(#a)">
+      <path d="M54 140 H320"/><path d="M640 140 H906"/>
+      <path d="M54 205 H320"/><path d="M640 205 H906"/>
+      <path d="M320 270 H54"/><path d="M906 270 H640"/>
+    </g>
+    <text x="480" y="319" font-size="14">데이터·유효: 수신 → 송신　|　준비: 송신 → 수신</text>
+  </g>
+</svg>
