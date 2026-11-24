@@ -180,3 +180,7 @@
 - TB: tb/ch24/tb_uart_regression.sv; 실행: scripts/run_ch24.py, scripts/run_ch24.sh; CI: .github/workflows/ch24-regression.yml.
 - HTML: ch24_regression_ci_reporting_v01.html; 기록: docs/CH24_VALIDATION_v01.md.
 - 시드 1/7/42, 각 32건, 4개 상태, 음성 시험, JSON/Markdown 보고. RTL_SIM NOT_RUN, CI_RUN NOT_RUN, BROWSER_VISUAL NOT_RUN.
+
+## 제01장 v02 · 학습안내서 개정
+- ch01_testbench_basics_v02.html: 원본 RTL·TB 전체 코드, SVG 도식·예상 파형, XSIM 절차 추가. RTL/TB 변경 없음.
+- [검증 기록](docs/CH01_VALIDATION_v02.md). RTL_SIM/BROWSER: NOT_RUN.
