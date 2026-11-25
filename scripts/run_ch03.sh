@@ -26,7 +26,7 @@ fi
 mkdir -p "$OUT_DIR"
 
 # -g2012는 이 테스트벤치의 SystemVerilog 문법을 지원하기 위한 옵션이다.
-iverilog -g2012 -s tb_pwm_reusable_stimulus \
+iverilog -g2012 -DVCD -s tb_pwm_reusable_stimulus \
   -o "$OUT_DIR/simulation.vvp" "$DUT_PATH" "$TB_PATH"
 
 # 표준 출력과 VCD 파형을 이 장만의 출력 폴더에 보존한다.
