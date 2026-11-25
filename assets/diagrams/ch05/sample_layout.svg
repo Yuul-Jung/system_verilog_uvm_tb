@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 256" role="img" aria-labelledby="ch05title ch05desc">
+<title id="ch05title">uart_sample_t의 10비트 배치</title><desc id="ch05desc">data는 비트 9부터 2, valid는 비트 1, ready는 비트 0이다. CASE_SEND 예시는 01000001, 1, 1이다.</desc>
+<rect width="900" height="256" fill="white"/>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle">
+<text x="450" y="32" font-size="20" font-weight="bold">uart_sample_t · struct packed (10비트)</text>
+<g stroke="#1F3A5F" stroke-width="2"><rect x="30" y="70" width="600" height="62" fill="#EDF4FD"/><rect x="630" y="70" width="120" height="62" fill="#F7F9FC"/><rect x="750" y="70" width="120" height="62" fill="#F7F9FC"/></g>
+<g font-size="16" font-weight="bold"><text x="330" y="96">data [9:2]</text><text x="690" y="96">valid [1]</text><text x="810" y="96">ready [0]</text></g>
+<g font-size="14"><text x="330" y="119">logic [7:0]</text><text x="690" y="119">logic</text><text x="810" y="119">logic</text></g>
+<text x="450" y="158" font-size="15" font-weight="bold">CASE_SEND · 입력값 배치</text>
+<g stroke="#1F3A5F" stroke-width="1.5" fill="white"><rect x="30" y="174" width="600" height="42"/><rect x="630" y="174" width="120" height="42"/><rect x="750" y="174" width="120" height="42"/><path d="M105 174V216 M180 174V216 M255 174V216 M330 174V216 M405 174V216 M480 174V216 M555 174V216"/></g>
+<g font-size="17"><text x="67.5" y="201">0</text><text x="142.5" y="201">1</text><text x="217.5" y="201">0</text><text x="292.5" y="201">0</text><text x="367.5" y="201">0</text><text x="442.5" y="201">0</text><text x="517.5" y="201">0</text><text x="592.5" y="201">1</text><text x="690" y="201">1</text><text x="810" y="201">1</text></g>
+<text x="450" y="240" font-size="14">8'h41 (ASCII A) · valid=1 · ready=1</text>
+</g></svg>
