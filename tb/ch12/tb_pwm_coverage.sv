@@ -13,6 +13,8 @@ module tb_pwm_coverage;
     wire pwm_out, pending, active_enable, active_polarity;
     wire [31:0] active_period, active_duty;
     int checks = 0;
+    // (추가) 커버리지 엔진과 별개로 12개 교차 조합을 집계한다.
+    bit [11:0] visited = 12'b0;
 
     pwm_core #(.RESET_PERIOD(32'd8)) dut (
         .clk(clk), .resetn(resetn), .cfg_apply(cfg_apply),
@@ -54,6 +56,8 @@ module tb_pwm_coverage;
         int waited;
         int highs;
         int expected_highs;
+        int sample_phase, bin_index;
+        logic expected_level;
         // 음의 에지에서 입력을 바꿔 양의 에지 샘플과 충돌하지 않는다.
         @(negedge clk);
         cfg_duty = duty;
@@ -83,6 +87,18 @@ module tb_pwm_coverage;
             @(negedge clk);
             if (pwm_out === 1'bx || pwm_out === 1'bz)
                 $fatal(1, "FAIL unknown pwm_out");
+            // (추가) 적용 관찰 직후 다음 하강 에지는 phase 1,
+            // 마지막 표본은 다음 주기의 phase 0이다.
+            sample_phase = (i + 1) % 8;
+            expected_level = en && (pol ? (sample_phase >= int'(duty))
+                                        : (sample_phase < int'(duty)));
+            if (pwm_out !== expected_level)
+                $fatal(1, "FAIL phase duty=%0d phase=%0d actual=%b expected=%b",
+                       duty, sample_phase, pwm_out, expected_level);
+            if (active_period !== 32'd8 || active_duty !== duty ||
+                active_enable !== en || active_polarity !== pol ||
+                pending !== 1'b0)
+                $fatal(1, "FAIL active state changed during sampling");
             if (pwm_out) highs++;
         end
         expected_highs = en ? (pol ? 8 - int'(duty) : int'(duty)) : 0;
@@ -91,7 +107,12 @@ module tb_pwm_coverage;
                    duty, en, pol, highs, expected_highs);
 
         // 출력 검사가 끝난 실제 적용 조합만 커버리지에 포함한다.
-        cov.sample(duty, en, pol);
+        // (변경) 확인한 DUT의 실제 활성 설정으로 샘플링한다.
+        cov.sample(active_duty, active_enable, active_polarity);
+        // (추가) zero/middle/full → 0/1/2, 각 구간에 4개 조합.
+        bin_index = ((duty == 0) ? 0 : (duty == 8) ? 2 : 1) * 4
+                    + int'(en) * 2 + int'(pol);
+        visited[bin_index] = 1'b1;
         checks++;
         $display("CHECK duty=%0d en=%b pol=%b highs=%0d",
                  duty, en, pol, highs);
@@ -102,9 +123,14 @@ module tb_pwm_coverage;
         $fatal(1, "FAIL GLOBAL_TIMEOUT");
     end
 
+`ifdef VCD
+    // (변경) VCD가 지원되는 실행 환경에서만 활성화한다.
     initial begin
         $dumpfile("ch12_pwm_coverage.vcd");
         $dumpvars(0, tb_pwm_coverage);
+    end
+`endif
+    initial begin
         repeat (3) @(negedge clk);
         resetn = 1;
         // 3 듀티 구간 × 2 enable × 2 polarity = 12개 cross bin.
@@ -119,8 +145,8 @@ module tb_pwm_coverage;
                 end
             end
         end
-        if (checks != 12)
-            $fatal(1, "FAIL missing test cases");
+        if (checks != 12 || visited !== 12'hfff)
+            $fatal(1, "FAIL missing test cases visited=%03h", visited);
         if (cov.get_coverage() < 99.99)
             $fatal(1, "FAIL coverage=%0.2f", cov.get_coverage());
         $display("PASS CH12 cases=%0d coverage=%0.2f%%",
