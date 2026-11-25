@@ -73,25 +73,30 @@ module tb_uart_types;
         end
     endtask
 
+`ifdef VCD
+    // (변경) Icarus 실행에서 VCD 파형을 기록한다.
     initial begin
         $dumpfile("ch05_uart_types.vcd");
         $dumpvars(0, tb_uart_types);
     end
+`endif
 
     initial begin
         $display("=== CH05 SYSTEMVERILOG TYPES START ===");
 
         // 입력 데이터가 있어도 valid=0이면 전송은 유효하지 않다.
-        run_case(CASE_IDLE, '{8'h00, 1'b0, 1'b1});
+        // (변경) packed struct와 같은 10비트의 연결 표현을 사용한다.
+        // data[9:2], valid[1], ready[0] 순서로 구성된다.
+        run_case(CASE_IDLE, {8'h00, 1'b0, 1'b1});
 
-        // valid=1, ready=1이면 전송 가능 상태이다.
-        run_case(CASE_SEND, '{8'h41, 1'b1, 1'b1});
+        // valid=1, ready=1이면 전송 가능 상태이다. 실제 수락 이벤트를 측정하지 않는다.
+        run_case(CASE_SEND, {8'h41, 1'b1, 1'b1});
 
-        // ready=0이면 출력 valid와 data는 유지되지만 수락은 안 된다.
-        run_case(CASE_STALL, '{8'h42, 1'b1, 1'b0});
+        // ready=0이면 이 입력 사례에서는 출력 valid와 data가 그대로 전달된다.
+        run_case(CASE_STALL, {8'h42, 1'b1, 1'b0});
 
         // logic과 원본 조합 DUT는 X를 보존하는지 확인할 수 있다.
-        run_case(CASE_XDATA, '{8'hx5, 1'b1, 1'b1});
+        run_case(CASE_XDATA, {8'hx5, 1'b1, 1'b1});
         four_state_copy = rx_data_i;
         compact_copy = rx_data_i;
 
