@@ -192,3 +192,7 @@
 ## 제02장 v02 · 설계 연계 및 관찰 환경 보완
 - amd_soc_npu 제2부 04.2장 02·06절과 원본 PWM 일치. DUT 수정 없음. TB 시간 표시와 VCD 조건부 기록 보완.
 - ch02_clock_reset_events_v02.html; [검증 기록](docs/CH02_VALIDATION_v02.md). 예상 상태 계산/두 SVG 단독 렌더링 완료, RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
+
+## 제03장 v03 · 독립 실행 및 반복 자극
+- 현행 amd_soc_p2 제2부 04.2장 02·06절, pwm_core 원본 SHA 일치. TB VCD 분리와 타임아웃 종료 오류 처리 보완.
+- ch03_reusable_stimulus_v03.html; [검증 기록](docs/CH03_VALIDATION_v03.md). 독립 이벤트 계산 및 SVG 단독 렌더링 PASS, 실제 RTL_SIM/전체 HTML 렌더링 NOT_RUN.
