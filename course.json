@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v55",
+  "version": "v56",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -216,9 +216,9 @@
       "id": "ch24",
       "number": 24,
       "title": "회귀·CI·검증 보고",
-      "subtitle": "시드 반복·음성 시험·커버리지·JSON 보고·GitHub Actions",
+      "subtitle": "시드 재현·독립 커버리지 계산·비교기 오류 검출·실제 SHA·CI 보고",
       "slug": "ch24_regression_ci_reporting",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch24/tb_uart_regression.sv"
     }
   ]
