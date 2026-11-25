@@ -103,6 +103,9 @@ module tb_pwm_pass_fail;
             apply_duty(step);
             check_period(step);
         end
+        // (추가) 비교 누락을 정상 종료로 처리하지 않는다.
+        if (checks != 11)
+            $fatal(1, "FAIL COUNT checks=%0d expected=11", checks);
         if (errors == 0) begin
             $display("PASS checks=%0d errors=0", checks);
             $finish;
