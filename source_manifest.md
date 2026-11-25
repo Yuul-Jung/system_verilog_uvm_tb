@@ -213,3 +213,7 @@
 ## 제07장 v02 · 인터페이스·타이밍 분리
 - amd_soc_npu 제1장 03절 UART 에코 원본 및 uart_stream_if 유지. 조건부 VCD와 XSIM 우선 실행, Verilator 한계, 실제 clocking 관찰·구동 시간 관계 보완.
 - ch07_interface_modport_clocking_v02.html; [검증 기록](docs/CH07_VALIDATION_v02.md). 독립 이벤트 계산·SVG 단독 렌더·원격 정적 검사 PASS. 실제 RTL_SIM 및 전체 HTML 렌더링 NOT_RUN.
+
+## 제08장 v02 및 제2부 종합 검증
+- amd_soc_npu 제1장 03절 UART 에코 원본 유지. IDLE 생성 제약 결과 별도 검사, 상속과 부모 타입 재사용 해설 보완, XSIM/Verilator 절차 추가.
+- ch08_objects_constraints_v02.html; [제08장 검증 기록](docs/CH08_VALIDATION_v02.md), [제2부 종합 검증](docs/PART02_VALIDATION.md). 제05~08장 원본·TB·의존 파일·목차 대조 완료. 실제 RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
