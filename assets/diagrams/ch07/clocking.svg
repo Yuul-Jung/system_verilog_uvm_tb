@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" role="img" aria-labelledby="ch07title ch07desc">
+<title id="ch07title">clocking 이벤트의 관찰과 구동</title><desc id="ch07desc">5ns에 A를 구동하고 15ns에 A를 관찰한다. 이후 Z 대기, Z 수락, IDLE을 순서대로 관찰한다.</desc>
+<rect width="900" height="330" fill="white"/>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" font-size="14">
+<text x="24" y="23" font-size="20" font-weight="bold">clocking cb · 관찰 후 다음 입력 구동</text>
+<text x="24" y="50">input #1step: 에지 직전 값</text><text x="470" y="50">output #0: 해당 에지의 구동</text>
+<text x="24" y="110" font-weight="bold">tb_clk</text><text x="24" y="180" font-weight="bold">check_case()</text><text x="24" y="252" font-weight="bold">다음 입력</text>
+<g stroke="#1F3A5F" stroke-width="2" fill="none"><path d="M135 118H200V90H270V118H340V90H410V118H480V90H550V118H620V90H690V118H760V90H830V118H870"/></g>
+<g stroke="#A8B6C8" stroke-dasharray="4 4"><path d="M200 80V285 M340 80V285 M480 80V285 M620 80V285 M760 80V285"/></g>
+<g text-anchor="middle"><text x="200" y="78">5 ns</text><text x="340" y="78">15 ns</text><text x="480" y="78">25 ns</text><text x="620" y="78">35 ns</text><text x="760" y="78">45 ns</text>
+<g fill="#F7F9FC" stroke="#1F3A5F"><rect x="145" y="153" width="110" height="48" rx="4"/><rect x="285" y="153" width="110" height="48" rx="4"/><rect x="425" y="153" width="110" height="48" rx="4"/><rect x="565" y="153" width="110" height="48" rx="4"/><rect x="705" y="153" width="110" height="48" rx="4"/>
+<rect x="145" y="225" width="110" height="48" rx="4"/><rect x="285" y="225" width="110" height="48" rx="4"/><rect x="425" y="225" width="110" height="48" rx="4"/><rect x="565" y="225" width="110" height="48" rx="4"/><rect x="705" y="225" width="110" height="48" rx="4"/></g>
+<text x="200" y="182">검사 없음</text><text x="340" y="168">A_ACCEPT</text><text x="340" y="192">41 / 1 / 1</text><text x="480" y="168">Z_STALL</text><text x="480" y="192">5A / 1 / 0</text><text x="620" y="168">Z_ACCEPT</text><text x="620" y="192">5A / 1 / 1</text><text x="760" y="168">IDLE</text><text x="760" y="192">5A / 0 / 1</text>
+<text x="200" y="254">41 / 1 / 1</text><text x="340" y="254">5A / 1 / 0</text><text x="480" y="254">ready → 1</text><text x="620" y="254">valid → 0</text><text x="760" y="254">종료</text></g>
+<text x="24" y="309" font-size="13">값 표기: data(16진수) / valid / ready · Z는 문자 0x5A이며 고임피던스 상태가 아님</text></g></svg>
