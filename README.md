@@ -1,123 +1,42 @@
 # RTL Testbench · SystemVerilog · UVM 검증 학습안내서
 
-- **전체 편성:** 독립 6부, 총 24장/48시간, 한 장은 60분 × 2회로 진행
-- **발행:** [INDEX](index.html) / [제01장](ch01_testbench_basics_v01.html) / [제02장](ch02_clock_reset_events_v01.html) / [제03장](ch03_reusable_stimulus_v02.html) / [제04장](ch04_pass_fail_automation_v02.html) / [제05장](ch05_verification_types_v02.html) / [제06장](ch06_arrays_queues_packages_v02.html) / [제07장](ch07_interface_modport_clocking_v01.html) / [제08장](ch08_objects_constraints_v01.html) / [제09장](ch09_reference_model_scoreboard_v02.html) / [제10장](ch10_corner_reset_timeout_v02.html) / [제11장](ch11_temporal_assertions_v01.html) / [제12장](ch12_functional_coverage_v01.html) / [제13장](ch13_uart_stream_verification_v01.html) / [제14장](ch14_fifo_flow_control_v01.html) / [제15장](ch15_axi4lite_register_verification_v01.html) / [제16장](ch16_mac_npu_integer_verification_v01.html) / [제17장](ch17_minimal_uvm_environment_v01.html) / [제18장](ch18_sequence_driver_v01.html) / [제19장](ch19_monitor_agent_scoreboard_v02.html) / [제20장](ch20_factory_config_objection_v01.html) / [제21장](ch21_uvm_register_abstraction_v01.html) / [제22장](ch22_multi_agent_vip_v02.html) / [전체 편성](CURRICULUM.md)
-- **검증용 RTL:** 기존 원본의 읽기 전용 복사본을 `reference_rtl/`에서 참조합니다. UART Echo·PWM·AXI4-Lite·MAC/FIFO 등은 해당 장별 `source_manifest.md`를 확인합니다.
-- **목표:** 문법 → Testbench → Self-checking → SVA/Coverage → UVM → Regression/CI
-- **상태:** 제01~22장 HTML·TB·실행 스크립트 발행. 제22장은 Config DB 범위 오류 수정 후 정적 검토 완료, **RTL_SIM=NOT_RUN** (실제 Verilator/UVM 빌드 미수행).
+- **교육과정:** 6부 24장. 기존 RTL을 보존하고 독립 테스트벤치로 검증합니다.
+- **진입점:** [전체 학습안내서](index.html) · [전체 편성](CURRICULUM.md) · [설계 대응표](docs/DESIGN_VERIFICATION_MAP.md)
+- **검증 상태:** 24장 발행. 실제 시뮬레이션/CI/브라우저 실행 결과는 별도 기록으로 구분합니다.
 
-## 규칙
-- 정본 [rule_md](https://github.com/Yuul-Jung/rule_md) / [HTML STANDARD](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/web/education-html/STANDARD.md)
-- 기존 `amd_soc_rtl`의 `AGENTS.md`와 [공통 코드 스타일](https://github.com/Yuul-Jung/rule_md/blob/d1b8278d41fca8f5e3960736f3ac9d377e462fda/common/code-style-rules.md) 적용
-- 원본 수정 금지, 공개 보안 점검, 실행 기록 기반으로만 PASS 표기, 장별 `_vNN.html` 사용
+## 최신 장별 자료
 
-## 독립 저장소 설치 (Ubuntu)
+| 부 | 장 | 학습안내서 | 테스트벤치 |
+|---|---:|---|---|
+| 1 | 01 | [테스트벤치의 첫 실행](ch01_testbench_basics_v04.html) | [tb/ch01/tb_uart_echo_basics.sv](tb/ch01/tb_uart_echo_basics.sv) |
+| 1 | 02 | [Clock·Reset·이벤트](ch02_clock_reset_events_v03.html) | [tb/ch02/tb_pwm_clock_reset.sv](tb/ch02/tb_pwm_clock_reset.sv) |
+| 1 | 03 | [반복 자극과 작업 분리](ch03_reusable_stimulus_v03.html) | [tb/ch03/tb_pwm_reusable_stimulus.sv](tb/ch03/tb_pwm_reusable_stimulus.sv) |
+| 1 | 04 | [PASS/FAIL 자동 판정](ch04_pass_fail_automation_v04.html) | [tb/ch04/tb_pwm_pass_fail.sv](tb/ch04/tb_pwm_pass_fail.sv) |
+| 2 | 05 | [검증 자료형과 타입](ch05_verification_types_v04.html) | [tb/ch05/tb_uart_types.sv](tb/ch05/tb_uart_types.sv) |
+| 2 | 06 | [배열·큐·패키지](ch06_arrays_queues_packages_v04.html) | [tb/ch06/tb_uart_arrays_queues.sv](tb/ch06/tb_uart_arrays_queues.sv) |
+| 2 | 07 | [인터페이스·타이밍 분리](ch07_interface_modport_clocking_v03.html) | [tb/ch07/tb_uart_interface.sv](tb/ch07/tb_uart_interface.sv) |
+| 2 | 08 | [객체와 제약 기반 입력](ch08_objects_constraints_v02.html) | [tb/ch08/tb_uart_objects.sv](tb/ch08/tb_uart_objects.sv) |
+| 3 | 09 | [참조 모델·스코어보드](ch09_reference_model_scoreboard_v03.html) | [tb/ch09/tb_pwm_scoreboard.sv](tb/ch09/tb_pwm_scoreboard.sv) |
+| 3 | 10 | [경계조건·오류 주입](ch10_corner_reset_timeout_v04.html) | [tb/ch10/tb_pwm_corner_reset_timeout.sv](tb/ch10/tb_pwm_corner_reset_timeout.sv) |
+| 3 | 11 | [시간적 속성 검사](ch11_temporal_assertions_v03.html) | [tb/ch11/tb_pwm_sva.sv](tb/ch11/tb_pwm_sva.sv) |
+| 3 | 12 | [기능 커버리지](ch12_functional_coverage_v02.html) | [tb/ch12/tb_pwm_coverage.sv](tb/ch12/tb_pwm_coverage.sv) |
+| 4 | 13 | [UART 스트림 검증](ch13_uart_stream_verification_v02.html) | [tb/ch13/tb_uart_stream.sv](tb/ch13/tb_uart_stream.sv) |
+| 4 | 14 | [FIFO 및 흐름 제어](ch14_fifo_flow_control_v02.html) | [tb/ch14/tb_uart_fifo_flow.sv](tb/ch14/tb_uart_fifo_flow.sv) |
+| 4 | 15 | [AXI4-Lite 레지스터 검증](ch15_axi4lite_register_verification_v02.html) | [tb/ch15/tb_axi4lite_registers.sv](tb/ch15/tb_axi4lite_registers.sv) |
+| 4 | 16 | [MAC·NPU 정수 연산 검증](ch16_mac_npu_integer_verification_v02.html) | [tb/ch16/tb_mac_integer.sv](tb/ch16/tb_mac_integer.sv) |
+| 5 | 17 | [최소 UVM 환경](ch17_minimal_uvm_environment_v02.html) | [tb/ch17/tb_pwm_uvm.sv](tb/ch17/tb_pwm_uvm.sv) |
+| 5 | 18 | [Sequence에서 Driver까지](ch18_sequence_driver_v02.html) | [tb/ch18/tb_pwm_sequence_driver.sv](tb/ch18/tb_pwm_sequence_driver.sv) |
+| 5 | 19 | [Monitor·Agent·Scoreboard](ch19_monitor_agent_scoreboard_v03.html) | [tb/ch19/tb_pwm_monitor_agent_scoreboard.sv](tb/ch19/tb_pwm_monitor_agent_scoreboard.sv) |
+| 5 | 20 | [Factory·Config·Objection](ch20_factory_config_objection_v02.html) | [tb/ch20/tb_pwm_factory_config_objection.sv](tb/ch20/tb_pwm_factory_config_objection.sv) |
+| 6 | 21 | [UVM 레지스터 추상화](ch21_uvm_register_abstraction_v02.html) | [tb/ch21/tb_axi_uvm_ral.sv](tb/ch21/tb_axi_uvm_ral.sv) |
+| 6 | 22 | [다중 Agent·VIP](ch22_multi_agent_vip_v03.html) | [tb/ch22/tb_axi_multiagent_irq.sv](tb/ch22/tb_axi_multiagent_irq.sv) |
+| 6 | 23 | [NPU 통합 정답 비교](ch23_npu_integrated_scoreboard_v03.html) | [tb/ch23/tb_npu_integrated.sv](tb/ch23/tb_npu_integrated.sv) |
+| 6 | 24 | [회귀·CI·검증 보고](ch24_regression_ci_reporting_v03.html) | [tb/ch24/tb_uart_regression.sv](tb/ch24/tb_uart_regression.sv) |
 
-GitHub 독립 저장소 이름과 로컬 디렉터리를 `system_verilog_uvm_tb`로 통일합니다.
+## 제작·검증 원칙
 
-```bash
-# 별도 GitHub 저장소를 원하는 로컬 폴더 이름으로 복제한다.
-git clone https://github.com/Yuul-Jung/system_verilog_uvm_tb.git system_verilog_uvm_tb
-cd system_verilog_uvm_tb
-```
-
-이 과정은 **독립 저장소 루트**를 기준으로 동작합니다. `reference_rtl/`은 `amd_soc_rtl`에서 읽기 전용으로 복사한 **원본 동일 스냅샷**입니다. 다른 버전의 DUT 검증이 필요하면 `DUT_PATH`로 원본 파일을 직접 지정합니다.
-
-## 장별 실행 (Ubuntu)
-```bash
-# 위 git clone 작업으로 이 폴더에 진입한 상태에서 실행
-# pwd로 현재 경로를 확인한다
-sudo apt update
-sudo apt install -y iverilog
-bash scripts/run_ch01.sh
-bash scripts/run_ch02.sh
-bash scripts/run_ch03.sh
-bash scripts/run_ch04.sh
-bash scripts/run_ch05.sh
-bash scripts/run_ch06.sh
-# 제07장은 clocking block 실습으로 Verilator를 사용함
-verilator --version
-bash scripts/run_ch07.sh
-# 제08장 객체·제약 무작위 입력 검증
-bash scripts/run_ch08.sh
-# 제09장 PWM 참조 모델·스코어보드(iverilog 사용)
-bash scripts/run_ch09.sh
-# 제10장: 정상 시험 1회 + 오류 주입 검출 시험 2회
-bash scripts/run_ch10.sh
-```
-
-별도 복제 저장소에서도 실행할 수 있습니다.
-```bash
-DUT_PATH=/실제/RTL/경로/uart_echo_controller.v bash scripts/run_ch01.sh
-DUT_PATH=/실제/RTL/경로/pwm_core.v bash scripts/run_ch03.sh
-```
-
-`.build/`는 로컬 생성물이며 GitHub에 올리지 않습니다. 온라인 학습안내서는 `index.html`로 시작합니다.
-
-## HTML 레이아웃·내비게이션 보정
-- 제03~06장 `_v02.html`: 누락된 `<main class="content" id="main-content">` 영역을 복구하고, 좌측 세부 절 탐색이 `main section[id]`를 정상 식별하도록 수정.
-- INDEX와 `course.json`을 최신 발행 장에 맞춰 동기화. 디자인·기존 RTL·실습 코드 변경 없음.
-- 실제 GitHub Pages HTTP 접속은 별도로 확인해야 하며, 저장소 파일 존재를 공개 사이트 정상 구동과 혼동하지 않는다.
-
-## 좌측 목차 체계
-`PART(부) → CHAPTER(장) → SECTION(절)`의 계층을 사용합니다. 현재 페이지의 PART는 상단에 한 번만 표시하고, 해당 PART의 CHAPTER 아래 현재 장 SECTION을 들여씁니다. 전체 6개 PART와 24장 편성은 INDEX에서 확인할 수 있습니다. 공통 스타일의 로컬 확장으로 `assets/site.js`와 `assets/site.css`에서 구현합니다.
-
-### 제07장 시뮬레이터 안내
-- 제01~06장 실행과 달리 제07장은 interface·modport·clocking block 지원이 필요한 SystemVerilog 실습이다.
-- Verilator 버전에 따라 지원 차이가 있을 수 있다. `sudo apt install verilator g++ make` 후 `verilator --version`을 확인한다.
-- `bash scripts/run_ch07.sh`는 도구·원본 파일을 확인하고 빌드·실행 로그를 `.build/ch07/`에 보관한다.
-- 실제 컴파일·시뮬레이션 성공이 확인되기 전에는 PASS로 기록하지 않는다.
-
-## 발행 위치
-
-- **이전 검증 기록:** [docs/MIGRATION_v01.md](docs/MIGRATION_v01.md)
-
-- **정본(배포·커밋 대상):** `Yuul-Jung/system_verilog_uvm_tb` 저장소 **최상위 루트**.
-- **참고(과거 잘못 작성한 사본):** `Yuul-Jung/amd_soc_rtl/system_verilog_uvm_tb/`. 이 경로에 신규 커밋하지 않습니다.
-- **원본 DUT:** `reference_rtl/`에는 원본과 동일한 2개 파일을 보관합니다. 복사본의 Git Blob SHA를 원본과 비교합니다.
-- **예상 결과와 실제 실행 판정:** 실제 시뮬레이터 실행 증거가 없으면 `NOT_RUN`으로 표시합니다.
-
-### 제08장 제약 무작위화 실습
-- `bash scripts/run_ch08.sh`는 SystemVerilog class·extends·constraint·randomize() 지원 시뮬레이터가 필요합니다.
-- Verilator 버전과 제약 해결기 지원을 확인하십시오. 실제 실행이 없으면 RTL_SIM=NOT_RUN입니다.
-
-### 제09장 PWM 참조 모델·스코어보드
-- `reference_rtl/pwm_core.v`를 수정하지 않고 `tb/ch09/pwm_reference_model.sv`와 `tb/ch09/tb_pwm_scoreboard.sv`를 함께 컴파일합니다.
-- `bash scripts/run_ch09.sh`로 매 상승 에지 DUT 6출력과 참조 모델을 자동 비교합니다.
-- 실제 실행 전까지 예상 로그와 PASS 문자열을 **검증 완료로 취급하지 않습니다**. `RTL_SIM=NOT_RUN`.
-
-- **제09장 검증 기록:** [docs/CH09_VALIDATION_v02.md](docs/CH09_VALIDATION_v02.md). 공개용 최신 HTML은 `ch09_reference_model_scoreboard_v02.html`입니다.
-
-### 제10장 오류 주입과 검출 검증
-- **학습안내서:** [제10장 v02](ch10_corner_reset_timeout_v02.html) · [검증 기록](docs/CH10_VALIDATION_v02.md).
-- **정상 시험:** 0%/100% 듀티 16클록씩, 중간 리셋, 재설정 → 총 48개 표본.
-- **의도된 부정 시험:** `+INJECT_FAULT`(관찰값만 반전), `+INJECT_TIMEOUT`(외부 `cfg_apply` 누락).
-- 실행 스크립트는 정상 시험 PASS와 부정 시험 2건의 비정상 종료·정확한 진단을 모두 확인해야 전체 PASS를 출력한다. 원본 RTL 자체에 결함을 주입하지 않는다.
-- 실제 시뮬레이션은 미실행: 결과는 `RTL_SIM=NOT_RUN`. `normal.log`, `fault_injection.log`, `apply_timeout.log`를 실행 후 확인한다.
-
-## 제19장 UVM Monitor·Agent·Scoreboard
-- 배포 페이지: [제19장 v02](ch19_monitor_agent_scoreboard_v02.html).
-- 정적 검증 기록: [CH19_VALIDATION_v02](docs/CH19_VALIDATION_v02.md).
-- 실행: `UVM_HOME=/실제/UVM/경로 bash scripts/run_ch19.sh` (Verilator/UVM 라이브러리 및 호환 버전 필요).
-- Monitoring(관찰)은 `pwm19_monitor`, 예상값 판정은 `pwm19_scoreboard`, 재사용 단위는 `pwm19_agent`로 분리한다.
-- 실제 실행 전까지 PASS 문자열은 예상 메시지이며, RTL 시뮬레이션 결과가 아니다.
-
-## 제20장 Factory·Config DB·Objection
-- [제20장 HTML v01](ch20_factory_config_objection_v01.html) · [제20장 검증기록](docs/CH20_VALIDATION_v01.md)
-- 검증 소스: `tb/ch20/tb_pwm_factory_config_objection.sv` · 실행: `scripts/run_ch20.sh`.
-- `pwm20_driver::type_id::set_type_override()`로 Driver를 교체하지만 기존 `pwm_core.v`는 수정하지 않는다.
-- `pwm20_cfg` 설정을 UVM Config DB로 Driver·Scoreboard에 제공한다.
-- `pwm20_test`의 Objection은 Sequence/Monitor/Scoreboard의 3개 거래 완료 후 내린다.
-- 설치된 UVM 라이브러리와 Verilator의 지원 여부를 확인한 뒤 `UVM_HOME=/실제/경로 bash scripts/run_ch20.sh`로 실행한다.
-- 실제 컴파일/시뮬레이션과 브라우저 공개 접속은 미검증. 예상 PASS 로그를 실측 결과로 간주하지 않는다.
-
-## 제22장 · 다중 Agent·VIP
-- 배포 안내서: [제22장 v01](ch22_multi_agent_vip_v02.html) · [검증 기록](docs/CH22_VALIDATION_v01.md).
-- 소스: `tb/ch22/tb_axi_multiagent_irq.sv`. 실행: `bash scripts/run_ch22.sh`.
-- **교육용 VIP-style 구현**: AXI4-Lite Master Driver·Sequencer·독립 Monitor를 직접 작성했으며 **상용 AMD AXI VIP는 포함하지 않는다**.
-- 두 Agent: `axi22_bus_agent`와 `irq22_event_agent`. Virtual Sequence가 AXI/Reset/IRQ 거래를 순서대로 수행한다.
-- 통합 Scoreboard: AXI 쓰기 4회, 읽기 11회, 하드웨어 IRQ 이벤트 2회, 초기·중간 리셋 2회의 예정 결과 비교.
-- 두 원본 RTL(`axi4lite_slave_adapter.v`, `custom_register_bank.v`)은 읽기 전용; 새로운 검증 소스는 TB와 스크립트뿐이다.
-- 실제 RTL/UVM 시뮬레이션·화면 렌더링·GitHub Pages 접속 검증은 미수행. 예상 로그를 실측 PASS로 취급하지 않는다.
-
-- **제22장 정적 검증:** [CH22_VALIDATION_v02.md](docs/CH22_VALIDATION_v02.md). UVM 최상위 Test와 하위 Agent에 모두 VIF를 전달하도록 `uvm_test_top*` 범위를 사용합니다.
+- [중앙 rule_md](https://github.com/Yuul-Jung/rule_md) · [과정 규칙](AGENTS.md)
+- 순서화 → 구조화 → 체계화 → 시각화. 원본 RTL과 TB, 예상 출력과 실측을 구별합니다.
+- Ubuntu에서 저장소를 복제한 뒤 장별 안내서의 실행 절차를 따릅니다. Vivado XSIM/UVM과 Icarus/Verilator 지원 범위는 장별로 다릅니다.
+- 생성 로그는 `.build/`에 보관합니다. 원본 RTL 수정 금지. 제24장은 UART Echo 단일 DUT의 회귀 예제이며 전 과정 CI가 아닙니다.
+- [통합 적대적 검증 기록](docs/COURSE_VALIDATION_v01.md)
