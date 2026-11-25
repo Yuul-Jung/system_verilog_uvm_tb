@@ -30,11 +30,13 @@ module tb_pwm_corner_reset_timeout;
     );
     always #5 clk = ~clk;
 
-    // (추가) 세 가지 실행 모드 각각의 파형을 해당 실행 폴더에 저장한다.
+`ifdef VCD
+    // (변경) Icarus 실행에서만 VCD 기록을 활성화한다.
     initial begin
         $dumpfile("ch10_pwm_corner_reset_timeout.vcd");
         $dumpvars(0, tb_pwm_corner_reset_timeout);
     end
+`endif
 
     // 실패 시 무한 대기하지 않도록 전체 시뮬레이션에 상한을 둔다.
     initial begin
@@ -105,6 +107,13 @@ module tb_pwm_corner_reset_timeout;
                  i = i + 1) begin
                 @(posedge clk);
                 #1;
+                // (추가) 요청 누락 시험에서 기존 정상 0% 상태를 확인한다.
+                // 다른 상태 오류를 의도된 타임아웃 성공으로 오인하지 않는다.
+                if (inject_timeout && duty == 32'd8 &&
+                    (pending !== 1'b0 || active_period !== 32'd8 ||
+                     active_duty !== 32'd0 || active_enable !== 1'b1 ||
+                     active_polarity !== 1'b0 || pwm_out !== 1'b0))
+                    $fatal(1, "FAIL TIMEOUT_BASELINE");
             end
 
             if (pending !== 1'b0 || active_duty !== duty) begin
@@ -132,8 +141,9 @@ module tb_pwm_corner_reset_timeout;
 
         // 동기 리셋: 첫 상승 에지 이후 초기 레지스터를 검사한다.
         @(posedge clk); #1;
-        if (active_period !== 32'd8 || active_duty !== 0 ||
-            active_enable !== 0 || pending !== 0 || pwm_out !== 0)
+        if (active_period !== 32'd8 || active_duty !== 32'd0 ||
+            active_enable !== 1'b0 || active_polarity !== 1'b0 ||
+            pending !== 1'b0 || pwm_out !== 1'b0)
             $fatal(1, "FAIL initial reset");
         @(negedge clk);
         resetn = 1'b1;
@@ -141,19 +151,26 @@ module tb_pwm_corner_reset_timeout;
         check_constant_window(32'd0, 1'b0); // 0%: 항상 LOW
         check_constant_window(32'd8, 1'b1); // 100%: 항상 HIGH
 
-        // 동작 중 리셋을 하강 에지 사이에 가한다.
+        // (추가) 출력이 HIGH인 상태에서 리셋 차단을 검사한다.
+        if (pwm_out !== 1'b1)
+            $fatal(1, "FAIL RESET_PRECONDITION");
+        // 직전 상승 에지의 관찰 후 2ns, 다음 상승 에지 전에 인가.
         #2 resetn = 1'b0;
         #1;
         if (pwm_out !== 1'b0)
             $fatal(1, "FAIL async output gate");
         @(posedge clk); #1;
-        if (active_period !== 32'd8 || active_duty !== 0 ||
-            active_enable !== 0 || pending !== 0 || pwm_out !== 0)
+        if (active_period !== 32'd8 || active_duty !== 32'd0 ||
+            active_enable !== 1'b0 || active_polarity !== 1'b0 ||
+            pending !== 1'b0 || pwm_out !== 1'b0)
             $fatal(1, "FAIL synchronous register reset");
         @(negedge clk);
         resetn = 1'b1;
 
         check_constant_window(32'd8, 1'b1); // 리셋 뒤 재설정
+        // (추가) 세 요청과 세 묶음의 16회 검사 완료 확인.
+        if (requests != 3 || checks != 48)
+            $fatal(1, "FAIL COUNT requests=%0d checks=%0d", requests, checks);
         $display("PASS CH10 requests=%0d checks=%0d", requests, checks);
         $finish;
     end
