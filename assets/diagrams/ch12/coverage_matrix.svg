@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" role="img" aria-labelledby="ch12title ch12desc">
+<title id="ch12title">PWM 기능 커버리지 교차 조합</title><desc id="ch12desc">듀티 0, 4, 8과 enable 및 polarity 두 상태를 교차한 12개 사례의 예상 HIGH 개수이다.</desc>
+<rect width="900" height="330" fill="white"/>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle">
+<text x="450" y="30" font-size="20" font-weight="bold">cx_settings · 3 × 2 × 2 = 12개 교차 구간</text>
+<g font-size="14" font-weight="bold"><text x="114" y="72">cp_duty</text><text x="272" y="60">disabled</text><text x="442" y="60">disabled</text><text x="612" y="60">enabled</text><text x="782" y="60">enabled</text></g>
+<g font-size="13"><text x="272" y="80">normal (0)</text><text x="442" y="80">inverted (1)</text><text x="612" y="80">normal (0)</text><text x="782" y="80">inverted (1)</text></g>
+<g fill="#F7F9FC" stroke="#1F3A5F" stroke-width="1.5"><rect x="187" y="94" width="680" height="180"/><path d="M357 94V274 M527 94V274 M697 94V274 M187 154H867 M187 214H867" fill="none"/></g>
+<g font-size="15" font-weight="bold"><text x="114" y="120">zero</text><text x="114" y="180">middle</text><text x="114" y="240">full</text></g>
+<g font-size="12"><text x="114" y="140">duty=0</text><text x="114" y="200">duty=4 (대표값)</text><text x="114" y="260">duty=8</text></g>
+<g font-size="19"><text x="272" y="131">0</text><text x="442" y="131">0</text><text x="612" y="131">0</text><text x="782" y="131">8</text><text x="272" y="191">0</text><text x="442" y="191">0</text><text x="612" y="191">4</text><text x="782" y="191">4</text><text x="272" y="251">0</text><text x="442" y="251">0</text><text x="612" y="251">8</text><text x="782" y="251">0</text></g>
+<text x="450" y="304" font-size="14">각 칸은 한 교차 bin의 예상 HIGH 개수 / 8개 관찰 표본</text>
+</g></svg>
