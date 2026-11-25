@@ -196,3 +196,8 @@
 ## 제03장 v03 · 독립 실행 및 반복 자극
 - 현행 amd_soc_p2 제2부 04.2장 02·06절, pwm_core 원본 SHA 일치. TB VCD 분리와 타임아웃 종료 오류 처리 보완.
 - ch03_reusable_stimulus_v03.html; [검증 기록](docs/CH03_VALIDATION_v03.md). 독립 이벤트 계산 및 SVG 단독 렌더링 PASS, 실제 RTL_SIM/전체 HTML 렌더링 NOT_RUN.
+
+## 제04장 v03 및 제1부 종합 검증
+- 제04장 pwm_core 원본 동일, TB VCD 분리 및 시간 표시 보완. ch04_pass_fail_automation_v03.html.
+- 제01장 v04 설계 참조 보완, 제02장 v03 독립 제2부 참조 수정, 제1부 탐색 데이터 최신화. RTL 원본 유지.
+- [제04장 검증 기록](docs/CH04_VALIDATION_v03.md), [제1부 종합 검증](docs/PART01_VALIDATION.md). 실제 RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
