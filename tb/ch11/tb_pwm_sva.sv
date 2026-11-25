@@ -8,6 +8,8 @@ module tb_pwm_sva;
   wire pwm_out, pending, active_enable, active_polarity;
   wire [31:0] active_period, active_duty;
   integer checks = 0;
+  // (추가) 어설션 관찰 경로의 의도된 실패 시험. DUT는 수정하지 않는다.
+  bit inject_sva_pending = 0;
   // (추가) 속성의 선행 조건 발생 횟수. SVA 엔진의 통과 횟수와 구별한다.
   integer reset_hits = 0, disabled_hits = 0, apply_hits = 0;
   integer zero_hits = 0, full_hits = 0;
@@ -37,8 +39,14 @@ module tb_pwm_sva;
   // 경계와 겹쳐도 cfg_apply 대입이 마지막이므로 pending=1.
   ap_apply_pending: assert property (
     @(posedge clk) disable iff (!resetn)
-      cfg_apply |=> pending
-  ) else $fatal(1, "FAIL SVA apply pending");
+      cfg_apply |=> (pending && !inject_sva_pending)
+  ) else begin
+    // (추가) 실제 샘플 pending이 1인데 관찰 경로만 차단했을 때의 진단.
+    if (inject_sva_pending && ($sampled(pending) === 1'b1))
+      $fatal(1, "DETECTED_SVA_PENDING t=%0d", $time);
+    else
+      $fatal(1, "FAIL SVA apply pending");
+  end
 
   // 주기·듀티가 8/0이고 정상 극성이면 출력은 LOW.
   ap_zero_duty: assert property (
@@ -92,6 +100,7 @@ module tb_pwm_sva;
     $fatal(1, "FAIL GLOBAL_TIMEOUT");
   end
   initial begin
+    inject_sva_pending = $test$plusargs("INJECT_SVA_PENDING");
 `ifdef VCD
     $dumpfile("ch11_pwm_sva.vcd");
     $dumpvars(0, tb_pwm_sva);
