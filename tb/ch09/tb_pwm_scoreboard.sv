@@ -39,6 +39,13 @@ module tb_pwm_scoreboard;
     always @(posedge clk) begin
         #1;
         score_cycles = score_cycles + 1;
+        // (추가) 양쪽이 같은 X/Z여도 정상으로 판정하지 않는다.
+        // Reduction XOR는 묶음에 X/Z가 있으면 X를 반환한다.
+        if ((^{pwm_out, pending, active_period, active_duty,
+               active_enable, active_polarity}) === 1'bx ||
+            (^{ref_pwm, ref_pending, ref_period, ref_duty,
+               ref_enable, ref_polarity}) === 1'bx)
+            $fatal(1, "UNKNOWN_OUTPUT t=%0d", $time);
         if ((pwm_out         !== ref_pwm)      ||
             (pending         !== ref_pending)  ||
             (active_period   !== ref_period)   ||
@@ -76,10 +83,13 @@ module tb_pwm_scoreboard;
         end
     endtask
 
+`ifdef VCD
+    // (변경) VCD는 Icarus 실행에서만 활성화한다.
     initial begin
         $dumpfile("ch09_pwm_scoreboard.vcd");
         $dumpvars(0, tb_pwm_scoreboard);
     end
+`endif
     initial begin
         #1200;
         $fatal(1, "CH09 TIMEOUT: 검증이 정상 종료되지 않음");
@@ -110,6 +120,9 @@ module tb_pwm_scoreboard;
 
         // t=580ns: PWM HIGH 상태에서 LOW 리셋 인가.
         @(negedge clk);
+        // (추가) 이미 LOW라면 출력 차단 검사가 무의미하므로 선행 조건 확인.
+        if ((pwm_out !== 1'b1) || (ref_pwm !== 1'b1))
+            $fatal(1, "FAIL RESET_PRECONDITION: expected HIGH");
         resetn = 1'b0;
         #1;
         if ((pwm_out !== 1'b0) || (ref_pwm !== 1'b0))
@@ -121,6 +134,10 @@ module tb_pwm_scoreboard;
         request_config(6, 32'd0, 1'b1, 1'b0); // 0% 듀티
         repeat (10) @(negedge clk);
 
+        // (추가) 현재 고정 시나리오의 전체 비교·요청 횟수 확인.
+        if (score_cycles != 72 || scenarios != 6)
+            $fatal(1, "FAIL COUNT cycles=%0d scenarios=%0d",
+                score_cycles, scenarios);
         $display("PASS CH09 score_cycles=%0d scenarios=%0d",
             score_cycles, scenarios);
         $finish;
