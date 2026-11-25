@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v46",
+  "version": "v47",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -137,7 +137,7 @@
       "title": "AXI4-Lite 레지스터 검증",
       "subtitle": "독립 AW/W, B/R backpressure, WSTRB, 원본 레지스터 맵",
       "slug": "ch15_axi4lite_register_verification",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch15/tb_axi4lite_registers.sv"
     },
     {
