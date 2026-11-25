@@ -13,10 +13,11 @@ for file in uart_core.v uart_rx.v uart_tx.v; do
     exit 2
   fi
 done
+RTL="$(realpath "$RTL")"
 mkdir -p "$ROOT/.build/ch14"
 cd "$ROOT/.build/ch14"
-iverilog -g2012 -s tb_uart_fifo_flow -o sim \
+iverilog -g2012 -DVCD -s tb_uart_fifo_flow -o sim \
   "$RTL/uart_core.v" "$RTL/uart_rx.v" "$RTL/uart_tx.v" \
   "$ROOT/tb/ch14/tb_uart_fifo_flow.sv"
 vvp sim | tee simulation.log
-grep -q '^PASS CH14 tx=18 rx=16$' simulation.log
+grep -Fxq 'PASS CH14 tx=18 rx=16+17 overrun=1 reset=1' simulation.log
