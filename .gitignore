@@ -1,8 +1,10 @@
 .build/
+.tools/
 obj_dir/
 *.vcd
 *.vvp
 *.out
 *.log
+*.pb
 __pycache__/
 .DS_Store

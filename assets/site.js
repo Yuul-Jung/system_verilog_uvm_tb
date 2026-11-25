@@ -59,7 +59,7 @@
         "id": "ch08",
         "number": 8,
         "title": "객체와 제약 기반 입력",
-        "file": "ch08_objects_constraints_v02.html"
+        "file": "ch08_objects_constraints_v03.html"
       },
       {
         "id": "ch09",
@@ -113,37 +113,37 @@
         "id": "ch17",
         "number": 17,
         "title": "최소 UVM 환경",
-        "file": "ch17_minimal_uvm_environment_v02.html"
+        "file": "ch17_minimal_uvm_environment_v03.html"
       },
       {
         "id": "ch18",
         "number": 18,
         "title": "Sequence에서 Driver까지",
-        "file": "ch18_sequence_driver_v02.html"
+        "file": "ch18_sequence_driver_v03.html"
       },
       {
         "id": "ch19",
         "number": 19,
         "title": "Monitor·Agent·Scoreboard",
-        "file": "ch19_monitor_agent_scoreboard_v03.html"
+        "file": "ch19_monitor_agent_scoreboard_v04.html"
       },
       {
         "id": "ch20",
         "number": 20,
         "title": "Factory·Config·Objection",
-        "file": "ch20_factory_config_objection_v02.html"
+        "file": "ch20_factory_config_objection_v03.html"
       },
       {
         "id": "ch21",
         "number": 21,
         "title": "UVM 레지스터 추상화",
-        "file": "ch21_uvm_register_abstraction_v02.html"
+        "file": "ch21_uvm_register_abstraction_v03.html"
       },
       {
         "id": "ch22",
         "number": 22,
         "title": "다중 Agent·VIP",
-        "file": "ch22_multi_agent_vip_v03.html"
+        "file": "ch22_multi_agent_vip_v04.html"
       },
       {
         "id": "ch23",

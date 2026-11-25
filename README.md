@@ -15,7 +15,7 @@
 | 2 | 05 | [검증 자료형과 타입](ch05_verification_types_v04.html) | [tb/ch05/tb_uart_types.sv](tb/ch05/tb_uart_types.sv) |
 | 2 | 06 | [배열·큐·패키지](ch06_arrays_queues_packages_v04.html) | [tb/ch06/tb_uart_arrays_queues.sv](tb/ch06/tb_uart_arrays_queues.sv) |
 | 2 | 07 | [인터페이스·타이밍 분리](ch07_interface_modport_clocking_v03.html) | [tb/ch07/tb_uart_interface.sv](tb/ch07/tb_uart_interface.sv) |
-| 2 | 08 | [객체와 제약 기반 입력](ch08_objects_constraints_v02.html) | [tb/ch08/tb_uart_objects.sv](tb/ch08/tb_uart_objects.sv) |
+| 2 | 08 | [객체와 제약 기반 입력](ch08_objects_constraints_v03.html) | [tb/ch08/tb_uart_objects.sv](tb/ch08/tb_uart_objects.sv) |
 | 3 | 09 | [참조 모델·스코어보드](ch09_reference_model_scoreboard_v03.html) | [tb/ch09/tb_pwm_scoreboard.sv](tb/ch09/tb_pwm_scoreboard.sv) |
 | 3 | 10 | [경계조건·오류 주입](ch10_corner_reset_timeout_v04.html) | [tb/ch10/tb_pwm_corner_reset_timeout.sv](tb/ch10/tb_pwm_corner_reset_timeout.sv) |
 | 3 | 11 | [시간적 속성 검사](ch11_temporal_assertions_v03.html) | [tb/ch11/tb_pwm_sva.sv](tb/ch11/tb_pwm_sva.sv) |
@@ -24,12 +24,12 @@
 | 4 | 14 | [FIFO 및 흐름 제어](ch14_fifo_flow_control_v02.html) | [tb/ch14/tb_uart_fifo_flow.sv](tb/ch14/tb_uart_fifo_flow.sv) |
 | 4 | 15 | [AXI4-Lite 레지스터 검증](ch15_axi4lite_register_verification_v02.html) | [tb/ch15/tb_axi4lite_registers.sv](tb/ch15/tb_axi4lite_registers.sv) |
 | 4 | 16 | [MAC·NPU 정수 연산 검증](ch16_mac_npu_integer_verification_v02.html) | [tb/ch16/tb_mac_integer.sv](tb/ch16/tb_mac_integer.sv) |
-| 5 | 17 | [최소 UVM 환경](ch17_minimal_uvm_environment_v02.html) | [tb/ch17/tb_pwm_uvm.sv](tb/ch17/tb_pwm_uvm.sv) |
-| 5 | 18 | [Sequence에서 Driver까지](ch18_sequence_driver_v02.html) | [tb/ch18/tb_pwm_sequence_driver.sv](tb/ch18/tb_pwm_sequence_driver.sv) |
-| 5 | 19 | [Monitor·Agent·Scoreboard](ch19_monitor_agent_scoreboard_v03.html) | [tb/ch19/tb_pwm_monitor_agent_scoreboard.sv](tb/ch19/tb_pwm_monitor_agent_scoreboard.sv) |
-| 5 | 20 | [Factory·Config·Objection](ch20_factory_config_objection_v02.html) | [tb/ch20/tb_pwm_factory_config_objection.sv](tb/ch20/tb_pwm_factory_config_objection.sv) |
-| 6 | 21 | [UVM 레지스터 추상화](ch21_uvm_register_abstraction_v02.html) | [tb/ch21/tb_axi_uvm_ral.sv](tb/ch21/tb_axi_uvm_ral.sv) |
-| 6 | 22 | [다중 Agent·VIP](ch22_multi_agent_vip_v03.html) | [tb/ch22/tb_axi_multiagent_irq.sv](tb/ch22/tb_axi_multiagent_irq.sv) |
+| 5 | 17 | [최소 UVM 환경](ch17_minimal_uvm_environment_v03.html) | [tb/ch17/tb_pwm_uvm.sv](tb/ch17/tb_pwm_uvm.sv) |
+| 5 | 18 | [Sequence에서 Driver까지](ch18_sequence_driver_v03.html) | [tb/ch18/tb_pwm_sequence_driver.sv](tb/ch18/tb_pwm_sequence_driver.sv) |
+| 5 | 19 | [Monitor·Agent·Scoreboard](ch19_monitor_agent_scoreboard_v04.html) | [tb/ch19/tb_pwm_monitor_agent_scoreboard.sv](tb/ch19/tb_pwm_monitor_agent_scoreboard.sv) |
+| 5 | 20 | [Factory·Config·Objection](ch20_factory_config_objection_v03.html) | [tb/ch20/tb_pwm_factory_config_objection.sv](tb/ch20/tb_pwm_factory_config_objection.sv) |
+| 6 | 21 | [UVM 레지스터 추상화](ch21_uvm_register_abstraction_v03.html) | [tb/ch21/tb_axi_uvm_ral.sv](tb/ch21/tb_axi_uvm_ral.sv) |
+| 6 | 22 | [다중 Agent·VIP](ch22_multi_agent_vip_v04.html) | [tb/ch22/tb_axi_multiagent_irq.sv](tb/ch22/tb_axi_multiagent_irq.sv) |
 | 6 | 23 | [NPU 통합 정답 비교](ch23_npu_integrated_scoreboard_v03.html) | [tb/ch23/tb_npu_integrated.sv](tb/ch23/tb_npu_integrated.sv) |
 | 6 | 24 | [회귀·CI·검증 보고](ch24_regression_ci_reporting_v03.html) | [tb/ch24/tb_uart_regression.sv](tb/ch24/tb_uart_regression.sv) |
 
@@ -39,9 +39,13 @@
 # 독립 저장소를 복제하고 작업 폴더로 진입한다.
 git clone https://github.com/Yuul-Jung/system_verilog_uvm_tb.git
 cd system_verilog_uvm_tb
-# Icarus Verilog를 사용하는 장의 실행 도구를 설치한다.
+# 시스템 Icarus가 없다면 배포판 패키지로 설치한다.
 sudo apt update
-sudo apt install -y iverilog
+sudo apt install -y iverilog g++ make git
+# Vivado 설치는 변경하지 않고, Verilator 5.054와 Z3는 저장소의
+# .tools/ 아래에만 설치한다. 이미 설치되어 있으면 즉시 종료한다.
+bash scripts/bootstrap_local_tools.sh
+source scripts/setup_env.sh
 # 제1장 예제 실행
 bash scripts/run_ch01.sh
 # 제24장 독립 회귀 예제 실행
@@ -56,4 +60,4 @@ Vivado XSIM/UVM 등이 필요한 장은 해당 학습안내서의 환경 준비�
 - 순서화 → 구조화 → 체계화 → 시각화. 원본 RTL과 TB, 예상 출력과 실측을 구별합니다.
 - Ubuntu에서 저장소를 복제한 뒤 장별 안내서의 실행 절차를 따릅니다. Vivado XSIM/UVM과 Icarus/Verilator 지원 범위는 장별로 다릅니다.
 - 생성 로그는 `.build/`에 보관합니다. 원본 RTL 수정 금지. 제24장은 UART Echo 단일 DUT의 회귀 예제이며 전 과정 CI가 아닙니다.
-- [통합 적대적 검증 기록](docs/COURSE_VALIDATION_v01.md)
+- [통합 적대적 검증 기록](docs/COURSE_VALIDATION_v02.md)

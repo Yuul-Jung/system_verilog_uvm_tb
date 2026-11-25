@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "mshr-h.veriloghdl",
+    "teros-technology.teroshdl",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "esbenp.prettier-vscode",
+    "ritwickdey.liveserver"
+  ]
+}

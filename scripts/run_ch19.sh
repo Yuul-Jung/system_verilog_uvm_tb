@@ -19,7 +19,7 @@ OUT="$(mktemp -d "$ROOT/.build/ch19/run.XXXXXX")"
 cd "$OUT"
 xvlog "$RTL" 2>&1 | tee rtl.log
 xvlog -sv -L uvm "$ROOT/tb/ch19/tb_pwm_monitor_agent_scoreboard.sv" 2>&1 | tee tb.log
-xelab -L uvm -debug typical tb_pwm_monitor_agent_scoreboard -s ch19_sim 2>&1 | tee elaborate.log
+xelab -timescale 1ns/1ps -L uvm -debug typical tb_pwm_monitor_agent_scoreboard -s ch19_sim 2>&1 | tee elaborate.log
 xsim ch19_sim -runall -onerror quit 2>&1 | tee normal.log
 grep -Eq '\[RESULT\][[:space:]]+PASS CH19 requests=3 applied=3 samples=24[[:space:]]*$' normal.log
 grep -Eq 'UVM_ERROR[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log

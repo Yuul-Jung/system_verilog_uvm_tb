@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "UVM TB: 환경 확인",
+      "type": "shell",
+      "command": "source scripts/setup_env.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "UVM TB: 장 실행",
+      "type": "shell",
+      "command": "source scripts/setup_env.sh && bash scripts/run_ch${input:chapter}.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "chapter",
+      "type": "promptString",
+      "description": "실행할 장 번호(01~24)",
+      "default": "01"
+    }
+  ]
+}

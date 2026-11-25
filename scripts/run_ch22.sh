@@ -18,7 +18,7 @@ OUT="$(mktemp -d "$ROOT/.build/ch22/run.XXXXXX")"
 cd "$OUT"
 xvlog "$RTL/axi4lite_slave_adapter.v" "$RTL/custom_register_bank.v" 2>&1 | tee rtl.log
 xvlog -sv -L uvm "$ROOT/tb/ch22/tb_axi_multiagent_irq.sv" 2>&1 | tee tb.log
-xelab -L uvm -debug typical tb_axi_multiagent_irq -s ch22_sim 2>&1 | tee elaborate.log
+xelab -timescale 1ns/1ps -L uvm -debug typical tb_axi_multiagent_irq -s ch22_sim 2>&1 | tee elaborate.log
 xsim ch22_sim -runall -onerror quit 2>&1 | tee normal.log
 grep -Eq '\[RESULT\][[:space:]]+PASS CH22 AXI_W=6 AXI_R=13 IRQ=4 RESET=2 COLLISION=1 ZERO=1[[:space:]]*$' normal.log
 grep -Eq 'UVM_ERROR[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log

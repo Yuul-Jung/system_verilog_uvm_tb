@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v57",
+  "version": "v58",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -74,7 +74,7 @@
       "title": "객체와 제약 기반 입력",
       "subtitle": "class·new·extends·rand·constraint 기반 UART 거래 객체",
       "slug": "ch08_objects_constraints",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch08/tb_uart_objects.sv"
     },
     {
@@ -155,7 +155,7 @@
       "title": "최소 UVM 환경",
       "subtitle": "기존 PWM 코어의 uvm_test·uvm_env·phase·objection 검증",
       "slug": "ch17_minimal_uvm_environment",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch17/tb_pwm_uvm.sv"
     },
     {
@@ -164,7 +164,7 @@
       "title": "Sequence에서 Driver까지",
       "subtitle": "pwm18_item·Sequence·Sequencer·Driver로 기존 PWM 설정 거래 구동",
       "slug": "ch18_sequence_driver",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch18/tb_pwm_sequence_driver.sv"
     },
     {
@@ -173,7 +173,7 @@
       "title": "Monitor·Agent·Scoreboard",
       "subtitle": "Monitor의 매 클록 관찰과 독립 Scoreboard의 3개 거래·24개 PWM 표본 검증",
       "slug": "ch19_monitor_agent_scoreboard",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch19/tb_pwm_monitor_agent_scoreboard.sv"
     },
     {
@@ -182,7 +182,7 @@
       "title": "Factory·Config·Objection",
       "subtitle": "Factory 타입 교체·Config DB 설정 변경·Objection 종료 계약 및 정상 2/부정 3 시나리오",
       "slug": "ch20_factory_config_objection",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch20/tb_pwm_factory_config_objection.sv"
     },
     {
@@ -191,7 +191,7 @@
       "title": "UVM 레지스터 추상화",
       "subtitle": "RAL·독립 Monitor/Predictor·CONTROL 필드 모델 및 Frontdoor 10거래 검증",
       "slug": "ch21_uvm_register_abstraction",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch21/tb_axi_uvm_ral.sv"
     },
     {
@@ -200,7 +200,7 @@
       "title": "다중 Agent·VIP",
       "subtitle": "다중 Agent·Virtual Sequence·동일 에지 IRQ/W1C 우선순위 및 19거래 검증",
       "slug": "ch22_multi_agent_vip",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch22/tb_axi_multiagent_irq.sv"
     },
     {

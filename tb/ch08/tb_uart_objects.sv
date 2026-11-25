@@ -79,7 +79,7 @@ module tb_uart_objects;
         apply_and_check(normal, "DIRECT_A");
 
         // (추가) 인라인 제약으로 유효한 IDLE 사례를 생성한다.
-        if (!normal.randomize() with { valid == 0; ready == 1; })
+        if ((normal.randomize() with { valid == 0; ready == 1; }) == 0)
             $fatal(1, "RANDOMIZE_FAIL IDLE");
         // (추가) 생성 성공뿐 아니라 실제 IDLE 제약 만족 여부도 검사한다.
         if (!(normal.data >= 8'h20 && normal.data <= 8'h7e &&
@@ -88,7 +88,7 @@ module tb_uart_objects;
         apply_and_check(normal, "RANDOM_IDLE");
 
         // (추가) 상속된 제약은 데이터 범위를 유지하고 정지를 강제한다.
-        if (!stalled.randomize()) $fatal(1, "RANDOMIZE_FAIL STALL");
+        if (stalled.randomize() == 0) $fatal(1, "RANDOMIZE_FAIL STALL");
         if (!(stalled.data >= 8'h20 && stalled.data <= 8'h7e &&
               stalled.valid == 1'b1 && stalled.ready == 1'b0))
             $fatal(1, "CONSTRAINT_FAIL STALL");

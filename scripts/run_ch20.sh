@@ -19,7 +19,7 @@ OUT="$(mktemp -d "$ROOT/.build/ch20/run.XXXXXX")"
 cd "$OUT"
 xvlog "$RTL" 2>&1 | tee rtl.log
 xvlog -sv -L uvm "$ROOT/tb/ch20/tb_pwm_factory_config_objection.sv" 2>&1 | tee tb.log
-xelab -L uvm -debug typical tb_pwm_factory_config_objection -s ch20_sim 2>&1 | tee elaborate.log
+xelab -timescale 1ns/1ps -L uvm -debug typical tb_pwm_factory_config_objection -s ch20_sim 2>&1 | tee elaborate.log
 # 정상 시험 두 가지: 동일 환경에서 설정만 변경한다.
 check_normal() {
   local log="$1" plan="$2" a="$3" b="$4" c="$5"

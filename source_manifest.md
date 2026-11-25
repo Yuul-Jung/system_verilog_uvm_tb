@@ -1,4 +1,7 @@
 # Source Manifest
+
+> 아래 장별 `NOT_RUN` 표시는 각 문서 작성 당시의 이력이다. 2026-11-26 제01~24장 전수 실제 실행의 현재 판정과 로그는 `docs/COURSE_VALIDATION_v02.md`를 기준으로 한다.
+
 - **과정:** `system_verilog_uvm_tb`
 - **검증 DUT:** `Yuul-Jung/amd_soc_rtl/part03/common/rtl/uart_echo_controller.v`
 - **검증 DUT Blob SHA:** `28160c34522e47fbd961466651598da063bc74ae`
