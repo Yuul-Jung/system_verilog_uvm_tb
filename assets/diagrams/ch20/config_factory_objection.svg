@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 350" role="img" aria-labelledby="ch20title">
+<title id="ch20title">Factory와 Config DB, Objection의 책임</title><rect width="960" height="350" fill="white"/>
+<defs><marker id="ch20arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle">
+<text x="480" y="30" font-size="20" font-weight="bold">pwm20_test · 구성과 종료 정책</text>
+<g fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"><rect x="24" y="58" width="282" height="106" rx="4"/><rect x="339" y="58" width="282" height="106" rx="4"/><rect x="654" y="58" width="282" height="106" rx="4"/><rect x="24" y="218" width="282" height="100" rx="4"/><rect x="339" y="218" width="282" height="100" rx="4"/><rect x="654" y="218" width="282" height="100" rx="4"/></g>
+<g font-size="16" font-weight="bold"><text x="165" y="83">Factory</text><text x="480" y="83">Config DB</text><text x="795" y="83">Objection</text><text x="165" y="243">pwm20_traced_driver</text><text x="480" y="243">공유 설정 settings</text><text x="795" y="243">check / report_phase</text></g>
+<g font-size="13"><text x="165" y="111">set_type_override()</text><text x="165" y="134">pwm20_driver::type_id::create</text><text x="480" y="111">pwm20_cfg</text><text x="480" y="134">env.ag.drv · env.sb</text><text x="795" y="111">raise_objection()</text><text x="795" y="134">wait (env.sb.samples == 24)</text><text x="165" y="269">super.drive_one(req)</text><text x="165" y="292">$cast · trace_count</text><text x="480" y="269">seq.cfg / drv.cfg / sb.cfg</text><text x="480" y="292">duty_plan · timeout</text><text x="795" y="269">3거래 · 34개 관찰</text><text x="795" y="292">UVM 오류 누계</text><text x="165" y="189">생성 타입 교체</text><text x="480" y="189">설정 참조 공유</text><text x="795" y="189">drop_objection()</text></g>
+<g stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch20arr)"><path d="M165 164V177"/><path d="M165 198V218"/><path d="M480 164V177"/><path d="M480 198V218"/><path d="M795 164V177"/><path d="M795 198V218"/></g>
+<text x="480" y="340" font-size="12">DUT pwm_core 및 제19장의 독립 관찰·비교 구조는 유지</text>
+</g></svg>
