@@ -14,10 +14,11 @@ if ! command -v iverilog >/dev/null 2>&1 || ! command -v vvp >/dev/null 2>&1; th
   echo "NOT_RUN: Icarus Verilog not installed" >&2
   exit 2
 fi
+RTL="$(realpath "$RTL")"
 mkdir -p "$ROOT/.build/ch15"
 cd "$ROOT/.build/ch15"
-iverilog -g2012 -s tb_axi4lite_registers -o sim \
+iverilog -g2012 -DVCD -s tb_axi4lite_registers -o sim \
   "$RTL/axi4lite_slave_adapter.v" "$RTL/custom_register_bank.v" \
   "$ROOT/tb/ch15/tb_axi4lite_registers.sv"
 vvp sim | tee simulation.log
-grep -q '^PASS CH15 commits=3 checks=10$' simulation.log
+grep -Fxq 'PASS CH15 commits=7 checks=18' simulation.log
