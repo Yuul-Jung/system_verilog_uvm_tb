@@ -270,3 +270,7 @@
 ## 제20장 v02 및 제5부 종합 검증
 - amd_soc_p2 04.2장 02·06절 PWM 원본 동일·유지. 제19장의 독립 매 클록 모델 유지. Factory/Config/Objection 정상 2종·부정 3종, 24개 활성 표본 및 완료 검사.
 - ch20_factory_config_objection_v02.html; [제20장 검증 기록](docs/CH20_VALIDATION_v02.md), [제5부 종합 검증](docs/PART05_VALIDATION.md). 독립 시간 계산·Bash 문법/모의 판정 13건·SVG 단독 렌더·원격 정적 검사 완료. 제17~20장 탐색 최신화. 실제 UVM/RTL_SIM 및 전체 페이지 렌더 NOT_RUN.
+
+## 제21장 v02 · UVM 레지스터 추상화
+- 제15장 범용 AXI/RMAP 스냅샷 유지, 현행 설계 CONCEPT_ONLY. CONTROL 실제 필드, 독립 Monitor/Predictor, 읽기 이전 Mirror 및 10거래 완료 확인, NO_PREDICT 부정 시험.
+- ch21_uvm_register_abstraction_v02.html; [검증 기록](docs/CH21_VALIDATION_v02.md). 독립 레지스터 계산·Bash 문법·SVG 단독 렌더·원격 정적 검사 완료. 실제 UVM/RTL_SIM 및 전체 페이지 렌더 NOT_RUN.
