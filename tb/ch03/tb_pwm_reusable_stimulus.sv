@@ -97,16 +97,18 @@ module tb_pwm_reusable_stimulus;
         end
     endtask
 
+`ifdef VCD
     initial begin
         $dumpfile("ch03_pwm_reusable_stimulus.vcd");
         $dumpvars(0, tb_pwm_reusable_stimulus);
     end
+`endif
 
     // (추가) 시뮬레이션 무한 대기를 방지하기 위한 안전 종료.
     initial begin
         #2000;
-        $display("TIMEOUT: PWM 설정 완료 신호를 확인하세요.");
-        $finish;
+        // (변경) 제한 시간 초과를 실행 오류로 전달한다.
+        $fatal(1, "TIMEOUT: PWM 설정 완료 신호를 확인하세요.");
     end
 
     integer duty_step;
