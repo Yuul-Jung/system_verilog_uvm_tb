@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 // 제17장: 기존 pwm_core를 읽기 전용 DUT로 사용하는 최소 UVM 환경.
-// UVM의 build/connect/run/check/report phase와 objection 수명주기를 확인한다.
+// UVM의 build/run/check/report phase와 objection 수명주기를 확인한다.
 interface pwm_if(input logic clk);
     logic resetn = 0;
     logic cfg_apply = 0;
@@ -22,6 +22,7 @@ package ch17_uvm_pkg;
         `uvm_component_utils(pwm_env)
         virtual pwm_if vif;
         int unsigned checks = 0;
+        bit done = 0;
 
         function new(string name, uvm_component parent);
             super.new(name, parent);
@@ -33,13 +34,13 @@ package ch17_uvm_pkg;
                 `uvm_fatal("NOVIF", "pwm_if was not provided")
         endfunction
 
-        // 출력이 바뀌는 에지 직후를 피하고 negedge에서 확인한다.
+        // (변경) 호출자가 하강 에지에서 관찰 시점을 정한다.
         task automatic expect_ports(
             input logic [31:0] duty, input logic enable,
             input logic expected_pwm
         );
-            @(negedge vif.clk);
-            if (vif.active_period !== 32'd8 ||
+            if (vif.pending !== 1'b0 ||
+                vif.active_period !== 32'd8 ||
                 vif.active_duty !== duty ||
                 vif.active_enable !== enable ||
                 vif.active_polarity !== 1'b0 ||
@@ -55,8 +56,9 @@ package ch17_uvm_pkg;
             // DUT는 동기 리셋: resetn=0인 동안 posedge가 필요하다.
             repeat (3) @(negedge vif.clk);
             if (vif.active_period !== 32'd8 ||
-                vif.active_duty !== 0 ||
-                vif.active_enable !== 0 || vif.pending !== 0)
+                vif.active_duty !== 32'd0 ||
+                vif.active_enable !== 1'b0 || vif.pending !== 1'b0 ||
+                vif.active_polarity !== 1'b0 || vif.pwm_out !== 1'b0)
                 `uvm_fatal("RESET", "PWM reset contract violated")
             `uvm_info("PWM", "RESET_CHECKED", UVM_LOW)
 
@@ -70,7 +72,8 @@ package ch17_uvm_pkg;
             vif.cfg_apply = 1;
             @(negedge vif.clk);
             vif.cfg_apply = 0;
-            if (vif.pending !== 1'b1)
+            if (vif.pending !== 1'b1 || vif.active_duty !== 32'd0 ||
+                vif.active_enable !== 1'b0 || vif.pwm_out !== 1'b0)
                 `uvm_fatal("PENDING", "cfg_apply was not latched")
 
             // 8클록 주기 경계가 도래할 때까지 기다린다.
@@ -88,26 +91,27 @@ package ch17_uvm_pkg;
             if (vif.active_duty !== 32'd4 || vif.active_enable !== 1'b1)
                 `uvm_fatal("APPLY", "PWM active settings mismatch")
 
-            // duty=4, period=8: 첫 네 클록 HIGH, 다음 네 클록 LOW.
-            // 경계 직후 counter=0이므로 현재 출력은 HIGH이다.
-            if (vif.pwm_out !== 1'b1)
-                `uvm_fatal("PWM", "Expected HIGH at new period")
-            // 4번의 상승 에지 후 counter=4, 출력은 LOW.
-            repeat (4) @(negedge vif.clk);
-            if (vif.pwm_out !== 1'b0)
-                `uvm_fatal("PWM", "Expected LOW after duty window")
-            checks++;
+            // (변경) 경계 직후 phase 0부터 전체 8개 표본을 검사한다.
+            for (int i=0; i<8; i++) begin
+                expect_ports(32'd4, 1'b1, (i < 4));
+                if (i < 7) @(negedge vif.clk);
+            end
             `uvm_info("PWM", "PWM_DUTY_CHECKED", UVM_LOW)
+            // (추가) 마지막 검사 및 기록 이후에만 완료를 통지한다.
+            done = 1;
         endtask
 
         function void check_phase(uvm_phase phase);
             super.check_phase(phase);
-            if (checks != 1)
+            if (checks != 8 || !done)
                 `uvm_fatal("CHECK", $sformatf("checks=%0d", checks))
         endfunction
 
         function void report_phase(uvm_phase phase);
             super.report_phase(phase);
+            if (uvm_report_server::get_server().get_severity_count(UVM_ERROR) != 0 ||
+                uvm_report_server::get_server().get_severity_count(UVM_FATAL) != 0)
+                `uvm_fatal("REPORT", "UVM error or fatal reported")
             `uvm_info("RESULT", $sformatf(
                 "PASS CH17 checks=%0d", checks), UVM_NONE)
         endfunction
@@ -130,7 +134,7 @@ package ch17_uvm_pkg;
             phase.raise_objection(this);
             // env의 run_phase와 test의 run_phase는 병렬 수행된다.
             // 이 장에서는 env의 완료를 기다리는 명시적 동기화가 필요하다.
-            wait (env.checks == 1);
+            wait (env.done);
             phase.drop_objection(this);
         endtask
     endclass
@@ -155,7 +159,9 @@ module tb_pwm_uvm;
     );
 
     initial begin
-        uvm_config_db#(virtual pwm_if)::set(null, "*", "vif", bus);
+        // (추가) NO_VIF는 연결 실패를 검출하는 부정 시험 전용이다.
+        if (!$test$plusargs("NO_VIF"))
+            uvm_config_db#(virtual pwm_if)::set(null, "uvm_test_top.env", "vif", bus);
         run_test("pwm_test");
     end
     initial begin
