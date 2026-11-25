@@ -217,3 +217,7 @@
 ## 제08장 v02 및 제2부 종합 검증
 - amd_soc_npu 제1장 03절 UART 에코 원본 유지. IDLE 생성 제약 결과 별도 검사, 상속과 부모 타입 재사용 해설 보완, XSIM/Verilator 절차 추가.
 - ch08_objects_constraints_v02.html; [제08장 검증 기록](docs/CH08_VALIDATION_v02.md), [제2부 종합 검증](docs/PART02_VALIDATION.md). 제05~08장 원본·TB·의존 파일·목차 대조 완료. 실제 RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
+
+## 제09장 v03 · 참조 모델·스코어보드
+- amd_soc_p2 04.2장 원본 PWM 및 참조 모델 유지. TB에 양쪽 미정값, 리셋 전 HIGH 및 최종 비교 횟수 검사 추가. XSIM 우선·조건부 VCD.
+- ch09_reference_model_scoreboard_v03.html; [검증 기록](docs/CH09_VALIDATION_v03.md). 독립 시간 계산·SVG 단독 렌더·원격 정적 검사 PASS. 실제 RTL_SIM 및 전체 HTML 렌더링 NOT_RUN.
