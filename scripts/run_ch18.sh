@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 제17장: Vivado XSIM 내장 UVM 라이브러리 사용.
+# 제18장: Vivado XSIM 내장 UVM 라이브러리 사용.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RTL="${DUT_PATH:-$ROOT/reference_rtl/pwm_core.v}"
