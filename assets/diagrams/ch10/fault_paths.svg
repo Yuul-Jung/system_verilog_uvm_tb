@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 340" role="img" aria-labelledby="ch10title ch10desc">
+<title id="ch10title">PWM 검증 경로와 오류 주입 위치</title><desc id="ch10desc">request_duty의 설정 요청 누락과 measured_pwm의 관찰값 반전은 DUT 외부에서 발생하며, 적용 대기와 출력 비교로 각각 검출한다.</desc>
+<defs><marker id="ch10arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<rect width="940" height="340" fill="white"/>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle">
+<text x="470" y="30" font-size="20" font-weight="bold">원본 PWM과 두 오류 주입 경로</text>
+<g fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"><rect x="24" y="132" width="185" height="76" rx="4"/><rect x="269" y="132" width="175" height="76" rx="4"/><rect x="504" y="132" width="175" height="76" rx="4"/><rect x="739" y="132" width="171" height="76" rx="4"/><rect x="504" y="242" width="406" height="68" rx="4"/></g>
+<g font-size="16" font-weight="bold"><text x="116.5" y="158">request_duty()</text><text x="356.5" y="158">pwm_core</text><text x="591.5" y="158">measured_pwm</text><text x="824.5" y="158">check_outputs()</text><text x="707" y="267">check_constant_window()</text></g>
+<g font-size="13"><text x="116.5" y="183">cfg_apply · cfg_duty</text><text x="356.5" y="183">원본 RTL 유지</text><text x="591.5" y="183">pwm_out XOR 관찰 반전</text><text x="824.5" y="183">기대 레벨 비교</text><text x="707" y="290">pending · active_duty · 최대 10클록 대기</text></g>
+<g fill="#5A1E1E" font-size="13"><text x="116.5" y="65">+INJECT_TIMEOUT</text><text x="116.5" y="85">cfg_apply 누락</text><text x="591.5" y="65">+INJECT_FAULT</text><text x="591.5" y="85">corrupt_observation</text></g>
+<g stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch10arr)"><path d="M116.5 93V132"/><path d="M591.5 93V132"/><path d="M209 170H269"/><path d="M444 170H504"/><path d="M679 170H739"/><path d="M356.5 208V276H504"/></g>
+<text x="470" y="119" font-size="12">pwm_out</text><text x="430" y="265" font-size="12">공개 상태</text>
+</g></svg>
