@@ -242,3 +242,7 @@
 - 제04/05/06장 v04, 제07장 v03: 완료 횟수 및 스크립트 정확한 완료 행 검사. 제10장 v04: 동기 레지스터 리셋의 상승 에지 이전 상태 보존 검사. 제11장 v03: SVA 부정 시험 추가. 원본 RTL 불변.
 - 전체 13개 최신 HTML·TB·의존 파일·24장 탐색 데이터 및 INDEX 재대조. 수정 스크립트 5개 bash -n 및 로그·종료 상태 모의 판정 23건 완료. 실제 RTL_SIM·SVA·커버리지·전체 브라우저 렌더링 NOT_RUN.
 - [종합 검증 기록](docs/CH01_13_ADVERSARIAL_REVIEW.md). 기존 장별 기록은 당시 버전의 근거로 보존한다.
+
+## 제14장 v02 · FIFO 및 흐름 제어
+- amd_soc_npu 제1장 03절 UART 3개 RTL 주석 제외 일치. 원본 유지. TX 독립 직렬 복조 및 포화 교체, RX 16+1·overrun, 비어 있지 않은 FIFO 리셋 보강.
+- ch14_fifo_flow_control_v02.html; [검증 기록](docs/CH14_VALIDATION_v02.md). 원본·독립 거래 계산·원격 정적 검사 PASS. RTL_SIM 및 브라우저 렌더 NOT_RUN.
