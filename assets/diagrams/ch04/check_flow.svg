@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 350" role="img" aria-labelledby="ch04title ch04desc">
+<title id="ch04title">PWM 자동 판정 데이터 흐름</title><desc id="ch04desc">입력 듀티는 PWM 코어와 독립 기대값 비교에 사용되고, 실제 HIGH 개수와 기대값을 비교해 오류를 누적한다.</desc>
+<defs><marker id="ch04arrow" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<rect width="940" height="350" fill="white"/>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle">
+<g fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"><rect x="24" y="75" width="170" height="68" rx="4"/><rect x="240" y="75" width="170" height="68" rx="4"/><rect x="456" y="75" width="190" height="68" rx="4"/><rect x="24" y="216" width="170" height="68" rx="4"/><rect x="710" y="146" width="200" height="68" rx="4"/></g>
+<g font-size="16" font-weight="bold"><text x="109" y="100">apply_duty()</text><text x="325" y="100">pwm_core</text><text x="551" y="100">check_period()</text><text x="109" y="241">duty_ticks</text><text x="810" y="171">검사 결과 집계</text></g>
+<g font-size="13"><text x="109" y="125">cfg_duty · cfg_apply</text><text x="325" y="125">실제 PWM 출력</text><text x="551" y="125">high_count 계산</text><text x="109" y="266">독립 기대 HIGH 수</text><text x="810" y="196">checks · errors</text></g>
+<g stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch04arrow)"><path d="M194 109H240"/><path d="M410 109H456"/><path d="M551 143V161"/><path d="M194 250H551V222"/><path d="M661 191H710"/></g>
+<rect x="441" y="161" width="220" height="61" rx="4" fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"/>
+<text x="551" y="184" font-size="14" font-weight="bold">독립 비교</text><text x="551" y="207" font-size="13">high_count !== duty_ticks</text>
+<text x="433" y="64" font-size="12">pwm_out</text><text x="338" y="240" font-size="13">expected</text><text x="685" y="181" font-size="12">판정</text>
+<text x="470" y="31" font-size="20" font-weight="bold">실제 출력과 독립 기대값 비교</text>
+<text x="470" y="320" font-size="14">최종 errors가 0이면 PASS, 아니면 $fatal · 미정값(X/Z)은 별도 오류로 기록</text>
+</g></svg>
