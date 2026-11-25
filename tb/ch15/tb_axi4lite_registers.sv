@@ -18,6 +18,9 @@ module tb_axi4lite_registers;
     wire [1:0] mode_o,irq_status_o;
     wire [31:0] data_in_o;
     integer checks=0, commits=0;
+    integer aw_count=0, w_count=0, b_count=0, ar_count=0, r_count=0;
+    reg [31:0] saved_aw, saved_w;
+    reg [3:0] saved_strb;
     reg [31:0] captured;
 
     axi4lite_slave_adapter dut (
@@ -45,8 +48,33 @@ module tb_axi4lite_registers;
         .clear_pulse_o(clear_pulse_o), .data_in_o(data_in_o),
         .irq_status_o(irq_status_o)
     );
-    // 두 채널을 모두 수락한 다음에만 wr_en이 1회 발생해야 한다.
-    always @(posedge clk) if(resetn && wr_en) commits=commits+1;
+    // (추가) 실제 수락 및 저장된 payload를 BFM과 독립적으로 검증.
+    always @(posedge clk) if(resetn) begin
+        if(wr_en === 1'b1) begin
+            if(aw_count!=commits+1 || w_count!=commits+1 ||
+               wr_offset !== saved_aw[7:0] || wr_data !== saved_w ||
+               wr_strb !== saved_strb)
+                $fatal(1,"FAIL COMMIT_CONTRACT");
+            commits++;
+        end
+        if(awvalid && awready) begin
+            aw_count++; saved_aw=awaddr;
+        end
+        if(wvalid && wready) begin
+            w_count++; saved_w=wdata; saved_strb=wstrb;
+        end
+        if(bvalid && bready) begin
+            if(bresp !== 2'b00 || b_count>=commits)
+                $fatal(1,"FAIL B_TRANSACTION");
+            b_count++;
+        end
+        if(arvalid && arready) ar_count++;
+        if(rvalid && rready) begin
+            if(rresp !== 2'b00 || r_count>=ar_count)
+                $fatal(1,"FAIL R_TRANSACTION");
+            r_count++;
+        end
+    end
 
     task automatic send_aw(input [31:0] address);
         integer guard;
@@ -62,6 +90,8 @@ module tb_axi4lite_registers;
             @(posedge clk);
             @(negedge clk);
             awvalid=0;
+            // (추가) 수락 이후 주소를 바꿔 저장 여부를 검증한다.
+            awaddr=32'h000000FC;
         end
     endtask
 
@@ -79,6 +109,8 @@ module tb_axi4lite_registers;
             @(posedge clk);
             @(negedge clk);
             wvalid=0;
+            // (추가) 수락 이후 live 데이터와 스트로브를 변경한다.
+            wdata=32'hDEADBEEF; wstrb=4'b0000;
         end
     endtask
 
@@ -95,7 +127,7 @@ module tb_axi4lite_registers;
             // 응답을 받지 않는 동안 BVALID는 내려가면 안 된다.
             repeat(3) begin
                 @(negedge clk);
-                if(bvalid !== 1'b1 || awready !== 1'b0 ||
+                if(bvalid !== 1'b1 || bresp !== 2'b00 || awready !== 1'b0 ||
                    wready !== 1'b0) $fatal(1,"FAIL B_HOLD");
             end
             bready=1;
@@ -124,9 +156,11 @@ module tb_axi4lite_registers;
             if(rvalid !== 1'b1 || rresp !== 2'b00 || rdata !== expected)
                 $fatal(1,"FAIL READ addr=%h got=%h exp=%h",address,rdata,expected);
             captured=rdata;
+            // (추가) 다른 주소를 제시해도 캡처한 R payload는 유지되어야 한다.
+            araddr=(address[7:0]==8'h18)?32'h1C:32'h18;
             repeat(3) begin
                 @(negedge clk);
-                if(rvalid !== 1'b1 || arready !== 1'b0 ||
+                if(rvalid !== 1'b1 || rresp !== 2'b00 || arready !== 1'b0 ||
                    rdata !== captured) $fatal(1,"FAIL R_HOLD");
             end
             rready=1;
@@ -143,9 +177,13 @@ module tb_axi4lite_registers;
         $fatal(1,"FAIL GLOBAL_TIMEOUT");
     end
 
+`ifdef VCD
     initial begin
         $dumpfile("ch15_axi4lite.vcd");
         $dumpvars(0,tb_axi4lite_registers);
+    end
+`endif
+    initial begin
         repeat(4) @(negedge clk);
         if(awready !== 1'b0 || wready !== 1'b0 ||
            arready !== 1'b0) $fatal(1,"FAIL RESET_READY");
@@ -181,8 +219,34 @@ module tb_axi4lite_registers;
             $fatal(1,"FAIL CONTROL_OUTPUT");
         $display("T3_CONTROL_RO_PASS");
 
-        // T4: 리셋 후 CONTROL/DATA_IN 초기화, 채널 준비 복구.
+        // (추가) T4: 동시 AW/W, zero strobe, RO 및 미매핑 쓰기.
+        fork
+            send_aw(32'h10);
+            send_w(32'hFFFFFFFF,4'b0000);
+        join
+        finish_b();
+        read_expect(32'h10,32'h11BB33DD);
+        send_aw(32'h18); send_w(32'hFFFFFFFF,4'b1111);
+        finish_b();
+        read_expect(32'h18,32'h00010000);
+        send_aw(32'hFC); send_w(32'hFFFFFFFF,4'b1111);
+        finish_b();
+        read_expect(32'hFC,32'h00000000);
+        read_expect(32'h110,32'h11BB33DD); // 하위 8비트 주소 별칭
+        read_expect(32'h14,32'h12345678);
+        $display("T4_ZERO_RO_ALIAS_PASS");
+
+        // (변경) T5: B/R 응답이 실제로 대기 중일 때 리셋.
+        send_aw(32'h00); send_w(32'h00000007,4'b0001);
         @(negedge clk);
+        if(bvalid !== 1'b1 || bresp !== 2'b00 || enable_o !== 1'b1 ||
+           mode_o !== 2'b11 || data_in_o !== 32'h11BB33DD)
+            $fatal(1,"FAIL RESET_B_PRECONDITION");
+        araddr=32'h10; arvalid=1;
+        @(posedge clk);
+        @(negedge clk); arvalid=0;
+        if(rvalid !== 1'b1 || rdata !== 32'h11BB33DD || bvalid !== 1'b1)
+            $fatal(1,"FAIL RESET_R_PRECONDITION");
         resetn=0;
         repeat(3) @(negedge clk);
         if(bvalid !== 1'b0 || rvalid !== 1'b0 ||
@@ -192,9 +256,10 @@ module tb_axi4lite_registers;
         @(negedge clk);
         read_expect(32'h10,32'h00000000);
         read_expect(32'h00,32'h00000000);
-        if(commits!=3 || checks!=10)
+        if(commits!=7 || checks!=18 || aw_count!=7 || w_count!=7 ||
+           b_count!=6 || ar_count!=13 || r_count!=12)
             $fatal(1,"FAIL COUNTS commits=%0d checks=%0d",commits,checks);
-        $display("T4_RESET_PASS");
+        $display("T5_RESET_PENDING_PASS");
         $display("PASS CH15 commits=%0d checks=%0d",commits,checks);
         $finish;
     end
