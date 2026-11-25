@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v56",
+  "version": "v57",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -209,7 +209,7 @@
       "title": "NPU 통합 정답 비교",
       "subtitle": "4뉴런 독립 정수 모델·정확한 지연·최대 길이 64·동점·거부 조건",
       "slug": "ch23_npu_integrated_scoreboard",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch23/tb_npu_integrated.sv"
     },
     {
@@ -218,7 +218,7 @@
       "title": "회귀·CI·검증 보고",
       "subtitle": "시드 재현·독립 커버리지 계산·비교기 오류 검출·실제 SHA·CI 보고",
       "slug": "ch24_regression_ci_reporting",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch24/tb_uart_regression.sv"
     }
   ]
