@@ -12,8 +12,12 @@ fi
 if [[ ! -f "$DUT_PATH" ]]; then echo "ERROR: DUT 파일 없음: $DUT_PATH"; exit 2; fi
 mkdir -p "$OUT"
 verilator --version | tee "$OUT/tool_version.txt"
-# Verilator 5.x의 randomize/constraint 지원 및 solver 설치 여부를 확인한다.
-verilator --binary --timing --sv --top-module tb_uart_objects \
+# 제약 무작위화를 지원하는 최신 Verilator와 외부 solver를 사용한다.
+# 기본 solver인 z3가 필요하다(VERILATOR_SOLVER로 다른 solver 지정 가능).
+if [[ -z "${VERILATOR_SOLVER:-}" ]] && ! command -v z3 >/dev/null 2>&1; then
+  echo "ERROR: z3 없음. sudo apt install z3"; exit 2
+fi
+verilator --binary --timing --sv -Wno-TIMESCALEMOD --top-module tb_uart_objects \
   --Mdir "$OUT/obj_dir" "$DUT_PATH" "$TB_PATH" 2>&1 | tee "$OUT/build.log"
 (cd "$OUT" && ./obj_dir/Vtb_uart_objects | tee output.log)
 echo "실행 기록: $OUT/output.log"
