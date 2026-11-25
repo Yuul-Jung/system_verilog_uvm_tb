@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v34",
+  "version": "v35",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -11,7 +11,7 @@
       "title": "테스트벤치의 첫 실행",
       "subtitle": "UART Echo 테스트벤치 기초",
       "slug": "ch01_testbench_basics",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch01/tb_uart_echo_basics.sv"
     },
     {
@@ -20,7 +20,7 @@
       "title": "Clock·Reset·이벤트",
       "subtitle": "기존 PWM 코어의 클록·리셋·주기 경계",
       "slug": "ch02_clock_reset_events",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch02/tb_pwm_clock_reset.sv"
     },
     {
