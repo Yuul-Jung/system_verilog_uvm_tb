@@ -274,3 +274,7 @@
 ## 제21장 v02 · UVM 레지스터 추상화
 - 제15장 범용 AXI/RMAP 스냅샷 유지, 현행 설계 CONCEPT_ONLY. CONTROL 실제 필드, 독립 Monitor/Predictor, 읽기 이전 Mirror 및 10거래 완료 확인, NO_PREDICT 부정 시험.
 - ch21_uvm_register_abstraction_v02.html; [검증 기록](docs/CH21_VALIDATION_v02.md). 독립 레지스터 계산·Bash 문법·SVG 단독 렌더·원격 정적 검사 완료. 실제 UVM/RTL_SIM 및 전체 페이지 렌더 NOT_RUN.
+
+## 제22장 v03 · 다중 Agent·VIP
+- 제15·21장 범용 AXI/RMAP 스냅샷 유지, CONCEPT_ONLY. bank commit 기준 독립 IRQ 모델·AR 시각 기대값·동일 에지 set/W1C 우선·zero WSTRB 및 실제 commit 대조. 19개 거래, CORRUPT_IRQ 부정 시험.
+- ch22_multi_agent_vip_v03.html; [검증 기록](docs/CH22_VALIDATION_v03.md). 독립 계산·Bash 문법/모의 판정 9건·SVG 단독 렌더·원격 정적 검사 완료. 실제 UVM/RTL_SIM 및 전체 페이지 렌더 NOT_RUN.
