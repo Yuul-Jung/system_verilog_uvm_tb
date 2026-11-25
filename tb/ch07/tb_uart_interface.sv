@@ -79,6 +79,9 @@ module uart_stream_agent(uart_stream_if.TB bus);
         @(bus.cb);
         check_case("IDLE", 8'h5A, 1'b0, 1'b1);
 
+        // (추가) 네 관찰 사례 모두 완료되었는지 확인한다.
+        if (checked != 4)
+            $fatal(1, "FAIL COUNT checked=%0d expected=4", checked);
         $display("CH07 PASS: %0d cases checked", checked);
         $finish;
     end
