@@ -9,5 +9,5 @@
 <g font-size="16" font-weight="bold"><text x="218" y="112">pwm_test · uvm_test_top</text><text x="218" y="235">pwm_env · env</text><text x="579" y="128">pwm_if · bus</text><text x="837.5" y="128">pwm_core · dut</text></g>
 <g font-size="13"><text x="218" y="137">create · raise/drop_objection</text><text x="218" y="259">run_phase · expect_ports()</text><text x="121" y="184">create env</text><text x="315" y="184">done</text><text x="450" y="227">vif</text><text x="579" y="157">cfg_* · resetn</text><text x="579" y="194">active_* · pending</text><text x="579" y="216">pwm_out</text><text x="837.5" y="157">Shadow → Active</text><text x="837.5" y="194">counter · duty_high</text><text x="837.5" y="216">RESET_PERIOD=8</text><text x="707" y="143">입력</text><text x="707" y="201">출력</text></g>
 <g stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch17arr)"><path d="M180 158V211"/><path d="M260 211V158"/><path d="M387 246H489"/><path d="M669 155H745"/><path d="M745 213H669"/></g>
-<text x="710" y="282" font-size="13">공통 clk · 10ns</text><text x="710" y="300" font-size="12">vif는 bus 인스턴스의 참조</text>
+<text x="710" y="279" font-size="13">공통 clk · 10ns</text><text x="710" y="307" font-size="12">vif는 bus 인스턴스의 참조</text>
 </g></svg>
