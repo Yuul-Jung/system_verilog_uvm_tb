@@ -13,10 +13,11 @@ for f in mac_core.v mac_pipeline_core.v; do
     exit 2
   fi
 done
+RTL="$(realpath "$RTL")"
 mkdir -p "$ROOT/.build/ch16"
 cd "$ROOT/.build/ch16"
-iverilog -g2012 -s tb_mac_integer -o sim \
+iverilog -g2012 -DVCD -s tb_mac_integer -o sim \
   "$RTL/mac_core.v" "$RTL/mac_pipeline_core.v" \
   "$ROOT/tb/ch16/tb_mac_integer.sv"
 vvp sim | tee simulation.log
-grep -q '^PASS CH16 ' simulation.log
+grep -Fxq 'PASS CH16 cycles=21 basic_valid=12 pipe_valid=10' simulation.log
