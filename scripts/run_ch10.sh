@@ -20,7 +20,10 @@ if [[ ! -f "$DUT_PATH" ]]; then
 fi
 
 mkdir -p "$OUT"
-iverilog -g2012 -s tb_pwm_corner_reset_timeout -o "$OUT/sim.vvp" \
+# 이전 실행의 파형을 이번 실행 결과로 오인하지 않도록 정리한다.
+rm -f "$OUT/ch10_pwm_corner_reset_timeout.vcd" "$OUT/normal.vcd" \
+  "$OUT/fault_injection.vcd" "$OUT/apply_timeout.vcd"
+iverilog -g2012 -DVCD -s tb_pwm_corner_reset_timeout -o "$OUT/sim.vvp" \
   "$DUT_PATH" "$TB_PATH" 2>&1 | tee "$OUT/build.log"
 
 # ① 정상 사례: 실제 DUT가 0%·100%·중간 리셋·재설정을 통과해야 함.
