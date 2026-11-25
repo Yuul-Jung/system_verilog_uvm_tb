@@ -254,3 +254,7 @@
 ## 제16장 v02 및 제4부 종합 검증
 - amd_soc_npu 제1장 04·06절 두 MAC 원본 Blob 동일, 원본 유지. 16/24비트 부호 확장·양방향 순환·clear/reset 보류 곱 폐기, 21클록 완료 확인.
 - ch16_mac_npu_integer_verification_v02.html; [제16장 검증 기록](docs/CH16_VALIDATION_v02.md), [제4부 종합 검증](docs/PART04_VALIDATION.md). 실제 Python 독립 계산, Bash 문법, SVG 단독 렌더 및 원격 정적 검사 완료. 제13~16장 탐색 동기화. 제15장 CONCEPT_ONLY 유지. 실제 RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
+
+## 제17장 v02 · 최소 UVM 환경
+- amd_soc_p2 04.2장 02·06절 PWM 원본 동일. 8개 표본, done/objection·오류 누계·NO_VIF 부정 시험, XSIM 내장 UVM 경로 적용.
+- ch17_minimal_uvm_environment_v02.html; [검증 기록](docs/CH17_VALIDATION_v02.md). 독립 시간 계산·Bash 문법 및 모의 판정 8건·SVG 단독 렌더·원격 정적 검사 PASS. 실제 UVM/RTL_SIM 및 전체 페이지 렌더 NOT_RUN.
