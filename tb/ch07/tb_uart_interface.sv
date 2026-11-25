@@ -94,10 +94,13 @@ module tb_uart_interface;
     uart_echo_bind   adapter(stream);
     uart_stream_agent agent(stream);
 
+`ifdef VCD
+    // (변경) Verilator 실행 시 파형 기록을 활성화한다.
     initial begin
         $dumpfile("ch07_uart_interface.vcd");
         $dumpvars(0, tb_uart_interface);
     end
+`endif
 
     // 정지 상태나 입력 오류로 무한 대기할 때 검사한다.
     initial begin
