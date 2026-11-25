@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v47",
+  "version": "v48",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -146,7 +146,7 @@
       "title": "MAC·NPU 정수 연산 검증",
       "subtitle": "INT8 signed·누산 wrap-around·pipeline·Python 독립 모델",
       "slug": "ch16_mac_npu_integer_verification",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch16/tb_mac_integer.sv"
     },
     {
