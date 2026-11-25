@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="PWM 출력과 독립 기대값을 비교하는 자동 판정 테스트벤치"><title>제04장 · PASS/FAIL 자동 판정 · RTL Testbench · SystemVerilog · UVM 실무 검증</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch04">
+<a class="access-skip" href="#main-content" style="position:absolute;left:-9999px;top:0">본문 바로가기</a>
+<button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div>
+<header class="hero"><div class="hero-inner"><p class="kicker">제1부 · VERILOG TESTBENCH</p><h1>제04장 · PASS/FAIL 자동 판정</h1><p>PWM 출력과 독립 기대값을 비교하는 자동 판정 테스트벤치</p>
+<div class="chips"><span class="chip">6부 · 24장</span><span class="chip">자동 판정</span><span class="chip">기존 RTL 재사용</span></div></div></header>
+<div class="wrap"><nav class="toc" id="course-nav" aria-label="장과 절 탐색"></nav>
+<main class="content" id="main-content">
+<section class="section" id="s00"><h2><span class="num">00</span>개요 · 관찰에서 자동 판정으로</h2><p>제03장에서는 PWM(Pulse Width Modulation, 펄스폭 변조)의 출력 HIGH 개수를 셌습니다. 이제 기대값과 실제값을 자동으로 비교하여 정상과 오류를 구분합니다. 사람이 파형을 일일이 확인하지 않아도 테스트벤치가 검사 결과를 판정하는 구조입니다.</p><p><strong>선행 설계 학습안내서:</strong> 제2부 사용자 AXI IP와 주변장치(<code>amd_soc_p2</code>), 04.2장 「RTL · AXI 풀이」 02절 「설정 Shadow와 출력 Active를 분리」, 06절 「독립 PWM Core 전체」. 파일은 <code>pwm_core.v</code>입니다. 이 장은 AXI 래퍼나 보드 전체가 아닌 PWM 코어의 단위 검증을 수행합니다.</p></section>
+<section class="section" id="s01"><h2><span class="num">01</span>원본 RTL · 검증 대상</h2><p><code>pwm_core</code>는 설정값을 Shadow에 보관한 후 현재 주기가 끝날 때 Active에 반영합니다. 정상 극성에서 카운터가 Active 듀티보다 작으면 출력이 HIGH입니다. TB에서는 초기 주기를 8클록으로 지정하고 원본 자체는 수정하지 않습니다.</p><div class="codeblock"><div class="codebar"><span>reference_rtl/pwm_core.v · Verilog</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// P2-04: 보드와 무관한 단일 채널 범용 PWM 코어.
+// (추가) period와 duty는 클록 횟수 단위. 0%/100%는 지속 LOW/HIGH.
+// (추가) 설정은 주기 마지막 경계에서만 활성값으로 반영.
+module pwm_core #(
+    parameter [31:0] RESET_PERIOD = 32'd100000
+)(
+    input  wire        clk,
+    input  wire        resetn,
+    input  wire        cfg_apply,
+    input  wire [31:0] cfg_period,
+    input  wire [31:0] cfg_duty,
+    input  wire        cfg_enable,
+    input  wire        cfg_polarity,
+    output wire        pwm_out,
+    output reg         pending,
+    output reg [31:0] active_period,
+    output reg [31:0] active_duty,
+    output reg         active_enable,
+    output reg         active_polarity
+);
+    reg [31:0] counter;
+    reg [31:0] shadow_period;
+    reg [31:0] shadow_duty;
+    reg        shadow_enable;
+    reg        shadow_polarity;
+
+    wire boundary = (counter &gt;= active_period - 32'd1);
+    wire duty_high = (counter &lt; active_duty);
+
+    // (주의) enable=0이면 polarity와 관계없이 LOW로 차단.
+    // (설명) 기본 polarity에서 active_duty=0이면 항상 LOW,
+    //         active_duty=active_period이면 항상 HIGH.
+    assign pwm_out = resetn &amp;&amp; active_enable &amp;&amp;
+                     (active_polarity ? !duty_high : duty_high);
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            counter         &lt;= 32'd0;
+            active_period   &lt;= RESET_PERIOD;
+            active_duty     &lt;= 32'd0;
+            active_enable   &lt;= 1'b0;
+            active_polarity &lt;= 1'b0;
+            shadow_period   &lt;= RESET_PERIOD;
+            shadow_duty     &lt;= 32'd0;
+            shadow_enable   &lt;= 1'b0;
+            shadow_polarity &lt;= 1'b0;
+            pending         &lt;= 1'b0;
+        end else begin
+            if (boundary) begin
+                counter &lt;= 32'd0;
+                if (pending) begin
+                    active_period   &lt;= shadow_period;
+                    active_duty     &lt;= shadow_duty;
+                    active_enable   &lt;= shadow_enable;
+                    active_polarity &lt;= shadow_polarity;
+                    pending         &lt;= 1'b0;
+                end
+            end else begin
+                counter &lt;= counter + 32'd1;
+            end
+            // (추가) 경계와 APPLY가 겹치면 새 값은 다음 경계에 적용.
+            // 여러 APPLY가 겹치면 최종 요청값을 우선하는 단일 Shadow 구조.
+            if (cfg_apply) begin
+                shadow_period   &lt;= cfg_period;
+                shadow_duty     &lt;= cfg_duty;
+                shadow_enable   &lt;= cfg_enable;
+                shadow_polarity &lt;= cfg_polarity;
+                pending         &lt;= 1'b1;
+            end
+        end
+    end
+endmodule
+</code></pre></div><p>이 모듈은 추가 사용자 RTL 없이 독립적으로 컴파일할 수 있습니다.</p></section>
+<section class="section" id="s02"><h2><span class="num">02</span>검증 구조와 독립 기대값</h2><figure class="figure-wrap" style="margin:16px 0;overflow-x:auto"><div style="min-width:650px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 350" role="img" aria-labelledby="ch04title ch04desc">
+<title id="ch04title">PWM 자동 판정 데이터 흐름</title><desc id="ch04desc">입력 듀티는 PWM 코어와 독립 기대값 비교에 사용되고, 실제 HIGH 개수와 기대값을 비교해 오류를 누적한다.</desc>
+<defs><marker id="ch04arrow" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<rect width="940" height="350" fill="white"/>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle">
+<g fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"><rect x="24" y="75" width="170" height="68" rx="4"/><rect x="240" y="75" width="170" height="68" rx="4"/><rect x="456" y="75" width="190" height="68" rx="4"/><rect x="24" y="216" width="170" height="68" rx="4"/><rect x="710" y="146" width="200" height="68" rx="4"/></g>
+<g font-size="16" font-weight="bold"><text x="109" y="100">apply_duty()</text><text x="325" y="100">pwm_core</text><text x="551" y="100">check_period()</text><text x="109" y="241">duty_ticks</text><text x="810" y="171">검사 결과 집계</text></g>
+<g font-size="13"><text x="109" y="125">cfg_duty · cfg_apply</text><text x="325" y="125">실제 PWM 출력</text><text x="551" y="125">high_count 계산</text><text x="109" y="266">독립 기대 HIGH 수</text><text x="810" y="196">checks · errors</text></g>
+<g stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch04arrow)"><path d="M194 109H240"/><path d="M410 109H456"/><path d="M551 143V161"/><path d="M194 250H551V222"/><path d="M661 191H710"/></g>
+<rect x="441" y="161" width="220" height="61" rx="4" fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"/>
+<text x="551" y="184" font-size="14" font-weight="bold">독립 비교</text><text x="551" y="207" font-size="13">high_count !== duty_ticks</text>
+<text x="433" y="64" font-size="12">pwm_out</text><text x="338" y="240" font-size="13">expected</text><text x="685" y="181" font-size="12">판정</text>
+<text x="470" y="31" font-size="20" font-weight="bold">실제 출력과 독립 기대값 비교</text>
+<text x="470" y="320" font-size="14">최종 errors가 0이면 PASS, 아니면 $fatal · 미정값(X/Z)은 별도 오류로 기록</text>
+</g></svg>
+</div><figcaption>한 주기의 HIGH 개수 판정 경로. 함수·태스크는 TB 내부 기능이며 pwm_core만 DUT입니다. 리셋 및 Active 듀티는 별도 검사합니다.</figcaption></figure><p>기대 HIGH 개수는 입력 듀티 <code>step</code>에서 가져옵니다. 실제 DUT의 <code>active_duty</code>나 내부 <code>counter</code>로 기대값을 만들지 않습니다. 그렇지 않으면 회로가 잘못된 설정을 반영했을 때 기대값까지 잘못 바뀌어 오류를 놓칠 수 있습니다.</p><table><thead><tr><th>입력 듀티</th><th>정상 HIGH 표본</th><th>정상 LOW 표본</th><th>듀티비</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>8</td><td>0%</td></tr><tr><td>2</td><td>2</td><td>6</td><td>25%</td></tr><tr><td>4</td><td>4</td><td>4</td><td>50%</td></tr><tr><td>6</td><td>6</td><td>2</td><td>75%</td></tr><tr><td>8</td><td>8</td><td>0</td><td>100%</td></tr></tbody></table><p>정상 극성·출력 활성·고정 주기 8이라는 조건에 한정합니다. 총 HIGH 개수만 같고 순서가 뒤바뀌는 오류는 이 검사만으로 검출할 수 없습니다. 이후 장에서 시간적 속성과 경계조건 검사를 확장합니다.</p></section>
+<section class="section" id="s03"><h2><span class="num">03</span>4상태 비교와 오류 처리</h2><table><thead><tr><th>구문</th><th>동작</th></tr></thead><tbody><tr><td><code>==</code> / <code>!=</code></td><td>비교 결과가 X가 될 수 있음</td></tr><tr><td><code>===</code> / <code>!==</code></td><td>0·1·X·Z를 명시적으로 비교. 결과는 0 또는 1</td></tr><tr><td><code>$error</code></td><td>오류 메시지를 남김. 도구 설정에 따라 실행이 중단될 수도 있음</td></tr><tr><td><code>$fatal(1,...)</code></td><td>치명적 오류를 보고하고 시뮬레이션 종료</td></tr><tr><td><code>$finish</code></td><td>시뮬레이션 종료. 자체적으로 정답 검증을 의미하지 않음</td></tr></tbody></table><p>예를 들어 정상 출력의 기대값이 1일 때 실제가 X라면 <code>actual !== expected</code>는 참입니다. 기대값까지 X로 만들면 X와 X의 일치를 정상으로 오해할 수 있으므로 기대값은 명확히 정의합니다.</p><div class="codeblock"><div class="codebar"><span>SystemVerilog · 실제 TB 비교 구문</span></div><pre tabindex="0"><code>checks = checks + 1;
+if (actual !== expected) begin
+    errors = errors + 1;
+    $error(&quot;MISMATCH t=%0d ns actual=%b expected=%b&quot;,
+        $time, actual, expected);
+end</code></pre></div><p>출력의 X/Z는 HIGH 개수에 포함하지 않고 별도 오류로 기록합니다. 이 검사에서 HIGH 개수 비교가 맞더라도 X/Z가 있으면 최종 PASS가 나오지 않습니다.</p></section>
+<section class="section" id="s04"><h2><span class="num">04</span>테스트벤치 전체 코드</h2><p>입력 자극, 적용 완료 대기, 출력 관찰, 비교와 종료 처리를 하나의 TB로 연결합니다. 클록은 10ns 주기이며 하강 에지에서 입력을 바꾸고 안정된 출력도 하강 에지에서 관찰합니다.</p><div class="codeblock"><div class="codebar"><span>tb/ch04/tb_pwm_pass_fail.sv · SystemVerilog</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// CH04: 기존 pwm_core의 PASS/FAIL 자동 판정 테스트벤치.
+module tb_pwm_pass_fail;
+    reg clk = 1'b0;
+    reg resetn = 1'b0;
+    reg cfg_apply = 1'b0;
+    reg [31:0] cfg_period = 32'd8;
+    reg [31:0] cfg_duty = 32'd0;
+    reg cfg_enable = 1'b1;
+    reg cfg_polarity = 1'b0;
+    wire pwm_out, pending, active_enable, active_polarity;
+    wire [31:0] active_period, active_duty;
+    integer checks = 0, errors = 0, step;
+
+    // 원본 RTL의 13개 포트를 동일한 이름으로 연결.
+    pwm_core #(.RESET_PERIOD(32'd8)) dut (
+        .clk(clk), .resetn(resetn),
+        .cfg_apply(cfg_apply), .cfg_period(cfg_period),
+        .cfg_duty(cfg_duty), .cfg_enable(cfg_enable),
+        .cfg_polarity(cfg_polarity), .pwm_out(pwm_out),
+        .pending(pending), .active_period(active_period),
+        .active_duty(active_duty), .active_enable(active_enable),
+        .active_polarity(active_polarity)
+    );
+    always #5 clk = ~clk; // 10ns 주기
+
+    // (추가) X/Z까지 검사하는 4상태 비교.
+    task automatic check_bit(input reg actual, input reg expected);
+        begin
+            checks = checks + 1;
+            if (actual !== expected) begin
+                errors = errors + 1;
+                $error(&quot;MISMATCH t=%0d ns actual=%b expected=%b&quot;,
+                    $time, actual, expected);
+            end
+        end
+    endtask
+
+    // (추가) 설정 요청 뒤 Shadow 수락과 Active 반영을 모두 기다림.
+    task automatic apply_duty(input [31:0] requested);
+        begin
+            @(negedge clk);
+            cfg_duty = requested;
+            cfg_apply = 1'b1;
+            @(negedge clk);
+            cfg_apply = 1'b0;
+            wait (pending === 1'b1);
+            wait (pending === 1'b0);
+            #1; // NBA 반영 후 안정된 값 검사
+            checks = checks + 1;
+            if (active_duty !== requested) begin
+                errors = errors + 1;
+                $error(&quot;ACTIVE_DUTY expected=%0d actual=%0d&quot;,
+                    requested, active_duty);
+            end
+            $display(&quot;APPLIED duty=%0d t=%0d ns&quot;, requested, $time);
+        end
+    endtask
+
+    // (추가) 내부 counter를 참조하지 않는 독립 기준값.
+    task automatic check_period(input integer duty_ticks);
+        integer sample, high_count;
+        begin
+            high_count = 0;
+            for (sample = 0; sample &lt; 8; sample = sample + 1) begin
+                @(negedge clk);
+                if (pwm_out === 1'b1)
+                    high_count = high_count + 1;
+                if ((pwm_out !== 1'b0) &amp;&amp; (pwm_out !== 1'b1)) begin
+                    errors = errors + 1;
+                    $error(&quot;UNKNOWN_PWM sample=%0d pwm=%b&quot;,
+                        sample, pwm_out);
+                end
+            end
+            checks = checks + 1;
+            if (high_count !== duty_ticks) begin
+                errors = errors + 1;
+                $error(&quot;HIGH_COUNT duty=%0d expected=%0d actual=%0d&quot;,
+                    duty_ticks, duty_ticks, high_count);
+            end
+            $display(&quot;CHECK duty=%0d high=%0d/8 expected=%0d/8&quot;,
+                duty_ticks, high_count, duty_ticks);
+        end
+    endtask
+
+`ifdef VCD
+    // (변경) Icarus 실행에서만 VCD 기록을 사용한다.
+    initial begin
+        $dumpfile(&quot;ch04_pwm_pass_fail.vcd&quot;);
+        $dumpvars(0, tb_pwm_pass_fail);
+    end
+`endif
+    initial begin
+        #2000;
+        $fatal(1, &quot;TIMEOUT: pending 적용 완료 대기 초과&quot;);
+    end
+    initial begin
+        $display(&quot;=== CH04 PWM SELF-CHECK START ===&quot;);
+        repeat (2) @(negedge clk);
+        check_bit(pwm_out, 1'b0);
+        resetn = 1'b1;
+        for (step = 0; step &lt;= 8; step = step + 2) begin
+            apply_duty(step);
+            check_period(step);
+        end
+        // (추가) 비교 누락을 정상 종료로 처리하지 않는다.
+        if (checks != 11)
+            $fatal(1, &quot;FAIL COUNT checks=%0d expected=11&quot;, checks);
+        if (errors == 0) begin
+            $display(&quot;PASS checks=%0d errors=0&quot;, checks);
+            $finish;
+        end else begin
+            $fatal(1, &quot;FAIL checks=%0d errors=%0d&quot;, checks, errors);
+        end
+    end
+endmodule
+</code></pre></div><h3>핵심 코드 풀이</h3><table><thead><tr><th>실제 코드</th><th>역할</th></tr></thead><tbody><tr><td><code>check_bit()</code></td><td>리셋 중 출력 LOW인지 1회 비교</td></tr><tr><td><code>apply_duty()</code></td><td>한 클록 동안 요청, pending 1→0 대기, #1 뒤 Active 듀티 비교</td></tr><tr><td><code>check_period()</code></td><td>하강 에지 8회 관찰, X/Z 오류 기록, HIGH 개수 비교</td></tr><tr><td><code>for (step = 0; ...)</code></td><td>0·2·4·6·8 다섯 설정을 순차 시험</td></tr><tr><td><code>checks</code></td><td>리셋 1 + Active 듀티 5 + HIGH 개수 5 → 11회</td></tr><tr><td><code>errors</code></td><td>오류 건수. X/Z 표본 오류는 별도 누적하며 checks를 증가시키지는 않음</td></tr><tr><td><code>#2000; $fatal(...)</code></td><td>pending 대기가 끝나지 않을 때 무한 시뮬레이션 방지</td></tr></tbody></table></section>
+<section class="section" id="s05"><h2><span class="num">05</span>실행 · Ubuntu / Vivado XSIM</h2><p>아래 폴더를 만들고 01절의 RTL과 04절의 TB 전체 코드를 각각 저장합니다. 외부 설계 저장소 접근은 필요하지 않습니다.</p><div class="codeblock"><div class="codebar"><span>Ubuntu 터미널 · 실습 폴더 준비</span></div><pre tabindex="0"><code>mkdir -p ch04_lab/reference_rtl ch04_lab/tb/ch04
+cd ch04_lab</code></pre></div><div class="codeblock"><div class="codebar"><span>Ubuntu 터미널 · Vivado XSIM</span></div><pre tabindex="0"><code># Vivado 설치 경로의 settings64.sh를 source한 뒤 실행
+command -v xvlog xelab xsim
+mkdir -p .build/ch04/xsim
+cd .build/ch04/xsim
+xvlog ../../../reference_rtl/pwm_core.v
+xvlog -sv ../../../tb/ch04/tb_pwm_pass_fail.sv
+xelab -debug typical tb_pwm_pass_fail -s ch04_sim
+xsim ch04_sim -runall
+# 파형 확인: 같은 폴더에서 실행
+xsim ch04_sim -gui</code></pre></div><table><thead><tr><th>명령</th><th>기능</th></tr></thead><tbody><tr><td>xvlog</td><td>Verilog 및 SystemVerilog 코드 분석</td></tr><tr><td>xelab</td><td>TB와 DUT를 연결하여 시뮬레이션 스냅샷 생성</td></tr><tr><td>xsim</td><td>시뮬레이션 실행 또는 GUI 파형 관찰</td></tr></tbody></table><p>GUI에서 clk, resetn, cfg_apply, pending, active_duty, pwm_out을 추가하고 Run All을 실행합니다.</p><h3>대체 실행 · Icarus Verilog</h3><div class="codeblock"><div class="codebar"><span>Ubuntu 터미널 · 실습 폴더 루트</span></div><pre tabindex="0"><code>mkdir -p .build/ch04/iverilog
+iverilog -g2012 -DVCD -s tb_pwm_pass_fail \
+  -o .build/ch04/iverilog/sim \
+  reference_rtl/pwm_core.v tb/ch04/tb_pwm_pass_fail.sv
+(cd .build/ch04/iverilog &amp;&amp; vvp ./sim)</code></pre></div><p><code>-DVCD</code>는 VCD 파형 기록 부분을 활성화합니다. XSIM은 이 매크로 없이 GUI 파형 기능을 사용합니다. Icarus 실행에서 생성되는 파일은 <code>.build/ch04/iverilog/ch04_pwm_pass_fail.vcd</code>입니다.</p></section>
+<section class="section" id="s06"><h2><span class="num">06</span>예상 출력 · 정답 및 반례</h2><p>정상 RTL의 시간 계약으로 계산한 예상 출력입니다. 실제 실행 로그와 비교합니다.</p><div class="codeblock"><div class="codebar"><span>예상 콘솔 출력 · 주요 행</span></div><pre tabindex="0"><code>APPLIED duty=0 t=96 ns
+CHECK duty=0 high=0/8 expected=0/8
+APPLIED duty=2 t=256 ns
+CHECK duty=2 high=2/8 expected=2/8
+APPLIED duty=4 t=416 ns
+CHECK duty=4 high=4/8 expected=4/8
+APPLIED duty=6 t=576 ns
+CHECK duty=6 high=6/8 expected=6/8
+APPLIED duty=8 t=736 ns
+CHECK duty=8 high=8/8 expected=8/8
+PASS checks=11 errors=0</code></pre></div><p>첫 요청은 30ns, 반영 에지는 95ns, 로그는 96ns입니다. 첫 8개 표본은 100~170ns에 읽습니다. 두 번째 요청은 180ns입니다(첫 요청과의 간격은 150ns). 이후 적용 관찰 시각은 160ns씩 증가합니다.</p><table><thead><tr><th>실제 관측</th><th>기대</th><th>판정</th></tr></thead><tbody><tr><td>듀티 4, HIGH 4</td><td>HIGH 4</td><td>개수 일치</td></tr><tr><td>듀티 4, HIGH 3</td><td>HIGH 4</td><td>HIGH_COUNT 오류</td></tr><tr><td>듀티 4, HIGH 4 + X/Z 표본</td><td>모든 표본 0/1</td><td>UNKNOWN_PWM 오류</td></tr><tr><td>active_duty=2</td><td>요청 4</td><td>ACTIVE_DUTY 오류</td></tr><tr><td>pending이 계속 1</td><td>정상 완료</td><td>TIMEOUT</td></tr></tbody></table><p>반례는 검사의 의미를 보여주는 가상 입력 결과이며 실제 오류 주입 실행 기록은 아닙니다. 최종 PASS는 이 장의 11개 비교와 표본 미정값 검사 범위에만 해당합니다.</p></section>
+<section class="section" id="s07"><h2><span class="num">07</span>오류 분석 및 다음 단계</h2><p>11개 비교가 실제로 완료됐는지 최종 확인합니다. 오류 수가 0이어도 비교 수가 11이 아니면 실패합니다.</p><table><thead><tr><th>증상</th><th>확인할 신호·조건</th></tr></thead><tbody><tr><td>ACTIVE_DUTY</td><td>cfg_apply, pending, active_duty</td></tr><tr><td>HIGH_COUNT</td><td>active_period, active_enable, active_polarity, pwm_out</td></tr><tr><td>UNKNOWN_PWM</td><td>resetn, 초기화 및 포트 연결</td></tr><tr><td>TIMEOUT</td><td>clk, cfg_apply, pending</td></tr><tr><td>실행 실패</td><td>소스 저장 경로, 명령 환경, 컴파일 오류</td></tr></tbody></table><p>제1부의 흐름은 조합회로 관찰 → 순차회로 타이밍 이해 → 반복 자극 재사용 → 자동 판정으로 완성됩니다. 제2부에서는 SystemVerilog의 자료형, 배열, 인터페이스 및 객체를 통해 검증 구조를 확장합니다.</p></section>
+<div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH04 v04</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v04.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v03.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v03.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v03.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v02.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v02.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v01.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v01.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v02.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v02.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v01.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v01.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v01.html"},{"id":"ch14","number":14,"title":"FIFO 및 흐름 제어","file":"ch14_fifo_flow_control_v01.html"},{"id":"ch15","number":15,"title":"AXI4-Lite 레지스터 검증","file":"ch15_axi4lite_register_verification_v01.html"},{"id":"ch16","number":16,"title":"MAC·NPU 정수 연산 검증","file":"ch16_mac_npu_integer_verification_v01.html"},{"id":"ch17","number":17,"title":"최소 UVM 환경","file":"ch17_minimal_uvm_environment_v01.html"},{"id":"ch18","number":18,"title":"Sequence에서 Driver까지","file":"ch18_sequence_driver_v01.html"},{"id":"ch19","number":19,"title":"Monitor·Agent·Scoreboard","file":"ch19_monitor_agent_scoreboard_v02.html"},{"id":"ch20","number":20,"title":"Factory·Config·Objection","file":"ch20_factory_config_objection_v01.html"},{"id":"ch21","number":21,"title":"UVM 레지스터 추상화","file":"ch21_uvm_register_abstraction_v01.html"},{"id":"ch22","number":22,"title":"다중 Agent·VIP","file":"ch22_multi_agent_vip_v02.html"},{"id":"ch23","number":23,"title":"NPU 통합 정답 비교","file":"ch23_npu_integrated_scoreboard_v01.html"},{"id":"ch24","number":24,"title":"회귀·CI·검증 보고","file":"ch24_regression_ci_reporting_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
