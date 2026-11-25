@@ -81,6 +81,10 @@ module tb_uart_objects;
         // (추가) 인라인 제약으로 유효한 IDLE 사례를 생성한다.
         if (!normal.randomize() with { valid == 0; ready == 1; })
             $fatal(1, "RANDOMIZE_FAIL IDLE");
+        // (추가) 생성 성공뿐 아니라 실제 IDLE 제약 만족 여부도 검사한다.
+        if (!(normal.data >= 8'h20 && normal.data <= 8'h7e &&
+              normal.valid == 1'b0 && normal.ready == 1'b1))
+            $fatal(1, "CONSTRAINT_FAIL IDLE");
         apply_and_check(normal, "RANDOM_IDLE");
 
         // (추가) 상속된 제약은 데이터 범위를 유지하고 정지를 강제한다.
@@ -90,7 +94,7 @@ module tb_uart_objects;
             $fatal(1, "CONSTRAINT_FAIL STALL");
         apply_and_check(stalled, "RANDOM_STALL");
 
-        // (추가) 부모 클래스 핸들로 자식 객체를 넘겨 다형성을 실습한다.
+        // (추가) 부모 타입 인자로 자식 객체를 전달해 공통 검사 태스크를 재사용한다.
         apply_and_check(stalled, "POLYMORPHIC_STALL");
         if (checked != 4) $fatal(1, "COUNT_FAIL %0d", checked);
         $display("CH08 PASS: %0d cases checked", checked);
