@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v44",
+  "version": "v45",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -38,7 +38,7 @@
       "title": "PASS/FAIL 자동 판정",
       "subtitle": "기존 PWM 코어의 기대값·실제 출력 자동 비교",
       "slug": "ch04_pass_fail_automation",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch04/tb_pwm_pass_fail.sv"
     },
     {
@@ -47,7 +47,7 @@
       "title": "검증 자료형과 타입",
       "subtitle": "logic·bit·enum·struct·typedef로 UART 데이터와 상태 모델링",
       "slug": "ch05_verification_types",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch05/tb_uart_types.sv"
     },
     {
@@ -56,7 +56,7 @@
       "title": "배열·큐·패키지",
       "subtitle": "packed/unpacked 배열·queue·package로 UART 기대 데이터 관리",
       "slug": "ch06_arrays_queues_packages",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch06/tb_uart_arrays_queues.sv"
     },
     {
@@ -65,7 +65,7 @@
       "title": "인터페이스·타이밍 분리",
       "subtitle": "interface·modport·clocking block 기반 UART Byte Stream 검증",
       "slug": "ch07_interface_modport_clocking",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch07/tb_uart_interface.sv"
     },
     {
@@ -92,7 +92,7 @@
       "title": "경계조건·오류 주입",
       "subtitle": "PWM 0%·100%·동작 중 리셋 및 두 가지 오류 주입 검출",
       "slug": "ch10_corner_reset_timeout",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch10/tb_pwm_corner_reset_timeout.sv"
     },
     {
@@ -101,7 +101,7 @@
       "title": "시간적 속성 검사",
       "subtitle": "SVA 속성으로 PWM 시간 계약 검증",
       "slug": "ch11_temporal_assertions",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch11/tb_pwm_sva.sv"
     },
     {
