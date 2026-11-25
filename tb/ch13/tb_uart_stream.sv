@@ -10,6 +10,10 @@ module tb_uart_stream;
     wire [7:0] tx_data_o;
     integer checks = 0;
     integer accepted = 0;
+    // (추가) 모든 샘플 에지를 감시하는 독립 모니터 상태.
+    integer stalled = 0, unknown_ready = 0;
+    reg previous_stall = 1'b0;
+    reg [7:0] held_data;
 
     uart_echo_controller dut (
         .rx_data_i(rx_data_i), .rx_valid_i(rx_valid_i),
@@ -20,6 +24,38 @@ module tb_uart_stream;
     // TB 가상 샘플 클록: DUT에 연결되지 않는다.
     reg tb_clk = 0;
     always #5 tb_clk = ~tb_clk;
+
+    // (추가) 수락 카운트는 BFM이 아니라 매 상승 에지 모니터가 관리한다.
+    always @(posedge tb_clk) begin
+        if (tx_data_o !== rx_data_i || tx_valid_o !== rx_valid_i ||
+            rx_ready_o !== tx_ready_i)
+            $fatal(1, "FAIL MONITOR_PORTS");
+        // 직전 샘플에서 대기했다면 다음 샘플까지 데이터와 valid를 유지.
+        if (previous_stall &&
+            (tx_valid_o !== 1'b1 || tx_data_o !== held_data))
+            $fatal(1, "FAIL HOLD");
+        previous_stall = 1'b0;
+        if (tx_valid_o === 1'b1) begin
+            case (tx_ready_i)
+                1'b0: begin
+                    stalled++;
+                    previous_stall = 1'b1;
+                    held_data = tx_data_o;
+                end
+                1'b1: begin
+                    case (accepted)
+                        0: if (tx_data_o !== 8'h41) $fatal(1, "FAIL ORDER A");
+                        1: if (tx_data_o !== 8'h5A) $fatal(1, "FAIL ORDER Z");
+                        2: if (tx_data_o !== 8'h0A) $fatal(1, "FAIL ORDER LF");
+                        default: $fatal(1, "FAIL EXTRA_ACCEPT");
+                    endcase
+                    accepted++;
+                    $display("ACCEPT t=%0d ns data=%h", $time, tx_data_o);
+                end
+                default: unknown_ready++; // X/Z는 확정 수락이 아니다.
+            endcase
+        end
+    end
 
     // 조합회로 안정화 후 모든 공개 출력의 4상태 비교.
     task automatic expect_ports(
@@ -56,9 +92,8 @@ module tb_uart_stream;
             tx_ready_i = 1'b1;
             expect_ports(data, 1'b1, 1'b1);
             @(posedge tb_clk);
-            if (rx_valid_i && rx_ready_o)
-                accepted = accepted + 1;
-            else
+            // (변경) 수락과 순서는 독립 상승 에지 모니터가 판정한다.
+            if (rx_valid_i !== 1'b1 || rx_ready_o !== 1'b1)
                 $fatal(1, "FAIL acceptance");
             @(negedge tb_clk);
             rx_valid_i = 1'b0;
@@ -71,9 +106,14 @@ module tb_uart_stream;
         $fatal(1, "FAIL GLOBAL_TIMEOUT");
     end
 
+`ifdef VCD
+    // (변경) Icarus에서 조건부 파형 기록.
     initial begin
         $dumpfile("ch13_uart_stream.vcd");
         $dumpvars(0, tb_uart_stream);
+    end
+`endif
+    initial begin
         // 비활성 상태: valid=0이면 데이터가 있어도 거래가 아니다.
         expect_ports(8'h00, 1'b0, 1'b0);
         // 문자 A, Z, 줄바꿈: 3바이트 프레임의 교육용 표현.
@@ -81,7 +121,7 @@ module tb_uart_stream;
         send_byte(8'h5A, 2);
         send_byte(8'h0A, 1);
         // UART 물리 계층의 패리티/프레이밍 오류는 이 DUT에 포트가 없다.
-        // 대신 준비 신호의 비정상 X 전파를 관찰하는 음성 시험.
+        // 대신 준비 신호의 비정상 X 전파를 관찰하는 시험.
         @(negedge tb_clk);
         rx_valid_i = 1'b1;
         rx_data_i = 8'h45;
@@ -91,8 +131,21 @@ module tb_uart_stream;
         rx_valid_i = 1'b0;
         tx_ready_i = 1'b0;
         expect_ports(8'h45, 1'b0, 1'b0);
-        if (accepted != 3 || checks != 12)
+        // (추가) 고임피던스 Z도 전파되며 확정 수락되지 않는다.
+        @(negedge tb_clk);
+        rx_valid_i = 1'b1;
+        rx_data_i = 8'h46;
+        tx_ready_i = 1'bz;
+        expect_ports(8'h46, 1'b1, 1'bz);
+        @(negedge tb_clk);
+        rx_valid_i = 1'b0;
+        tx_ready_i = 1'b0;
+        expect_ports(8'h46, 1'b0, 1'b0);
+        if (stalled != 3 || unknown_ready != 2 || previous_stall)
+            $fatal(1, "FAIL monitor counts");
+        if (accepted != 3 || checks != 14)
             $fatal(1, "FAIL count accepted=%0d checks=%0d", accepted, checks);
+        $display("MONITOR stalled=%0d unknown_ready=%0d", stalled, unknown_ready);
         $display("PASS CH13 accepted=%0d checks=%0d", accepted, checks);
         $finish;
     end
