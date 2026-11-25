@@ -262,3 +262,7 @@
 ## 제18장 v02 · Sequence에서 Driver까지
 - amd_soc_p2 04.2장 02·06절 PWM 원본 동일·유지. 전체 24개 표본, 대기 상태·적용 순서·거래 완료 검사 및 INVALID_DUTY 부정 시험. XSIM 우선.
 - ch18_sequence_driver_v02.html; [검증 기록](docs/CH18_VALIDATION_v02.md). 독립 시간 계산·Bash 문법 및 모의 판정 9건·SVG 단독 렌더·원격 정적 검사 PASS. 실제 UVM/RTL_SIM 및 전체 페이지 렌더 NOT_RUN.
+
+## 제19장 v03 · Monitor·Agent·Scoreboard
+- amd_soc_p2 04.2장 02·06절 PWM 원본 동일. 매 에지 원시 관찰, 독립 modulo 8 위상, 3거래·34표본 및 CORRUPT_SAMPLE 부정 시험. XSIM 우선.
+- ch19_monitor_agent_scoreboard_v03.html; [검증 기록](docs/CH19_VALIDATION_v03.md). 독립 시간 계산·Bash 문법 및 모의 판정 9건·SVG 단독 재렌더·원격 정적 검사 완료. 실제 UVM/RTL_SIM 및 전체 페이지 렌더 NOT_RUN.
