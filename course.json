@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v35",
+  "version": "v36",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -47,7 +47,7 @@
       "title": "검증 자료형과 타입",
       "subtitle": "logic·bit·enum·struct·typedef로 UART 데이터와 상태 모델링",
       "slug": "ch05_verification_types",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch05/tb_uart_types.sv"
     },
     {
