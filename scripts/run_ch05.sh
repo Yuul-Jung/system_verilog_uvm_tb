@@ -23,5 +23,8 @@ mkdir -p "$OUT_DIR"
 iverilog -g2012 -DVCD -s tb_uart_types -o "$OUT_DIR/simulation.vvp" \
   "$DUT_PATH" "$TB_PATH"
 (cd "$OUT_DIR" && vvp simulation.vvp | tee output.log)
+grep -q '^PASS checks=6 failures=0echo "로그: $OUT_DIR/output.log"
+echo "파형: $OUT_DIR/ch05_uart_types.vcd"
+ "$OUT_DIR/output.log"
 echo "로그: $OUT_DIR/output.log"
 echo "파형: $OUT_DIR/ch05_uart_types.vcd"
