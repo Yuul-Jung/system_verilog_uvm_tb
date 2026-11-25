@@ -1,28 +1,37 @@
 #!/usr/bin/env bash
-# 사용: UVM_HOME=/path/to/uvm bash scripts/run_ch18.sh
-# 원본 PWM RTL은 읽기 전용이며 실행 파일·로그는 .build/ch18에 저장.
+# 제17장: Vivado XSIM 내장 UVM 라이브러리 사용.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RTL="${DUT_PATH:-$ROOT/reference_rtl/pwm_core.v}"
 if [[ ! -f "$RTL" ]]; then
-  echo "NOT_RUN: PWM DUT missing: $RTL" >&2
+  echo "NOT_RUN: DUT missing" >&2
   exit 2
 fi
-if ! command -v verilator >/dev/null 2>&1; then
-  echo "NOT_RUN: Verilator not installed" >&2
-  exit 2
-fi
-if [[ -z "${UVM_HOME:-}" || ! -f "$UVM_HOME/src/uvm_pkg.sv" ]]; then
-  echo "NOT_RUN: UVM_HOME/src/uvm_pkg.sv missing" >&2
-  exit 2
-fi
+RTL="$(realpath "$RTL")"
+for tool in xvlog xelab xsim; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "NOT_RUN: $tool missing; source Vivado settings64.sh" >&2
+    exit 2
+  fi
+done
 mkdir -p "$ROOT/.build/ch18"
-verilator --binary --timing --assert -Wno-fatal \
-  --top-module tb_pwm_sequence_driver \
-  --Mdir "$ROOT/.build/ch18/obj_dir" \
-  +incdir+"$UVM_HOME/src" \
-  "$UVM_HOME/src/uvm_pkg.sv" "$RTL" \
-  "$ROOT/tb/ch18/tb_pwm_sequence_driver.sv"
-"$ROOT/.build/ch18/obj_dir/Vtb_pwm_sequence_driver" \
-  +UVM_TESTNAME=pwm18_test | tee "$ROOT/.build/ch18/simulation.log"
-grep -q 'PASS CH18 checks=3' "$ROOT/.build/ch18/simulation.log"
+OUT="$(mktemp -d "$ROOT/.build/ch18/run.XXXXXX")"
+cd "$OUT"
+xvlog "$RTL" 2>&1 | tee rtl.log
+xvlog -sv -L uvm "$ROOT/tb/ch18/tb_pwm_sequence_driver.sv" 2>&1 | tee tb.log
+xelab -L uvm -debug typical tb_pwm_sequence_driver -s ch18_sim 2>&1 | tee elaborate.log
+xsim ch18_sim -runall -onerror quit 2>&1 | tee normal.log
+grep -Eq '\[RESULT\][[:space:]]+PASS CH18 checks=3 samples=24[[:space:]]*$' normal.log
+grep -Eq 'UVM_ERROR[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log
+grep -Eq 'UVM_FATAL[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log
+# 부정 시험: 두 번째 거래의 직접 대입 범위 오류를 검출한다.
+# UVM $finish에 따른 종료 코드 차이가 있으므로 전용 진단도 검사한다.
+rc=0
+xsim ch18_sim -runall -onerror quit -testplusarg INVALID_DUTY > negative.log 2>&1 || rc=$?
+grep -Eq 'UVM_FATAL.*\[INVALID_DUTY\].*duty=9 completed=1' negative.log
+if grep -q 'PASS CH18\|FAIL CH18 GLOBAL_TIMEOUT' negative.log; then
+  echo "FAIL: unexpected negative result" >&2
+  exit 1
+fi
+echo "PASS CH18 HARNESS (negative exit=$rc)"
+echo "Logs: $OUT"
