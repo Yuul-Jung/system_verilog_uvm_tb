@@ -36,5 +36,8 @@ verilator --binary --timing --trace -DVCD -Wno-TIMESCALEMOD --top-module tb_uart
 
 # pipefail을 사용하므로 DUT 검증 실패나 실행 실패를 성공으로 숨기지 않는다.
 (cd "$OUT_DIR" && ./obj_dir/Vtb_uart_interface | tee output.log)
+grep -q '^CH07 PASS: 4 cases checkedecho "실제 실행 로그: $OUT_DIR/output.log"
+echo "실제 VCD 파형: $OUT_DIR/ch07_uart_interface.vcd"
+ "$OUT_DIR/output.log"
 echo "실제 실행 로그: $OUT_DIR/output.log"
 echo "실제 VCD 파형: $OUT_DIR/ch07_uart_interface.vcd"
