@@ -1,0 +1,389 @@
+[
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.rx_data_i",
+    "time_ns": 0,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.tx_data_o",
+    "time_ns": 0,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.tx_valid_o",
+    "time_ns": 0,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.rx_ready_o",
+    "time_ns": 0,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.rx_data_i",
+    "time_ns": 10,
+    "expected": 65,
+    "actual": 65,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.tx_data_o",
+    "time_ns": 10,
+    "expected": 65,
+    "actual": 65,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.tx_valid_o",
+    "time_ns": 10,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.rx_ready_o",
+    "time_ns": 10,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.rx_data_i",
+    "time_ns": 20,
+    "expected": 90,
+    "actual": 90,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.tx_data_o",
+    "time_ns": 20,
+    "expected": 90,
+    "actual": 90,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.tx_valid_o",
+    "time_ns": 20,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.rx_ready_o",
+    "time_ns": 20,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.rx_data_i",
+    "time_ns": 30,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.tx_data_o",
+    "time_ns": 30,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.tx_valid_o",
+    "time_ns": 30,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "signal": "tb_uart_echo_basics.rx_ready_o",
+    "time_ns": 30,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "signal": "tb_pwm_clock_reset.pending",
+    "time_ns": 35,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "signal": "tb_pwm_clock_reset.pending",
+    "time_ns": 95,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "signal": "tb_pwm_clock_reset.active_duty",
+    "time_ns": 95,
+    "expected": 3,
+    "actual": 3,
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "signal": "tb_pwm_clock_reset.pwm_out",
+    "time_ns": 95,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "signal": "tb_pwm_clock_reset.pwm_out",
+    "time_ns": 125,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "signal": "tb_pwm_clock_reset.pwm_out",
+    "time_ns": 190,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "signal": "tb_pwm_clock_reset.active_duty",
+    "time_ns": 190,
+    "expected": 3,
+    "actual": 3,
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "signal": "tb_pwm_clock_reset.active_duty",
+    "time_ns": 195,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_data_i",
+    "time_ns": 5,
+    "expected": 65,
+    "actual": 65,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_valid_i",
+    "time_ns": 5,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.tx_ready_i",
+    "time_ns": 5,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.agent.checked",
+    "time_ns": 5,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_data_i",
+    "time_ns": 15,
+    "expected": 90,
+    "actual": 90,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_valid_i",
+    "time_ns": 15,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.tx_ready_i",
+    "time_ns": 15,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.agent.checked",
+    "time_ns": 15,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_data_i",
+    "time_ns": 25,
+    "expected": 90,
+    "actual": 90,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_valid_i",
+    "time_ns": 25,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.tx_ready_i",
+    "time_ns": 25,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.agent.checked",
+    "time_ns": 25,
+    "expected": 2,
+    "actual": 2,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_data_i",
+    "time_ns": 35,
+    "expected": 90,
+    "actual": 90,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_valid_i",
+    "time_ns": 35,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.tx_ready_i",
+    "time_ns": 35,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.agent.checked",
+    "time_ns": 35,
+    "expected": 3,
+    "actual": 3,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_data_i",
+    "time_ns": 45,
+    "expected": 90,
+    "actual": 90,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.rx_valid_i",
+    "time_ns": 45,
+    "expected": 0,
+    "actual": 0,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.stream.tx_ready_i",
+    "time_ns": 45,
+    "expected": 1,
+    "actual": 1,
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "signal": "tb_uart_interface.agent.checked",
+    "time_ns": 45,
+    "expected": 4,
+    "actual": 4,
+    "status": "PASS"
+  },
+  {
+    "chapter": 23,
+    "contract": "2*length+2 clocks, 10ns clock",
+    "expected_ns": [
+      60,
+      60,
+      60,
+      60,
+      60,
+      40,
+      40,
+      1300
+    ],
+    "actual_ns": [
+      60,
+      60,
+      60,
+      60,
+      60,
+      40,
+      40,
+      1300
+    ],
+    "status": "PASS"
+  },
+  {
+    "chapter": 11,
+    "contract": "next-edge SVA violation at 55ns",
+    "status": "PASS"
+  },
+  {
+    "chapter": 12,
+    "contract": "12 cross cells, expected HIGH counts",
+    "status": "PASS"
+  }
+]

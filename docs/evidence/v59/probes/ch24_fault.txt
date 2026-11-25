@@ -1,0 +1,2 @@
+FATAL: <REPO>/tb/ch24/tb_uart_regression.sv:56: DETECTED_INJECTED_FAULT case=9
+       Time: 9000  Scope: tb_uart_regression.check_transaction

@@ -1,0 +1,8 @@
+VCD info: dumpfile ch01_uart_echo.vcd opened for output.
+=== CH01 UART ECHO TESTBENCH START ===
+t=10 ns rx=00 rv=0 tr=0 | tx=00 tv=0 rr=0
+t=20 ns rx=41 rv=1 tr=1 | tx=41 tv=1 rr=1
+t=30 ns rx=5a rv=1 tr=0 | tx=5a tv=1 rr=0
+t=40 ns rx=00 rv=0 tr=1 | tx=00 tv=0 rr=1
+=== CH01 END: OBSERVATION ONLY ===
+<REPO>/tb/ch01/tb_uart_echo_basics.sv:73: $finish called at 40000 (1ps)

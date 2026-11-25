@@ -1,0 +1,2792 @@
+{
+  "schema": 1,
+  "base_commit": "10d0ec00ecffca46aa49f88704f2782982ec7fc5",
+  "created_utc": "2026-11-25T22:19:13.605485+00:00",
+  "sources_sha256": {
+    "reference_rtl/axi4lite_slave_adapter.v": "1fa68691b1e084bfc0106e2b8cc4176c34f453fb9c7e3a03445c73f55455dae1",
+    "reference_rtl/custom_register_bank.v": "8ab6ad93899d148d7dbf3d8ac965d0826f52a29e4f501616221ad7b0aab9d7a7",
+    "reference_rtl/dsp_multiplier.v": "48d1d35c2add3d0fccaf92c1917079873344320e23d0718e43539d13033f8093",
+    "reference_rtl/mac_core.v": "32e11915722acf1028e2bf3cccc5b10d8f525a85b1731f92f821d73122a09857",
+    "reference_rtl/mac_pipeline_core.v": "9e05b10ee7cf55f3ef46b02ab920ad688504561929576fa8ab50acd6bc57c1f1",
+    "reference_rtl/npu_dsp_mac_lane.v": "ffcadb6575ba84c7c6f32acf7d3860a2d25617946859da6dbd8582f1fcd3d4f5",
+    "reference_rtl/npu_engine4.v": "6469feff2d0686be890be33655170aab73e0a556d91c8f30e9d6e7657eeb3438",
+    "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+    "reference_rtl/uart_core.v": "b5f3cb2825797958aca3c9a3f97b6425f339f46a216cca41cfd49f318eee9683",
+    "reference_rtl/uart_echo_controller.v": "3eaed301742a18b8e8652e3f73fb87da9b7635b59a557ed07429d0481de7d0ef",
+    "reference_rtl/uart_rx.v": "b4aff65d44e8749eacd001a15141d52e42fde9878b32553f3c6d5359a1c4609a",
+    "reference_rtl/uart_tx.v": "2a5b7586e775cec77df708156ac4717ff5bca2a9b0352568121934f4fbafaa5b",
+    "scripts/ch16_reference.py": "dd2738c83fc539e8acd343d0f7566b17f338bf6ac777613ed8e846ec0ac7e3cf",
+    "scripts/run_ch01.sh": "459545847c5fd53a4f84255eef012e11681eb171d34e2b21c89482785ce1c84d",
+    "scripts/run_ch02.sh": "a1d784487aee3a4dfefa3e625829a7bf821c114c2170872d5a18b56fb634c02a",
+    "scripts/run_ch03.sh": "deff3c23f07544c6a137dbae072143ba41675f0b5c033fcdb0b02da1668a7bc4",
+    "scripts/run_ch04.sh": "7bf44fdcb6eb76a83c8beaeb5c25e77f5fbbff368076a19d4eb63083b8cb49bb",
+    "scripts/run_ch05.sh": "487ac281fdcb09ef07d5f06a890eda41bb90ad5a45ad053814386b2a172d3dc3",
+    "scripts/run_ch06.sh": "e0c5f3e4af8a6e5dd94c75a7b883db9450508851a512bfc84e5e7af03cc39484",
+    "scripts/run_ch07.sh": "fa7f72f3f55302ec4998c2c85148798838e89cb1fa460608b4204c53798ee9cf",
+    "scripts/run_ch08.sh": "71df3d70548ed5efa2c376d8b535114a1789979759ff8d5258fa415a95e2fc94",
+    "scripts/run_ch09.sh": "9cf6c1a09112779e68304ef93c70a6ac1bced5eec527fcb21bfc606d615748ef",
+    "scripts/run_ch10.sh": "f41c5bb3703c0c2edeb2b78dc79223b5bc3de045f1ccc2e97a5cc40cd9f96893",
+    "scripts/run_ch13.sh": "6e7a143ff0d38d0274f44021b98201b063fd255ef7344ca9d21c2bead03e4da7",
+    "scripts/run_ch14.sh": "ea3d18540195ba0b38d018d56477dcd369db99747681406c0381f3adb6aeea40",
+    "scripts/run_ch15.sh": "a2a07f25f96c0c6413617773c04d8f66d7945b81d0bbe6a07abb43c4be72a2e6",
+    "scripts/run_ch16.sh": "ae7336eb8891fbfe20b15718826e096c41eaba61cd44485752447b943e45ae67",
+    "scripts/run_ch17.sh": "35d03c330c597d867dc00ec2b5780611f974009dda41ae57599ac6bb85accf57",
+    "scripts/run_ch18.sh": "a45cd609a4f3a40ebacc1b8ffb707f46689d1cfcaac4fb054d4db71d96449d97",
+    "scripts/run_ch19.sh": "1e5ff019f0d73f171e4e50c93ef497db5568f32a05407d356edc6bef2205a84d",
+    "scripts/run_ch20.sh": "0d3b18d217766b69a3b824598791e19f58eecefdaafd6d213a3702a4234fbf2e",
+    "scripts/run_ch21.sh": "1d82c9583bdf93fe3da66bd9c068e4de130b0198e07ace0a2b7e2d579ee4e5bb",
+    "scripts/run_ch22.sh": "f980c7d915502c463806c63fa159ccba928dbe4cefb70201f285a08f08b6610e",
+    "scripts/run_ch23.sh": "6463cdd1315f46c4249f384dca8544185d7f05f16d436a755f8299bbe4e7ccc2",
+    "scripts/run_ch24.py": "d63f987368a6e4b5454468ac6cb8f48083bb04574b11cf73d5361c86bea7f36c",
+    "scripts/run_ch24.sh": "3774109c27970773f56922b1c3760aa12543fdf0e772674f118dd79fa37f6087",
+    "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+    "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+    "tb/ch01/tb_uart_echo_basics.sv": "c5bdf70c18fb639a1a3114469bb691e6d8f2852617ffd41e482bae6e0b755404",
+    "tb/ch02/tb_pwm_clock_reset.sv": "27f3072144d4ccb87be70e1d01c578240472dcd0c9bab2acb21f5040a0782091",
+    "tb/ch03/tb_pwm_reusable_stimulus.sv": "93e3b1be1ac28da671b633e68cc1d8c1af8a747950efb6e8e5ead073d490243f",
+    "tb/ch04/tb_pwm_pass_fail.sv": "e0923f1b7e2249b50f82b5393781b32460eb2a6da768d8af7cd3b0fe0eafd215",
+    "tb/ch05/tb_uart_types.sv": "83b658bb77ca53dba189a1a2e6e8ddbc32066ddbd33e085c8eb9d198719d9268",
+    "tb/ch06/tb_uart_arrays_queues.sv": "7fedf5e8e423d5c39226ccf049e0923551f4326d39f539d2e51a49998d1b2761",
+    "tb/ch06/uart_expect_pkg.sv": "50a86bddad5629bc57737498bde2011ea2a9a5ac263f807dfa3479be4d2e1b24",
+    "tb/ch07/tb_uart_interface.sv": "56acd0797cbe8150db854a53daa0ba14014f32e687991ef0e21cd7396315bee9",
+    "tb/ch07/uart_stream_if.sv": "0a30dc56d14754d7dbf14cd5e4c03335eb36b10630ec68166eccd973738fe41c",
+    "tb/ch08/tb_uart_objects.sv": "4381fd3d32a861529877cf9dd6a397274d32b783b26320a72554693a9d39daa2",
+    "tb/ch09/pwm_reference_model.sv": "af171dd79f5a983e43b3eb4b2e2b946d3b762cf2a8d7c2db0a0bd365cc83a523",
+    "tb/ch09/tb_pwm_scoreboard.sv": "d84690fa7a866c1876fd6bf0f55c820a6c9c22bd2ae61a18d46ad697c0d4f27c",
+    "tb/ch10/tb_pwm_corner_reset_timeout.sv": "1da8a4e4252be688e26e8855ede94918b3d02c12830e8684f04f40c74c0e7bd2",
+    "tb/ch11/run_ch11.sh": "cd5200d41de0b8f3d020abb97784baec13f412314969d1819f56557cbea54e61",
+    "tb/ch11/tb_pwm_sva.sv": "a28ba22908e12dd234cd57ecb73bf5c216785dde02067c84e36b32560aac9921",
+    "tb/ch12/run_ch12.sh": "c618a813452a85cfecce6af564abf64eb320f23d2dc5d3a8df613b6caf777055",
+    "tb/ch12/tb_pwm_coverage.sv": "8f7702479ac6d621ebf169fe796c9e055aba35c16a94a69aade0eb94353da794",
+    "tb/ch13/tb_uart_stream.sv": "906d56d0afa1a3717eec702469961140a4ed2b8598d786d310ef48a7b3dd29b4",
+    "tb/ch14/tb_uart_fifo_flow.sv": "230bdff0983b2aae060bea5624fb9eb15dca2a78df400d303e3ab6262bf650b9",
+    "tb/ch15/tb_axi4lite_registers.sv": "5b99a4b894d5389cfcf1bb6151851848bdc8d043b26706038480d52735b50edb",
+    "tb/ch16/tb_mac_integer.sv": "afcc45ae697d8623794a33ec52cf0daee6b2c4a6bdb5b9395a1bdeaf6eddcf07",
+    "tb/ch17/tb_pwm_uvm.sv": "d92b91e797b7946410a62dd2cb28717f747bc2d91304409e619af3f0083f8957",
+    "tb/ch18/tb_pwm_sequence_driver.sv": "482bf19238d602cc302ff51861dfab3cf028b69df6358a3f7285281e4226c53b",
+    "tb/ch19/tb_pwm_monitor_agent_scoreboard.sv": "bf290259e56cc6df8aee01871bbeaa4e8658686742aec297556b7b955ef4bc3b",
+    "tb/ch20/tb_pwm_factory_config_objection.sv": "a6bdfad933a0ca56a135a060db0ea4da6bb5037b881ec4a00a93bc94ea0b9056",
+    "tb/ch21/tb_axi_uvm_ral.sv": "76f29e07fb3eee50462f0581815f10690b43e4714e2bc9a85d378c6b2c160d24",
+    "tb/ch22/tb_axi_multiagent_irq.sv": "7c83cc0fbe6e77b7dfaf35db4b453ad39af133adc13bc91f522f4c0bb0cc1b3f",
+    "tb/ch23/tb_npu_integrated.sv": "2332122341a2767b8a689548fbc0c0cf42453eff4ce89fba688e9e0a54a3a50f",
+    "tb/ch24/tb_uart_regression.sv": "2ce44426474e49274297ccf9f96d9dd870907443e67a3efd8bb308e7f969b735"
+  },
+  "tools": {
+    "version_output": "Icarus Verilog version 12.0 (stable) ()\nVerilator 5.054 2026-11-01 rev v5.054\nZ3 version 4.8.12 - 64 bit\nPython 3.12.3\nVivado Simulator v2024.2.0\n"
+  },
+  "chapters": [
+    {
+      "chapter": 1,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "01"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:13.632299+00:00",
+      "exit_code": 0,
+      "status": "EXECUTED_OBSERVATION",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch01/output.log",
+          "public_path": "legacy/ch01/output.log",
+          "raw_sha256": "c147dfb3dad34f9d66d3048a5835154ac015214ec2f9628980507a0bbfdf104e",
+          "public_sha256": "16943b7b870d0eb789e652f04bf9babfb2d130738cc11cca7de518b18ebb8c25",
+          "bytes": 371
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch01/output.log",
+          "public_path": "runs/ch01/output.log",
+          "raw_sha256": "c147dfb3dad34f9d66d3048a5835154ac015214ec2f9628980507a0bbfdf104e",
+          "public_sha256": "16943b7b870d0eb789e652f04bf9babfb2d130738cc11cca7de518b18ebb8c25",
+          "bytes": 371
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch01.txt",
+          "public_path": "runs/ch01/runner.txt",
+          "raw_sha256": "4f06c66e9738757ade689f482656cc5aa7beec120ba86c2e24fe0617dea94e84",
+          "public_sha256": "d97d252e15b6159d16ba9b5075b768e97ecbb7bf4e786b583811b82fae2d0f2c",
+          "bytes": 40221
+        },
+        {
+          "local_path": ".build/ch01/ch01_uart_echo.vcd",
+          "public_path": "waves/ch01_uart_echo.vcd",
+          "raw_sha256": "bc595a15d1e3c2c99c6f99192f74fa7bd3b99901ded6bf5ea002603bf92fb90c",
+          "public_sha256": "bc595a15d1e3c2c99c6f99192f74fa7bd3b99901ded6bf5ea002603bf92fb90c",
+          "bytes": 847
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch01/output.log",
+          "text": "t=10 ns rx=00 rv=0 tr=0 | tx=00 tv=0 rr=0"
+        },
+        {
+          "log": "runs/ch01/output.log",
+          "text": "t=20 ns rx=41 rv=1 tr=1 | tx=41 tv=1 rr=1"
+        },
+        {
+          "log": "runs/ch01/output.log",
+          "text": "t=30 ns rx=5a rv=1 tr=0 | tx=5a tv=1 rr=0"
+        },
+        {
+          "log": "runs/ch01/output.log",
+          "text": "t=40 ns rx=00 rv=0 tr=1 | tx=00 tv=0 rr=1"
+        },
+        {
+          "log": "runs/ch01/output.log",
+          "text": "=== CH01 END: OBSERVATION ONLY ==="
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "01"
+      ],
+      "sources_sha256": {
+        "reference_rtl/uart_echo_controller.v": "3eaed301742a18b8e8652e3f73fb87da9b7635b59a557ed07429d0481de7d0ef",
+        "scripts/run_ch01.sh": "459545847c5fd53a4f84255eef012e11681eb171d34e2b21c89482785ce1c84d",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch01/tb_uart_echo_basics.sv": "c5bdf70c18fb639a1a3114469bb691e6d8f2852617ffd41e482bae6e0b755404"
+      }
+    },
+    {
+      "chapter": 2,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "02"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:13.701801+00:00",
+      "exit_code": 0,
+      "status": "EXECUTED_OBSERVATION",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch02/output.log",
+          "public_path": "legacy/ch02/output.log",
+          "raw_sha256": "9f9997b61c2ca9c3b6492ac0baab7144e4d09bbcb035da143e6a0b5e68eaf391",
+          "public_sha256": "06f0a2eee50faf84264633b2fb5dc1c5773da048be70218cb74808c88aadc9dd",
+          "bytes": 1776
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch02/output.log",
+          "public_path": "runs/ch02/output.log",
+          "raw_sha256": "9f9997b61c2ca9c3b6492ac0baab7144e4d09bbcb035da143e6a0b5e68eaf391",
+          "public_sha256": "06f0a2eee50faf84264633b2fb5dc1c5773da048be70218cb74808c88aadc9dd",
+          "bytes": 1776
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch02.txt",
+          "public_path": "runs/ch02/runner.txt",
+          "raw_sha256": "d6c257ea1f080f8f2e09c0340dfdd0b71faaf39503d05d3797b1bb313945a610",
+          "public_sha256": "3bd6ae062d5fc1a6a41e2a6615219e2172591b08044a900eaf527fee3e274f27",
+          "bytes": 41738
+        },
+        {
+          "local_path": ".build/ch02/ch02_pwm_clock_reset.vcd",
+          "public_path": "waves/ch02_pwm_clock_reset.vcd",
+          "raw_sha256": "d20cad6b2c496ecb02bf3fadde8de0561464eb58a2a3a3a091cc1b00a255508b",
+          "public_sha256": "d20cad6b2c496ecb02bf3fadde8de0561464eb58a2a3a3a091cc1b00a255508b",
+          "bytes": 2283
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=6 ns rst=0 apply=0 pending=0 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=16 ns rst=0 apply=0 pending=0 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=26 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=36 ns rst=1 apply=1 pending=1 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=46 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=56 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=66 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=76 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=86 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=96 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=106 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=116 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=126 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=136 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=146 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=156 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=166 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=176 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=186 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "EVENT t=191 ns resetn=0 active_duty=3 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=196 ns rst=0 apply=0 pending=0 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=206 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=216 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=226 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "POS t=236 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0"
+        },
+        {
+          "log": "runs/ch02/output.log",
+          "text": "=== CH02 END: OBSERVATION ONLY ==="
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "02"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_ch02.sh": "a1d784487aee3a4dfefa3e625829a7bf821c114c2170872d5a18b56fb634c02a",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch02/tb_pwm_clock_reset.sv": "27f3072144d4ccb87be70e1d01c578240472dcd0c9bab2acb21f5040a0782091"
+      }
+    },
+    {
+      "chapter": 3,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "03"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:13.769880+00:00",
+      "exit_code": 0,
+      "status": "EXECUTED_OBSERVATION",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch03/output.log",
+          "public_path": "legacy/ch03/output.log",
+          "raw_sha256": "9cccf19c6bc478942ceeee686c1914ba698e61e201e71b4eb6a21729591b62ce",
+          "public_sha256": "f75357600d110eafb52fcec82781b1b3c2b6476f45ff4283dca4168691ada876",
+          "bytes": 1758
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch03/output.log",
+          "public_path": "runs/ch03/output.log",
+          "raw_sha256": "9cccf19c6bc478942ceeee686c1914ba698e61e201e71b4eb6a21729591b62ce",
+          "public_sha256": "f75357600d110eafb52fcec82781b1b3c2b6476f45ff4283dca4168691ada876",
+          "bytes": 1758
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch03.txt",
+          "public_path": "runs/ch03/runner.txt",
+          "raw_sha256": "23c6290b7f53e3c60a84b10c7c80319b62855d2eb894f6f12e813936f4a32fc4",
+          "public_sha256": "f7ce50ed603d38c257084352394f15fbd6cefe63aa9c38b27886fbc76f569ab6",
+          "bytes": 41750
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch03/output.log",
+          "text": "OBSERVED duty=0 HIGH=0/8"
+        },
+        {
+          "log": "runs/ch03/output.log",
+          "text": "OBSERVED duty=2 HIGH=2/8"
+        },
+        {
+          "log": "runs/ch03/output.log",
+          "text": "OBSERVED duty=4 HIGH=4/8"
+        },
+        {
+          "log": "runs/ch03/output.log",
+          "text": "OBSERVED duty=6 HIGH=6/8"
+        },
+        {
+          "log": "runs/ch03/output.log",
+          "text": "OBSERVED duty=8 HIGH=8/8"
+        },
+        {
+          "log": "runs/ch03/output.log",
+          "text": "=== CH03 END: OBSERVATION ONLY ==="
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "03"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_ch03.sh": "deff3c23f07544c6a137dbae072143ba41675f0b5c033fcdb0b02da1668a7bc4",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch03/tb_pwm_reusable_stimulus.sv": "93e3b1be1ac28da671b633e68cc1d8c1af8a747950efb6e8e5ead073d490243f"
+      }
+    },
+    {
+      "chapter": 4,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "04"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:13.838528+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch04/output.log",
+          "public_path": "legacy/ch04/output.log",
+          "raw_sha256": "6478f121c877b93b098e0489db5dcaf5f457ea851c6f5bfeb24faed104f92d1e",
+          "public_sha256": "2a2dad1ada0f59e8930b1e88b6cb9468a3f1e1b97a4610331ab4dd9fd41b5193",
+          "bytes": 484
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch04/output.log",
+          "public_path": "runs/ch04/output.log",
+          "raw_sha256": "6478f121c877b93b098e0489db5dcaf5f457ea851c6f5bfeb24faed104f92d1e",
+          "public_sha256": "2a2dad1ada0f59e8930b1e88b6cb9468a3f1e1b97a4610331ab4dd9fd41b5193",
+          "bytes": 484
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch04.txt",
+          "public_path": "runs/ch04/runner.txt",
+          "raw_sha256": "359f3f76bf06562088a2ff1fd3cd86c256164c0d9160df63771ddfa6c08f6170",
+          "public_sha256": "552eb5cc6274ff910109fdd777a42dcf61ec5301c22a81b2ec7ca156ee0ad6cb",
+          "bytes": 40502
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch04/output.log",
+          "text": "PASS checks=11 errors=0"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "04"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_ch04.sh": "7bf44fdcb6eb76a83c8beaeb5c25e77f5fbbff368076a19d4eb63083b8cb49bb",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch04/tb_pwm_pass_fail.sv": "e0923f1b7e2249b50f82b5393781b32460eb2a6da768d8af7cd3b0fe0eafd215"
+      }
+    },
+    {
+      "chapter": 5,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "05"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:13.906812+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch05/output.log",
+          "public_path": "legacy/ch05/output.log",
+          "raw_sha256": "1e36cbda98dd222d2e497cd854c66e3296377f9dc8c782c00625627d61fbba7b",
+          "public_sha256": "5ad581e1f9c3db85a0fa91ce64987863d7d93e433eb48a40819b437bd3bb60f6",
+          "bytes": 357
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch05/output.log",
+          "public_path": "runs/ch05/output.log",
+          "raw_sha256": "1e36cbda98dd222d2e497cd854c66e3296377f9dc8c782c00625627d61fbba7b",
+          "public_sha256": "5ad581e1f9c3db85a0fa91ce64987863d7d93e433eb48a40819b437bd3bb60f6",
+          "bytes": 357
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch05.txt",
+          "public_path": "runs/ch05/runner.txt",
+          "raw_sha256": "bd328913171ca17b16efc1eaafa45c67b82487bb256c83fde83bb417157fe9f4",
+          "public_sha256": "d906a130b9c43491227895ada3cb27854a0ae2729aa442e31d422b3c19076f07",
+          "bytes": 40392
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch05/output.log",
+          "text": "PASS checks=6 failures=0"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "05"
+      ],
+      "sources_sha256": {
+        "reference_rtl/uart_echo_controller.v": "3eaed301742a18b8e8652e3f73fb87da9b7635b59a557ed07429d0481de7d0ef",
+        "scripts/run_ch05.sh": "487ac281fdcb09ef07d5f06a890eda41bb90ad5a45ad053814386b2a172d3dc3",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch05/tb_uart_types.sv": "83b658bb77ca53dba189a1a2e6e8ddbc32066ddbd33e085c8eb9d198719d9268"
+      }
+    },
+    {
+      "chapter": 6,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "06"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:13.975973+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch06/output.log",
+          "public_path": "legacy/ch06/output.log",
+          "raw_sha256": "a5b9366ee5b0bfa296e7e6a188df10adfe3c11903bd81b7d4fdd8e28489933d2",
+          "public_sha256": "2d3f0362d80befedf88f6ecef1a5c3551aca8e89b6956a6d15572f5386a259f8",
+          "bytes": 462
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch06/output.log",
+          "public_path": "runs/ch06/output.log",
+          "raw_sha256": "a5b9366ee5b0bfa296e7e6a188df10adfe3c11903bd81b7d4fdd8e28489933d2",
+          "public_sha256": "2d3f0362d80befedf88f6ecef1a5c3551aca8e89b6956a6d15572f5386a259f8",
+          "bytes": 462
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch06.txt",
+          "public_path": "runs/ch06/runner.txt",
+          "raw_sha256": "b7f31c195bdf05c721684fbf2bf294fbaf5a414ffd9998fca877fbaba814223a",
+          "public_sha256": "ddf9d79b299c09d8a9874a60cf2b61249268dce6e3719449bcfa32dafd2280f5",
+          "bytes": 40632
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch06/output.log",
+          "text": "PASS checks=11 failures=0 queue=0"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "06"
+      ],
+      "sources_sha256": {
+        "reference_rtl/uart_echo_controller.v": "3eaed301742a18b8e8652e3f73fb87da9b7635b59a557ed07429d0481de7d0ef",
+        "scripts/run_ch06.sh": "e0c5f3e4af8a6e5dd94c75a7b883db9450508851a512bfc84e5e7af03cc39484",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch06/tb_uart_arrays_queues.sv": "7fedf5e8e423d5c39226ccf049e0923551f4326d39f539d2e51a49998d1b2761",
+        "tb/ch06/uart_expect_pkg.sv": "50a86bddad5629bc57737498bde2011ea2a9a5ac263f807dfa3479be4d2e1b24"
+      }
+    },
+    {
+      "chapter": 7,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "07"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:14.049392+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch07/output.log",
+          "public_path": "legacy/ch07/output.log",
+          "raw_sha256": "63c6394b3238b749ce649cf52b6bb9156a41d50badc5b8d859c79fa0050ef466",
+          "public_sha256": "4f3955cbdabb6f79cbd8060b2e41b62fcfacbbe68626fea6c820eb0547036bfc",
+          "bytes": 471
+        },
+        {
+          "local_path": ".build/ch07/build.log",
+          "public_path": "legacy/ch07/build.log",
+          "raw_sha256": "a36f98c4c1bf2b49a1d6a432bff38135466015ca9bc9045e1b9b18201aa04324",
+          "public_sha256": "27cb520e020c941e3bead3d284823506eb5ee1cb8480f86ff3c1e681bcd0010b",
+          "bytes": 434
+        },
+        {
+          "local_path": ".build/ch07/tool_version.txt",
+          "public_path": "legacy/ch07/tool_version.txt",
+          "raw_sha256": "3b2f04f2e3b84e2aceacc794ae7737f09d70a5c05a24f9a30952e4630ceb98da",
+          "public_sha256": "3b2f04f2e3b84e2aceacc794ae7737f09d70a5c05a24f9a30952e4630ceb98da",
+          "bytes": 38
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch07/output.log",
+          "public_path": "runs/ch07/output.log",
+          "raw_sha256": "501428c843190abdb2584c8d2b3e55518d2d304337c4e8dd186b29eb5de99df1",
+          "public_sha256": "afb61b8876d623b1826b193e92b4c0f6d164410f9a677448a79100aba5731c22",
+          "bytes": 471
+        },
+        {
+          "local_path": ".build/ch07/build.log",
+          "public_path": "runs/ch07/build.log",
+          "raw_sha256": "d585f70853e3432053302f08442426c7e2bc2691c5a39cd04acf2ea5090011bd",
+          "public_sha256": "9ef3cfd81bb9630126f3bebeee7a9a2ce38fc245021a07d41001fe6196d9b2e0",
+          "bytes": 434
+        },
+        {
+          "local_path": ".build/ch07/tool_version.txt",
+          "public_path": "runs/ch07/tool_version.txt",
+          "raw_sha256": "3b2f04f2e3b84e2aceacc794ae7737f09d70a5c05a24f9a30952e4630ceb98da",
+          "public_sha256": "3b2f04f2e3b84e2aceacc794ae7737f09d70a5c05a24f9a30952e4630ceb98da",
+          "bytes": 38
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch07.txt",
+          "public_path": "runs/ch07/runner.txt",
+          "raw_sha256": "9f6297bd6af40a62f75c8bf9097f202c1650a8d5bb769eac3a9e76e00d6f8892",
+          "public_sha256": "78148543cb9575589ce73baaae8b7bee1b8c90337a1735623b23f86e6133add3",
+          "bytes": 41217
+        },
+        {
+          "local_path": ".build/ch07/ch07_uart_interface.vcd",
+          "public_path": "waves/ch07_uart_interface.vcd",
+          "raw_sha256": "bc1760d73d6f3bfc92f53c5c39998842467f061a20f1b00578a51a316c3fd100",
+          "public_sha256": "bc1760d73d6f3bfc92f53c5c39998842467f061a20f1b00578a51a316c3fd100",
+          "bytes": 1000
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch07/output.log",
+          "text": "PASS A_ACCEPT: data=41 valid=1 ready=1"
+        },
+        {
+          "log": "runs/ch07/output.log",
+          "text": "PASS Z_STALL: data=5a valid=1 ready=0"
+        },
+        {
+          "log": "runs/ch07/output.log",
+          "text": "PASS Z_ACCEPT: data=5a valid=1 ready=1"
+        },
+        {
+          "log": "runs/ch07/output.log",
+          "text": "PASS IDLE: data=5a valid=0 ready=1"
+        },
+        {
+          "log": "runs/ch07/output.log",
+          "text": "CH07 PASS: 4 cases checked"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "07"
+      ],
+      "sources_sha256": {
+        "reference_rtl/uart_echo_controller.v": "3eaed301742a18b8e8652e3f73fb87da9b7635b59a557ed07429d0481de7d0ef",
+        "scripts/run_ch07.sh": "fa7f72f3f55302ec4998c2c85148798838e89cb1fa460608b4204c53798ee9cf",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch07/tb_uart_interface.sv": "56acd0797cbe8150db854a53daa0ba14014f32e687991ef0e21cd7396315bee9",
+        "tb/ch07/uart_stream_if.sv": "0a30dc56d14754d7dbf14cd5e4c03335eb36b10630ec68166eccd973738fe41c"
+      }
+    },
+    {
+      "chapter": 8,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "08"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:14.269755+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch08/output.log",
+          "public_path": "legacy/ch08/output.log",
+          "raw_sha256": "b1b7627e3e3003742d261569228afbfd30e847d6e4026e453de92ef79f21d923",
+          "public_sha256": "e5f4375e2dd9000dbcbc7d2522d31d890203a159a90dc5c6603cbb54f2d655a4",
+          "bytes": 475
+        },
+        {
+          "local_path": ".build/ch08/build.log",
+          "public_path": "legacy/ch08/build.log",
+          "raw_sha256": "4430e1301a2f1b84a9ee2f41d12173a172faa28033942ae13848c3eb58f8bbff",
+          "public_sha256": "45e610ef93958d5c00d9733166cee7dc4464952ca48a6187ccbcbc5c3162f2f1",
+          "bytes": 434
+        },
+        {
+          "local_path": ".build/ch08/tool_version.txt",
+          "public_path": "legacy/ch08/tool_version.txt",
+          "raw_sha256": "3b2f04f2e3b84e2aceacc794ae7737f09d70a5c05a24f9a30952e4630ceb98da",
+          "public_sha256": "3b2f04f2e3b84e2aceacc794ae7737f09d70a5c05a24f9a30952e4630ceb98da",
+          "bytes": 38
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch08/output.log",
+          "public_path": "runs/ch08/output.log",
+          "raw_sha256": "9654b966be43416b986c886c66617df4e3c14d852cc02c848ddd04b6a47e0a92",
+          "public_sha256": "00c1deb2e083b84c8360a04b8cc5860ad7fb99a05fbdcdc9626d00740318cf95",
+          "bytes": 475
+        },
+        {
+          "local_path": ".build/ch08/build.log",
+          "public_path": "runs/ch08/build.log",
+          "raw_sha256": "9ceba2d6b374a3ca8fdb9b6cd239d0b97ada66e43865f195f771134c7592bb8b",
+          "public_sha256": "b9493aef5cc202922f7d877166b7f57a6d2d2ae6dbd3b4301196c12c4d6ed2be",
+          "bytes": 434
+        },
+        {
+          "local_path": ".build/ch08/tool_version.txt",
+          "public_path": "runs/ch08/tool_version.txt",
+          "raw_sha256": "3b2f04f2e3b84e2aceacc794ae7737f09d70a5c05a24f9a30952e4630ceb98da",
+          "public_sha256": "3b2f04f2e3b84e2aceacc794ae7737f09d70a5c05a24f9a30952e4630ceb98da",
+          "bytes": 38
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch08.txt",
+          "public_path": "runs/ch08/runner.txt",
+          "raw_sha256": "ad8c0b62b360f4e6aa0410d95518ea86735eddd0febfcf1140e949d9c98bde63",
+          "public_sha256": "b3775ca6ab8c00144064a886a5fdcdfca729d98b88e7352c5946ab28c5d89581",
+          "bytes": 40944
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch08/output.log",
+          "text": "PASS DIRECT_A data=41 valid=1 ready=1"
+        },
+        {
+          "log": "runs/ch08/output.log",
+          "text": "PASS RANDOM_IDLE data=2d valid=0 ready=1"
+        },
+        {
+          "log": "runs/ch08/output.log",
+          "text": "PASS RANDOM_STALL data=72 valid=1 ready=0"
+        },
+        {
+          "log": "runs/ch08/output.log",
+          "text": "PASS POLYMORPHIC_STALL data=72 valid=1 ready=0"
+        },
+        {
+          "log": "runs/ch08/output.log",
+          "text": "CH08 PASS: 4 cases checked"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "08"
+      ],
+      "sources_sha256": {
+        "reference_rtl/uart_echo_controller.v": "3eaed301742a18b8e8652e3f73fb87da9b7635b59a557ed07429d0481de7d0ef",
+        "scripts/run_ch08.sh": "71df3d70548ed5efa2c376d8b535114a1789979759ff8d5258fa415a95e2fc94",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch08/tb_uart_objects.sv": "4381fd3d32a861529877cf9dd6a397274d32b783b26320a72554693a9d39daa2"
+      }
+    },
+    {
+      "chapter": 9,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "09"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:14.438950+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch09/output.log",
+          "public_path": "legacy/ch09/output.log",
+          "raw_sha256": "0b414f4511f1ce66babe7a539e1f87eb5143ee562f6039f057a306d96fe50ea2",
+          "public_sha256": "e48fcc66db51d67f0e83269932c65be68ba6db5dfe44d879f96f8e14df8aa0e8",
+          "bytes": 469
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch09/output.log",
+          "public_path": "runs/ch09/output.log",
+          "raw_sha256": "0b414f4511f1ce66babe7a539e1f87eb5143ee562f6039f057a306d96fe50ea2",
+          "public_sha256": "e48fcc66db51d67f0e83269932c65be68ba6db5dfe44d879f96f8e14df8aa0e8",
+          "bytes": 469
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch09.txt",
+          "public_path": "runs/ch09/runner.txt",
+          "raw_sha256": "38ea691e6ecdd8cbd4406f1d49d351ea0d1fb80e2a14cfa2ccbd09a76bf0bab2",
+          "public_sha256": "2169da391252369a04a00f090170d071d6a718e720256ca042b272a53430cee2",
+          "bytes": 40473
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch09/output.log",
+          "text": "RESET_GATE PASS t=581"
+        },
+        {
+          "log": "runs/ch09/output.log",
+          "text": "PASS CH09 score_cycles=72 scenarios=6"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "09"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_ch09.sh": "9cf6c1a09112779e68304ef93c70a6ac1bced5eec527fcb21bfc606d615748ef",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch09/pwm_reference_model.sv": "af171dd79f5a983e43b3eb4b2e2b946d3b762cf2a8d7c2db0a0bd365cc83a523",
+        "tb/ch09/tb_pwm_scoreboard.sv": "d84690fa7a866c1876fd6bf0f55c820a6c9c22bd2ae61a18d46ad697c0d4f27c"
+      }
+    },
+    {
+      "chapter": 10,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "10"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:14.475090+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch10/normal.log",
+          "public_path": "legacy/ch10/normal.log",
+          "raw_sha256": "fc9e4ee9199a7fb078c6c05938aab54598847370ca0c9a68757b2d317c2326ff",
+          "public_sha256": "8958fd01f814507b86e2d0c47a837792e8b5715ed666e920d67535ba2d023694",
+          "bytes": 185
+        },
+        {
+          "local_path": ".build/ch10/fault_injection.log",
+          "public_path": "legacy/ch10/fault_injection.log",
+          "raw_sha256": "2b721c460b28acf42fea08eb98646ac3b2f490d76b3967b33b44ac9241edc89c",
+          "public_sha256": "3dffb31077eba579a10939a2b874e3cf39e5f13d91254b9f9efea3702c6b2660",
+          "bytes": 240
+        },
+        {
+          "local_path": ".build/ch10/apply_timeout.log",
+          "public_path": "legacy/ch10/apply_timeout.log",
+          "raw_sha256": "721d4746a90a7c0e490ad1d224504e2cb8c27754b7efc890c8e398e962b248e8",
+          "public_sha256": "8c58d7074c4f449b266101f3322bc6a1d3af993abeff5f9caebc3ac4d5e963c2",
+          "bytes": 295
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch10/normal.log",
+          "public_path": "runs/ch10/normal.log",
+          "raw_sha256": "fc9e4ee9199a7fb078c6c05938aab54598847370ca0c9a68757b2d317c2326ff",
+          "public_sha256": "8958fd01f814507b86e2d0c47a837792e8b5715ed666e920d67535ba2d023694",
+          "bytes": 185
+        },
+        {
+          "local_path": ".build/ch10/fault_injection.log",
+          "public_path": "runs/ch10/fault_injection.log",
+          "raw_sha256": "2b721c460b28acf42fea08eb98646ac3b2f490d76b3967b33b44ac9241edc89c",
+          "public_sha256": "3dffb31077eba579a10939a2b874e3cf39e5f13d91254b9f9efea3702c6b2660",
+          "bytes": 240
+        },
+        {
+          "local_path": ".build/ch10/apply_timeout.log",
+          "public_path": "runs/ch10/apply_timeout.log",
+          "raw_sha256": "721d4746a90a7c0e490ad1d224504e2cb8c27754b7efc890c8e398e962b248e8",
+          "public_sha256": "8c58d7074c4f449b266101f3322bc6a1d3af993abeff5f9caebc3ac4d5e963c2",
+          "bytes": 295
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch10.txt",
+          "public_path": "runs/ch10/runner.txt",
+          "raw_sha256": "d4e555ac5b14537ff60c7054abf6c72a57ba6ba100f7d98ea3a60052ff387801",
+          "public_sha256": "b598f116482b9ff71b747223eb97e77b559146d1084dcca2dd57f84ab7057383",
+          "bytes": 41415
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch10/normal.log",
+          "text": "PASS CH10 requests=3 checks=48"
+        },
+        {
+          "log": "runs/ch10/fault_injection.log",
+          "text": "FATAL: <REPO>/tb/ch10/tb_pwm_corner_reset_timeout.sv:65: DETECTED_INJECTED_FAULT dut=1 measured=0"
+        },
+        {
+          "log": "runs/ch10/apply_timeout.log",
+          "text": "FATAL: <REPO>/tb/ch10/tb_pwm_corner_reset_timeout.sv:121: DETECTED_APPLY_TIMEOUT duty=8 deadline=10clks"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "10"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_ch10.sh": "f41c5bb3703c0c2edeb2b78dc79223b5bc3de045f1ccc2e97a5cc40cd9f96893",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch10/tb_pwm_corner_reset_timeout.sv": "1da8a4e4252be688e26e8855ede94918b3d02c12830e8684f04f40c74c0e7bd2"
+      }
+    },
+    {
+      "chapter": 11,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "11"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:14.544450+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch11/xsim/ch11.log",
+          "public_path": "legacy/ch11/ch11.log",
+          "raw_sha256": "7415934e440f84dec6efb539ce5dc58af0b4c796429f7be2fdfb9e856493328b",
+          "public_sha256": "30997e3e6cef35f78b69a969bf9dff682e188fe0ce5b569693473b35b348df3b",
+          "bytes": 753
+        },
+        {
+          "local_path": ".build/ch11/xsim/ch11_negative.log",
+          "public_path": "legacy/ch11/ch11_negative.log",
+          "raw_sha256": "9ed3948200b69fd518885317652df2bce02976cecad2c3a26fa6c7fad73651c0",
+          "public_sha256": "bdcc4e080723f13de05728871e9449728ec6667cb3f0aef1f7b5f4ede58d42d2",
+          "bytes": 907
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch11/xsim/ch11.log",
+          "public_path": "runs/ch11/ch11.log",
+          "raw_sha256": "773e202cedfd433da9c9b13cc76c8495ff372e47caf5b6cafc34f5251b5a493a",
+          "public_sha256": "fb61509a081f415a6c21de59ee95bd3a0e791563c6093537cbf684e6247b0779",
+          "bytes": 753
+        },
+        {
+          "local_path": ".build/ch11/xsim/ch11_negative.log",
+          "public_path": "runs/ch11/ch11_negative.log",
+          "raw_sha256": "5c9dc19a3dfb5e48833ffe76ab4321d3e061717b8965b4dc6ef224016e2a4ccc",
+          "public_sha256": "989f5222cb0f38da99b715f5a55a5ebf74b7d568ebf17fc664e2abc620cf1fb3",
+          "bytes": 907
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch11.txt",
+          "public_path": "runs/ch11/runner.txt",
+          "raw_sha256": "3bd28da6320fbf8bdc12397f9978f13ed4b430a8f0d17698500fda2489d86db1",
+          "public_sha256": "2a196f476db8bb40cc4260f7ac22b4d8b48d98a78faedc0b239e3384c14f8472",
+          "bytes": 42039
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch11/ch11.log",
+          "text": "PASS CH11 SVA checks=4"
+        },
+        {
+          "log": "runs/ch11/ch11_negative.log",
+          "text": "Fatal: DETECTED_SVA_PENDING t=55"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "11"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch11/run_ch11.sh": "cd5200d41de0b8f3d020abb97784baec13f412314969d1819f56557cbea54e61",
+        "tb/ch11/tb_pwm_sva.sv": "a28ba22908e12dd234cd57ecb73bf5c216785dde02067c84e36b32560aac9921"
+      }
+    },
+    {
+      "chapter": 12,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "12"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:24.495950+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch12/run.Iyw6Yi/output.log",
+          "public_path": "legacy/ch12/output.log",
+          "raw_sha256": "e73414bea47f5f7fd888143ae1f53c80e11d044617e4c4872d3c08e3fe4f7c34",
+          "public_sha256": "6dfb2258d54f937ea686a6e1f1411989d4405776d099cc0b5ca4fe6222745217",
+          "bytes": 1124
+        },
+        {
+          "local_path": ".build/ch12/run.Iyw6Yi/xcrg.log",
+          "public_path": "legacy/ch12/xcrg.log",
+          "raw_sha256": "037632d87c26178498b51c9914df84e995448f6af71e76c85fc3caec907fbc48",
+          "public_sha256": "037632d87c26178498b51c9914df84e995448f6af71e76c85fc3caec907fbc48",
+          "bytes": 756
+        },
+        {
+          "local_path": ".build/ch12/run.Iyw6Yi/report/functionalCoverageReport/dashboard.html",
+          "public_path": "legacy/ch12/report/functionalCoverageReport/dashboard.html",
+          "raw_sha256": "14a30694442b4ccd0b1b71e89621215ecf20b30678e32c8cf5afcc8cbc813403",
+          "public_sha256": "cf951af82538dbfcec30618de218de663b8315b03d913e9d57daf98560792908",
+          "bytes": 1520
+        },
+        {
+          "local_path": ".build/ch12/run.Iyw6Yi/report/functionalCoverageReport/groups.html",
+          "public_path": "legacy/ch12/report/functionalCoverageReport/groups.html",
+          "raw_sha256": "0139be98d810f42bb382e90dc4c306023ef935f9ee5c3358180557eab2c472c4",
+          "public_sha256": "0139be98d810f42bb382e90dc4c306023ef935f9ee5c3358180557eab2c472c4",
+          "bytes": 2312
+        },
+        {
+          "local_path": ".build/ch12/run.Iyw6Yi/report/functionalCoverageReport/grp0.html",
+          "public_path": "legacy/ch12/report/functionalCoverageReport/grp0.html",
+          "raw_sha256": "be0e636e458838c522bb2d30bdddcc09b66ef29e57adf457ec11a81cc694dd85",
+          "public_sha256": "7ee608d61368f268610de4fc9f4859c45687037be86c814b5c0b9f5a10ffa7ca",
+          "bytes": 20357
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch12/run.0gBD2d/output.log",
+          "public_path": "runs/ch12/output.log",
+          "raw_sha256": "9903fd4cf1d8e3c794ba21be7f2ff63f5d14ab79275cc46c0afa75fabde94101",
+          "public_sha256": "53c1bbafdf9eddf293e4a20d162298d7fc06ef6b0abdddbd542f7d9c54f920d0",
+          "bytes": 1124
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/xcrg.log",
+          "public_path": "runs/ch12/xcrg.log",
+          "raw_sha256": "037632d87c26178498b51c9914df84e995448f6af71e76c85fc3caec907fbc48",
+          "public_sha256": "037632d87c26178498b51c9914df84e995448f6af71e76c85fc3caec907fbc48",
+          "bytes": 756
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/dashboard.html",
+          "public_path": "runs/ch12/report/functionalCoverageReport/dashboard.html",
+          "raw_sha256": "3e473f7328e17ba0b55c4fb397f51eeaf2b4674db1d22487e3d2b1b4cc3a63fb",
+          "public_sha256": "fc2152087175db8062c30f246ffd28be5279b104048295964660ff68857f001c",
+          "bytes": 1520
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/groups.html",
+          "public_path": "runs/ch12/report/functionalCoverageReport/groups.html",
+          "raw_sha256": "0139be98d810f42bb382e90dc4c306023ef935f9ee5c3358180557eab2c472c4",
+          "public_sha256": "0139be98d810f42bb382e90dc4c306023ef935f9ee5c3358180557eab2c472c4",
+          "bytes": 2312
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/grp0.html",
+          "public_path": "runs/ch12/report/functionalCoverageReport/grp0.html",
+          "raw_sha256": "be0e636e458838c522bb2d30bdddcc09b66ef29e57adf457ec11a81cc694dd85",
+          "public_sha256": "7ee608d61368f268610de4fc9f4859c45687037be86c814b5c0b9f5a10ffa7ca",
+          "bytes": 20357
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch12.txt",
+          "public_path": "runs/ch12/runner.txt",
+          "raw_sha256": "c047a5ccc2fa5d2c32bdca2fbe55e4f26bfa64a1f12a1fff45b9a01266b8be55",
+          "public_sha256": "e8bf4406d28194d5b38c541a689b2452b9528fd2ada80659995cce9fdb57d5a5",
+          "bytes": 43078
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.accordin.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.accordin.css",
+          "raw_sha256": "dd0738a33f64d5f5963c672ee8d235f4be0bf210e4dae3a74448753a0b27587c",
+          "public_sha256": "dd0738a33f64d5f5963c672ee8d235f4be0bf210e4dae3a74448753a0b27587c",
+          "bytes": 982
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.bintables.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.bintables.css",
+          "raw_sha256": "ba15b699260f84bacf22c9fc49f16f4d98642ae66c0b6fd8df76b2e009ebcc82",
+          "public_sha256": "ba15b699260f84bacf22c9fc49f16f4d98642ae66c0b6fd8df76b2e009ebcc82",
+          "bytes": 2424
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.checkboxes.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.checkboxes.css",
+          "raw_sha256": "d1414e00b0d403fb5ac39af547d38c682bf79745f5e5f1013aa88c90d4e54f4f",
+          "public_sha256": "d1414e00b0d403fb5ac39af547d38c682bf79745f5e5f1013aa88c90d4e54f4f",
+          "bytes": 4522
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.collapse.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.collapse.css",
+          "raw_sha256": "bef626e9c8783e7091142c5859fdd135e92b6875dc0cd3c90a9a9b662fda0c9c",
+          "public_sha256": "bef626e9c8783e7091142c5859fdd135e92b6875dc0cd3c90a9a9b662fda0c9c",
+          "bytes": 1172
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.colorbuttons.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.colorbuttons.css",
+          "raw_sha256": "679c5d8def7aae84a32f4abc905e2121d65da3ac19918d66c0f8a4c2fbd564bb",
+          "public_sha256": "679c5d8def7aae84a32f4abc905e2121d65da3ac19918d66c0f8a4c2fbd564bb",
+          "bytes": 1658
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.cptables.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.cptables.css",
+          "raw_sha256": "6ebcbdf857246fc0877d715a60b433972ec4426135ca1ca8fe115652524f17e7",
+          "public_sha256": "6ebcbdf857246fc0877d715a60b433972ec4426135ca1ca8fe115652524f17e7",
+          "bytes": 1069
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.crosstable.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.crosstable.css",
+          "raw_sha256": "b2071cad1cfbc5e04b22a50d79499a8e22fe8f5d8d0194bd1bbc5202ed2f9363",
+          "public_sha256": "b2071cad1cfbc5e04b22a50d79499a8e22fe8f5d8d0194bd1bbc5202ed2f9363",
+          "bytes": 232
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.dashtable.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.dashtable.css",
+          "raw_sha256": "42822a98bf6c4a2bdf73987350c5e8cba59888e65310b5db35a00db9d7846875",
+          "public_sha256": "42822a98bf6c4a2bdf73987350c5e8cba59888e65310b5db35a00db9d7846875",
+          "bytes": 148
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.fadein.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.fadein.css",
+          "raw_sha256": "0793e380858e472b030dd084525e0df787955c1bb538cd3378fc15c98efe68a7",
+          "public_sha256": "0793e380858e472b030dd084525e0df787955c1bb538cd3378fc15c98efe68a7",
+          "bytes": 125
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.groupstable.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.groupstable.css",
+          "raw_sha256": "b63879fa9bbc3d7b25908a8949e2af8d6dc0f196a9a0f80ae65ed742300ff3d7",
+          "public_sha256": "b63879fa9bbc3d7b25908a8949e2af8d6dc0f196a9a0f80ae65ed742300ff3d7",
+          "bytes": 150
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.grpdivs.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.grpdivs.css",
+          "raw_sha256": "7ca35a510e0d5658421bd50fd226c9c3dc2753bad43b5b8de46943a72970c309",
+          "public_sha256": "7ca35a510e0d5658421bd50fd226c9c3dc2753bad43b5b8de46943a72970c309",
+          "bytes": 518
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.grpheader.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.grpheader.css",
+          "raw_sha256": "7e41e47ca57b981ef4a0debe7b1a2958d4c19d9e08cf26758456fd137043d54f",
+          "public_sha256": "7e41e47ca57b981ef4a0debe7b1a2958d4c19d9e08cf26758456fd137043d54f",
+          "bytes": 9857
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.grplayout.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.grplayout.css",
+          "raw_sha256": "3a6c6574c4764d9191cf5ba37314f6b641d68eb4798e3379af09d4eee5e1767f",
+          "public_sha256": "3a6c6574c4764d9191cf5ba37314f6b641d68eb4798e3379af09d4eee5e1767f",
+          "bytes": 849
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.grptable.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.grptable.css",
+          "raw_sha256": "e550ee9335e3cefe78b04d68f6c7c1b39b57d5eaa952707906c7dfa828bca57b",
+          "public_sha256": "e550ee9335e3cefe78b04d68f6c7c1b39b57d5eaa952707906c7dfa828bca57b",
+          "bytes": 171
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.header.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.header.css",
+          "raw_sha256": "3fb2ec91c06580c802c03a108aaf9e0d00c466ed1cefb700921a4f342eaf1317",
+          "public_sha256": "3fb2ec91c06580c802c03a108aaf9e0d00c466ed1cefb700921a4f342eaf1317",
+          "bytes": 9393
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.sorttablebuttons.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.sorttablebuttons.css",
+          "raw_sha256": "c7f3978f87de39516d162f18df97b696ae041f140fe82cb4275de1aa20c863be",
+          "public_sha256": "c7f3978f87de39516d162f18df97b696ae041f140fe82cb4275de1aa20c863be",
+          "bytes": 645
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.tabs.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.tabs.css",
+          "raw_sha256": "34ee74c4f3ed7025db4a77bf68bc9c24dc4d715bd5376eaf82ef67f1ae6f5740",
+          "public_sha256": "34ee74c4f3ed7025db4a77bf68bc9c24dc4d715bd5376eaf82ef67f1ae6f5740",
+          "bytes": 1114
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.css/.tooltips.css",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.css/.tooltips.css",
+          "raw_sha256": "ac01bfdd15a3186be107ce7e4a9d8fe76275f10181d40935878bd45a6a9744ba",
+          "public_sha256": "ac01bfdd15a3186be107ce7e4a9d8fe76275f10181d40935878bd45a6a9744ba",
+          "bytes": 4971
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.js/.checkdisp.js",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.js/.checkdisp.js",
+          "raw_sha256": "4c13ab3b0efb2abf63b240bbfa90dafad4db73797bf23dcdf449730b4191ad0e",
+          "public_sha256": "4c13ab3b0efb2abf63b240bbfa90dafad4db73797bf23dcdf449730b4191ad0e",
+          "bytes": 254
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.js/.collapsible.js",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.js/.collapsible.js",
+          "raw_sha256": "480913de6953cb222727c33e51d72fce5e6397b730df2fc44f20a708f86c62ec",
+          "public_sha256": "480913de6953cb222727c33e51d72fce5e6397b730df2fc44f20a708f86c62ec",
+          "bytes": 475
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.js/.cptablecollapse.js",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.js/.cptablecollapse.js",
+          "raw_sha256": "03399c022cda8c7f378a19666826ada52dc9eff3a1b2471e5051dd5fe824fab1",
+          "public_sha256": "03399c022cda8c7f378a19666826ada52dc9eff3a1b2471e5051dd5fe824fab1",
+          "bytes": 385
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.js/.showaccordin.js",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.js/.showaccordin.js",
+          "raw_sha256": "bf6c0b7c60a2276411fd1b0457ab4b80a73f96d607fb0fd3892fc4267f6883d9",
+          "public_sha256": "bf6c0b7c60a2276411fd1b0457ab4b80a73f96d607fb0fd3892fc4267f6883d9",
+          "bytes": 394
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.js/.showbintable.js",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.js/.showbintable.js",
+          "raw_sha256": "790d3e8931d647739ea1adb7e09579a33449890261493ab91476fe007268e4ad",
+          "public_sha256": "790d3e8931d647739ea1adb7e09579a33449890261493ab91476fe007268e4ad",
+          "bytes": 1197
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.js/.smoothscroll.js",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.js/.smoothscroll.js",
+          "raw_sha256": "71c53fcfa867675a94275bead1d697478d140d1b52749aff9a3678a4e389dc11",
+          "public_sha256": "71c53fcfa867675a94275bead1d697478d140d1b52749aff9a3678a4e389dc11",
+          "bytes": 789
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.js/.sortTable.js",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.js/.sortTable.js",
+          "raw_sha256": "4b6e2ba26d6d9ae06a7aa0a2d681ecd1bfa3bdd7276cea8fee857bad0a7ecbb6",
+          "public_sha256": "4b6e2ba26d6d9ae06a7aa0a2d681ecd1bfa3bdd7276cea8fee857bad0a7ecbb6",
+          "bytes": 1612
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.js/.stickyheader.js",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.js/.stickyheader.js",
+          "raw_sha256": "3616f945a34b5a3f265465d552c8c9ee7a03d934ac5fb2b451e674c54c5cff5f",
+          "public_sha256": "3616f945a34b5a3f265465d552c8c9ee7a03d934ac5fb2b451e674c54c5cff5f",
+          "bytes": 547
+        },
+        {
+          "local_path": ".build/ch12/run.0gBD2d/report/functionalCoverageReport/.js/.togglevisibility.js",
+          "public_path": "runs/ch12/report/functionalCoverageReport/.js/.togglevisibility.js",
+          "raw_sha256": "342ef34abc555d7edb420fed77bc8d1d975faf0f8da80d36660960828bfc4e61",
+          "public_sha256": "342ef34abc555d7edb420fed77bc8d1d975faf0f8da80d36660960828bfc4e61",
+          "bytes": 213
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch12/output.log",
+          "text": "PASS CH12 cases=12 coverage=100.00%"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "12"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch12/run_ch12.sh": "c618a813452a85cfecce6af564abf64eb320f23d2dc5d3a8df613b6caf777055",
+        "tb/ch12/tb_pwm_coverage.sv": "8f7702479ac6d621ebf169fe796c9e055aba35c16a94a69aade0eb94353da794"
+      }
+    },
+    {
+      "chapter": 13,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "13"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:31.994203+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch13/simulation.log",
+          "public_path": "legacy/ch13/simulation.log",
+          "raw_sha256": "50d82d3e2553d128153172a19c950dc7c85a4b66d90b6f4aef686c52564248e2",
+          "public_sha256": "aa1a3111cb9899bfdf7ebd8c609bedffed6aee6758c8e26d6b23127052ae13fe",
+          "bytes": 262
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch13/simulation.log",
+          "public_path": "runs/ch13/simulation.log",
+          "raw_sha256": "50d82d3e2553d128153172a19c950dc7c85a4b66d90b6f4aef686c52564248e2",
+          "public_sha256": "aa1a3111cb9899bfdf7ebd8c609bedffed6aee6758c8e26d6b23127052ae13fe",
+          "bytes": 262
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch13.txt",
+          "public_path": "runs/ch13/runner.txt",
+          "raw_sha256": "a295797ca899d129a6788459d63f32235f418871c344b296efb94e026e133dba",
+          "public_sha256": "6fe8f19ecacfa68b52355bb207bfc86adf54ba0a314d714c7855cf4a43bcf391",
+          "bytes": 40023
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch13/simulation.log",
+          "text": "PASS CH13 accepted=3 checks=14"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "13"
+      ],
+      "sources_sha256": {
+        "reference_rtl/uart_echo_controller.v": "3eaed301742a18b8e8652e3f73fb87da9b7635b59a557ed07429d0481de7d0ef",
+        "scripts/run_ch13.sh": "6e7a143ff0d38d0274f44021b98201b063fd255ef7344ca9d21c2bead03e4da7",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch13/tb_uart_stream.sv": "906d56d0afa1a3717eec702469961140a4ed2b8598d786d310ef48a7b3dd29b4"
+      }
+    },
+    {
+      "chapter": 14,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "14"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:32.067747+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch14/simulation.log",
+          "public_path": "legacy/ch14/simulation.log",
+          "raw_sha256": "5e556de2874775515a04c552ce09138b7b3623658a6baa5670b9d745ba467c47",
+          "public_sha256": "6e1d40745119b484dbd35b2c947184bf1988d7a8429361ce3297c61e7a0ed7c8",
+          "bytes": 300
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch14/simulation.log",
+          "public_path": "runs/ch14/simulation.log",
+          "raw_sha256": "5e556de2874775515a04c552ce09138b7b3623658a6baa5670b9d745ba467c47",
+          "public_sha256": "6e1d40745119b484dbd35b2c947184bf1988d7a8429361ce3297c61e7a0ed7c8",
+          "bytes": 300
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch14.txt",
+          "public_path": "runs/ch14/runner.txt",
+          "raw_sha256": "fd14c999478ddcdcba05254b55b8b2133736d334db625de317d2f161a964a3ec",
+          "public_sha256": "f86804d8b4aff246e573e3f3a7bcc5496e0469300177e527625db964b5c71725",
+          "bytes": 40238
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch14/simulation.log",
+          "text": "T1_TX_FIFO_PASS accepted=18 received=18"
+        },
+        {
+          "log": "runs/ch14/simulation.log",
+          "text": "T2_RX_BACKPRESSURE_PASS checked=16"
+        },
+        {
+          "log": "runs/ch14/simulation.log",
+          "text": "T3_RX_OVERRUN_PASS kept=17 dropped=1"
+        },
+        {
+          "log": "runs/ch14/simulation.log",
+          "text": "T4_RESET_PASS"
+        },
+        {
+          "log": "runs/ch14/simulation.log",
+          "text": "PASS CH14 tx=18 rx=16+17 overrun=1 reset=1"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "14"
+      ],
+      "sources_sha256": {
+        "reference_rtl/uart_core.v": "b5f3cb2825797958aca3c9a3f97b6425f339f46a216cca41cfd49f318eee9683",
+        "reference_rtl/uart_rx.v": "b4aff65d44e8749eacd001a15141d52e42fde9878b32553f3c6d5359a1c4609a",
+        "reference_rtl/uart_tx.v": "2a5b7586e775cec77df708156ac4717ff5bca2a9b0352568121934f4fbafaa5b",
+        "scripts/run_ch14.sh": "ea3d18540195ba0b38d018d56477dcd369db99747681406c0381f3adb6aeea40",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch14/tb_uart_fifo_flow.sv": "230bdff0983b2aae060bea5624fb9eb15dca2a78df400d303e3ab6262bf650b9"
+      }
+    },
+    {
+      "chapter": 15,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "15"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:32.190334+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch15/simulation.log",
+          "public_path": "legacy/ch15/simulation.log",
+          "raw_sha256": "5fff815b6f30de8803469da87575c586d5e56c266b384943aee8a549dc198104",
+          "public_sha256": "6c1ed7af06594956356b46e50cbfa03e47860bd76636aa303bc04ae2d5cb95e3",
+          "bytes": 272
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch15/simulation.log",
+          "public_path": "runs/ch15/simulation.log",
+          "raw_sha256": "5fff815b6f30de8803469da87575c586d5e56c266b384943aee8a549dc198104",
+          "public_sha256": "6c1ed7af06594956356b46e50cbfa03e47860bd76636aa303bc04ae2d5cb95e3",
+          "bytes": 272
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch15.txt",
+          "public_path": "runs/ch15/runner.txt",
+          "raw_sha256": "9b08f08b52fb3ad54387417fbc1e35188fc10788033e3d9a0f5d41530513b5c1",
+          "public_sha256": "c058cbf78ee3bb60d3bff221967a49b9e6a87dbf2aeb907850de404143cd1e12",
+          "bytes": 40162
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch15/simulation.log",
+          "text": "T1_AW_BEFORE_W_PASS"
+        },
+        {
+          "log": "runs/ch15/simulation.log",
+          "text": "T2_W_BEFORE_AW_WSTRB_PASS"
+        },
+        {
+          "log": "runs/ch15/simulation.log",
+          "text": "T3_CONTROL_RO_PASS"
+        },
+        {
+          "log": "runs/ch15/simulation.log",
+          "text": "T4_ZERO_RO_ALIAS_PASS"
+        },
+        {
+          "log": "runs/ch15/simulation.log",
+          "text": "T5_RESET_PENDING_PASS"
+        },
+        {
+          "log": "runs/ch15/simulation.log",
+          "text": "PASS CH15 commits=7 checks=18"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "15"
+      ],
+      "sources_sha256": {
+        "reference_rtl/axi4lite_slave_adapter.v": "1fa68691b1e084bfc0106e2b8cc4176c34f453fb9c7e3a03445c73f55455dae1",
+        "reference_rtl/custom_register_bank.v": "8ab6ad93899d148d7dbf3d8ac965d0826f52a29e4f501616221ad7b0aab9d7a7",
+        "scripts/run_ch15.sh": "a2a07f25f96c0c6413617773c04d8f66d7945b81d0bbe6a07abb43c4be72a2e6",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch15/tb_axi4lite_registers.sv": "5b99a4b894d5389cfcf1bb6151851848bdc8d043b26706038480d52735b50edb"
+      }
+    },
+    {
+      "chapter": 16,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "16"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:32.263001+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch16/simulation.log",
+          "public_path": "legacy/ch16/simulation.log",
+          "raw_sha256": "a9d0b1613361f82f4c3aa1d8ee045475d7aecc0ef582080e6d2f96a3be17a8aa",
+          "public_sha256": "46d2a46629738a98621e19a81dff684fd0a5fb022462876923e6d6267d443d7d",
+          "bytes": 177
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch16/simulation.log",
+          "public_path": "runs/ch16/simulation.log",
+          "raw_sha256": "a9d0b1613361f82f4c3aa1d8ee045475d7aecc0ef582080e6d2f96a3be17a8aa",
+          "public_sha256": "46d2a46629738a98621e19a81dff684fd0a5fb022462876923e6d6267d443d7d",
+          "bytes": 177
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch16.txt",
+          "public_path": "runs/ch16/runner.txt",
+          "raw_sha256": "4baeaa9b819c89bb39c169484e634bfacea5f98a1dbb111a5e52fb07542e9d91",
+          "public_sha256": "646c1db989d24eac8a9d7dd8e4f3794939b8b3cea6bd31cf863d061f1b4b3c93",
+          "bytes": 40004
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch16/simulation.log",
+          "text": "PASS CH16 cycles=21 basic_valid=12 pipe_valid=10"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "16"
+      ],
+      "sources_sha256": {
+        "reference_rtl/mac_core.v": "32e11915722acf1028e2bf3cccc5b10d8f525a85b1731f92f821d73122a09857",
+        "reference_rtl/mac_pipeline_core.v": "9e05b10ee7cf55f3ef46b02ab920ad688504561929576fa8ab50acd6bc57c1f1",
+        "scripts/run_ch16.sh": "ae7336eb8891fbfe20b15718826e096c41eaba61cd44485752447b943e45ae67",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch16/tb_mac_integer.sv": "afcc45ae697d8623794a33ec52cf0daee6b2c4a6bdb5b9395a1bdeaf6eddcf07"
+      }
+    },
+    {
+      "chapter": 17,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "17"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:32.337016+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch17/run.fdjMG1/normal.log",
+          "public_path": "legacy/ch17/normal.log",
+          "raw_sha256": "69677dd6575971c1bbc82792aca5cfe79641c06322013084eb7a58f0c7583ee0",
+          "public_sha256": "8b79e002e2bd5c741a963794ba037e4be90212b6031f5258246d06813b536dac",
+          "bytes": 2632
+        },
+        {
+          "local_path": ".build/ch17/run.fdjMG1/negative.log",
+          "public_path": "legacy/ch17/negative.log",
+          "raw_sha256": "3f677ca96b82dfd41881239865774a8b353e1de66938e0491c35505ae703bc64",
+          "public_sha256": "a0783262d3be628185ab51ddcba582999ee295f37af19e5fff161f46fa90c472",
+          "bytes": 2025
+        },
+        {
+          "local_path": ".build/ch17/run.fdjMG1/elaborate.log",
+          "public_path": "legacy/ch17/elaborate.log",
+          "raw_sha256": "77dec6130be7053132eccb54f02e672a856252cb919d6f5a80d6aabeeb08265e",
+          "public_sha256": "77dec6130be7053132eccb54f02e672a856252cb919d6f5a80d6aabeeb08265e",
+          "bytes": 1033
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch17/run.D2yOid/normal.log",
+          "public_path": "runs/ch17/normal.log",
+          "raw_sha256": "2222fcbaf1917edc00a3e40fd4d0a09fc8da60f17cfd957b280c348d211a9968",
+          "public_sha256": "1b0c0c91917374b03579e0afbd47ea8943c05ae3c84819fedcf14f748c0d7a0d",
+          "bytes": 2632
+        },
+        {
+          "local_path": ".build/ch17/run.D2yOid/negative.log",
+          "public_path": "runs/ch17/negative.log",
+          "raw_sha256": "802d51c5830ad988e3775630c99adf55c3959eac935bc456089662780e617eab",
+          "public_sha256": "1b691ff42c8dad15035848acde97e8406aa4b3b4fd0fe29c8e1a766db7f23fe2",
+          "bytes": 2025
+        },
+        {
+          "local_path": ".build/ch17/run.D2yOid/elaborate.log",
+          "public_path": "runs/ch17/elaborate.log",
+          "raw_sha256": "77dec6130be7053132eccb54f02e672a856252cb919d6f5a80d6aabeeb08265e",
+          "public_sha256": "77dec6130be7053132eccb54f02e672a856252cb919d6f5a80d6aabeeb08265e",
+          "bytes": 1033
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch17.txt",
+          "public_path": "runs/ch17/runner.txt",
+          "raw_sha256": "7b182532a0faa9aefeff7d9c2a6597b420bc07e077c0bfd13c0684579ea9e132",
+          "public_sha256": "36b23256ffdec14fbe43110a7990a25361b0df3a50f300c82d2aaa068c86f39e",
+          "bytes": 44458
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch17/normal.log",
+          "text": "UVM_INFO <REPO>/tb/ch17/tb_pwm_uvm.sv(116) @ 180000: uvm_test_top.env [RESULT] PASS CH17 checks=8"
+        },
+        {
+          "log": "runs/ch17/normal.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch17/normal.log",
+          "text": "UVM_FATAL :    0"
+        },
+        {
+          "log": "runs/ch17/negative.log",
+          "text": "UVM_FATAL <REPO>/tb/ch17/tb_pwm_uvm.sv(34) @ 0: uvm_test_top.env [NOVIF] pwm_if was not provided"
+        },
+        {
+          "log": "runs/ch17/negative.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch17/negative.log",
+          "text": "UVM_FATAL :    1"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "17"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_ch17.sh": "35d03c330c597d867dc00ec2b5780611f974009dda41ae57599ac6bb85accf57",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch17/tb_pwm_uvm.sv": "d92b91e797b7946410a62dd2cb28717f747bc2d91304409e619af3f0083f8957"
+      }
+    },
+    {
+      "chapter": 18,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "18"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:19:53.113197+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch18/run.m8Njsq/normal.log",
+          "public_path": "legacy/ch18/normal.log",
+          "raw_sha256": "80acc19b8b36fa303174f898462e2f2e8a6b484cf6d9756a25451c25cb7b5560",
+          "public_sha256": "e41cbaf3c743dbcff8d869726ffa8b2d485f7488379136290d8cfbe770bc46dd",
+          "bytes": 2833
+        },
+        {
+          "local_path": ".build/ch18/run.m8Njsq/negative.log",
+          "public_path": "legacy/ch18/negative.log",
+          "raw_sha256": "82bf3a652535b3a589dade85a343aa04a23306941642feccef47654cc792d538",
+          "public_sha256": "77a2d78043ed5a5617394b24310b96f2fc43d530f4e5a1d39fc2943cb921589c",
+          "bytes": 2434
+        },
+        {
+          "local_path": ".build/ch18/run.m8Njsq/elaborate.log",
+          "public_path": "legacy/ch18/elaborate.log",
+          "raw_sha256": "ccda2ab49f8b4b1ad91eee37218f8a51f9fc459cf57537b46452be4eeb6b2161",
+          "public_sha256": "ccda2ab49f8b4b1ad91eee37218f8a51f9fc459cf57537b46452be4eeb6b2161",
+          "bytes": 1059
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch18/run.btzHl3/normal.log",
+          "public_path": "runs/ch18/normal.log",
+          "raw_sha256": "05c9e790db547b123183ab7e568450fa6b5c82ca98ffcc4bf94ad5dfbf673681",
+          "public_sha256": "0f1350219d79384fb2f25428ddf452c14bd533b7b03bad3a82dcb842ac099fd1",
+          "bytes": 2833
+        },
+        {
+          "local_path": ".build/ch18/run.btzHl3/negative.log",
+          "public_path": "runs/ch18/negative.log",
+          "raw_sha256": "a8b7c9e79e340099f2dc00ad68297b969a0f7ad99b6d83bc1cbf578b26321f9b",
+          "public_sha256": "eb10b9d84c436ef1030bbf3225ab01476c23500601591f676e4e2dc352f0430c",
+          "bytes": 2434
+        },
+        {
+          "local_path": ".build/ch18/run.btzHl3/elaborate.log",
+          "public_path": "runs/ch18/elaborate.log",
+          "raw_sha256": "ccda2ab49f8b4b1ad91eee37218f8a51f9fc459cf57537b46452be4eeb6b2161",
+          "public_sha256": "ccda2ab49f8b4b1ad91eee37218f8a51f9fc459cf57537b46452be4eeb6b2161",
+          "bytes": 1059
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch18.txt",
+          "public_path": "runs/ch18/runner.txt",
+          "raw_sha256": "48fa410d1c301b474333cf9d54e1e8435632e3df3a79ac412d37a6b4bf865599",
+          "public_sha256": "1e441e2dbb0420b2063ab31f7aed000a22adb011014b854629ab0ba01c8761d3",
+          "bytes": 44752
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch18/normal.log",
+          "text": "UVM_INFO <REPO>/tb/ch18/tb_pwm_sequence_driver.sv(222) @ 500000: uvm_test_top [RESULT] PASS CH18 checks=3 samples=24"
+        },
+        {
+          "log": "runs/ch18/normal.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch18/normal.log",
+          "text": "UVM_FATAL :    0"
+        },
+        {
+          "log": "runs/ch18/negative.log",
+          "text": "UVM_FATAL <REPO>/tb/ch18/tb_pwm_sequence_driver.sv(89) @ 180000: uvm_test_top.env.drv [INVALID_DUTY] duty=9 completed=1"
+        },
+        {
+          "log": "runs/ch18/negative.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch18/negative.log",
+          "text": "UVM_FATAL :    1"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "18"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_ch18.sh": "a45cd609a4f3a40ebacc1b8ffb707f46689d1cfcaac4fb054d4db71d96449d97",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch18/tb_pwm_sequence_driver.sv": "482bf19238d602cc302ff51861dfab3cf028b69df6358a3f7285281e4226c53b"
+      }
+    },
+    {
+      "chapter": 19,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "19"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:20:13.496601+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch19/run.Ufk9kY/normal.log",
+          "public_path": "legacy/ch19/normal.log",
+          "raw_sha256": "67ef5e839b530ff3a39bb665d77770969fe38fa3c9dc8009d090e1c5dbb1a5ea",
+          "public_sha256": "9a41e69be57a6614bb8e8256558e7c7e7f86be7cbae2345a3cb9497046304cfd",
+          "bytes": 3188
+        },
+        {
+          "local_path": ".build/ch19/run.Ufk9kY/negative.log",
+          "public_path": "legacy/ch19/negative.log",
+          "raw_sha256": "89742932d1cce5112d4849522c8ad99cdf0f6327f9ac9cff1119bdf0a96a4b46",
+          "public_sha256": "96dd121e1c705dc9a422f467da8f05284f096f3b0735face5173c07f77997224",
+          "bytes": 2669
+        },
+        {
+          "local_path": ".build/ch19/run.Ufk9kY/elaborate.log",
+          "public_path": "legacy/ch19/elaborate.log",
+          "raw_sha256": "d37c12b82ba158d66b2fb2e6173ad7887f6967b71e20b6a1dbb28bf5f979882c",
+          "public_sha256": "d37c12b82ba158d66b2fb2e6173ad7887f6967b71e20b6a1dbb28bf5f979882c",
+          "bytes": 1077
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch19/run.mNnQAN/normal.log",
+          "public_path": "runs/ch19/normal.log",
+          "raw_sha256": "08510d4f7feb492b66b5c93ad69b387d52098437b368c9e76ba2a6f7e1937cc1",
+          "public_sha256": "8de719b7232018364b64c447be3635bad1276684861b392a21b35abbefa2d577",
+          "bytes": 3188
+        },
+        {
+          "local_path": ".build/ch19/run.mNnQAN/negative.log",
+          "public_path": "runs/ch19/negative.log",
+          "raw_sha256": "0626d2ba923f5410688ff5c3be2b814cefbd2d7cce1bab33d19da88a2836286f",
+          "public_sha256": "97f92d0d202feb4ec19c8eea1b8fe832e374246c954f83d41239f830e307233e",
+          "bytes": 2669
+        },
+        {
+          "local_path": ".build/ch19/run.mNnQAN/elaborate.log",
+          "public_path": "runs/ch19/elaborate.log",
+          "raw_sha256": "d37c12b82ba158d66b2fb2e6173ad7887f6967b71e20b6a1dbb28bf5f979882c",
+          "public_sha256": "d37c12b82ba158d66b2fb2e6173ad7887f6967b71e20b6a1dbb28bf5f979882c",
+          "bytes": 1077
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch19.txt",
+          "public_path": "runs/ch19/runner.txt",
+          "raw_sha256": "e45c679d04ca76346a18f5e8ccae017b581586578192693fe70e81d5e5a85fb1",
+          "public_sha256": "5deba35041a95c19f8105f6338c4a0a400edd32c3fc34770cd864b4b59b8b441",
+          "bytes": 45181
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch19/normal.log",
+          "text": "UVM_INFO <REPO>/tb/ch19/tb_pwm_monitor_agent_scoreboard.sv(324) @ 340000: uvm_test_top [RESULT] PASS CH19 requests=3 applied=3 samples=24"
+        },
+        {
+          "log": "runs/ch19/normal.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch19/normal.log",
+          "text": "UVM_FATAL :    0"
+        },
+        {
+          "log": "runs/ch19/negative.log",
+          "text": "UVM_FATAL <REPO>/tb/ch19/tb_pwm_monitor_agent_scoreboard.sv(237) @ 126000: uvm_test_top.env.sb [SB_PWM] t=126 phase=2 expected=0 got=1"
+        },
+        {
+          "log": "runs/ch19/negative.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch19/negative.log",
+          "text": "UVM_FATAL :    1"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "19"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_ch19.sh": "1e5ff019f0d73f171e4e50c93ef497db5568f32a05407d356edc6bef2205a84d",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch19/tb_pwm_monitor_agent_scoreboard.sv": "bf290259e56cc6df8aee01871bbeaa4e8658686742aec297556b7b955ef4bc3b"
+      }
+    },
+    {
+      "chapter": 20,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "20"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:20:33.527580+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch20/run.75rup7/normal.log",
+          "public_path": "legacy/ch20/normal.log",
+          "raw_sha256": "e9d9815171c40c6ded6175383fd7d7cda57748b7e3ccb35aa2b84a1fa26f1e96",
+          "public_sha256": "adeca7f23c577d907a3107128099dd34cb2832cf59e19621c1b904dcc08c1004",
+          "bytes": 3605
+        },
+        {
+          "local_path": ".build/ch20/run.75rup7/alt.log",
+          "public_path": "legacy/ch20/alt.log",
+          "raw_sha256": "baaa91f9140b3f60a2037e15df21f0503e78f33b7319da0763b3bf1ee136c2f0",
+          "public_sha256": "6f104488233ad1b8cd563b1571f6f8b533f16ba389edbcaa3ceb330b97980e2c",
+          "bytes": 3627
+        },
+        {
+          "local_path": ".build/ch20/run.75rup7/NO_OVERRIDE.log",
+          "public_path": "legacy/ch20/NO_OVERRIDE.log",
+          "raw_sha256": "75b994b73a5f7887f905fd54470a4e4c3f6955226f3833cce7a410ec82da0981",
+          "public_sha256": "669d6ac3b0d22c070f8a921b4e53b29a3db246610d97df2414cd9db7e4b327a2",
+          "bytes": 2302
+        },
+        {
+          "local_path": ".build/ch20/run.75rup7/NO_CFG.log",
+          "public_path": "legacy/ch20/NO_CFG.log",
+          "raw_sha256": "38bad718aad4d965bde1b77b48d097b2cb7aae7b16eca70f5991010f06b1b29b",
+          "public_sha256": "45db4c6e50e3c919c18b515a849922b59810f86f36b7ad3cda94a52f291a4628",
+          "bytes": 2057
+        },
+        {
+          "local_path": ".build/ch20/run.75rup7/EARLY_DROP.log",
+          "public_path": "legacy/ch20/EARLY_DROP.log",
+          "raw_sha256": "e8851b1e572d9fc82668f795538070290e2371446d10f3d6389bc2ac438bf2c6",
+          "public_sha256": "d32136daba23b8f2fa1be8fecb8e76840cbb22c280b700afea4a30ee1ccecd71",
+          "bytes": 3608
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch20/run.y8dfn7/normal.log",
+          "public_path": "runs/ch20/normal.log",
+          "raw_sha256": "b51a7ed6b7536ce5fa5ff823ad3d4e1bea949f08582cc7b248f865c8c19697e8",
+          "public_sha256": "d70531424473b36fda7bf82ec0f2ec7b13d8d0e09d0627cb08376e71d9e2b6a0",
+          "bytes": 3605
+        },
+        {
+          "local_path": ".build/ch20/run.y8dfn7/alt.log",
+          "public_path": "runs/ch20/alt.log",
+          "raw_sha256": "1de9e6fe5bece87fa9af9673dfd2c8322e587a874bc89cefb50e0f695f12cd2e",
+          "public_sha256": "b89303acb18310843534c28501f6af2b4c9199b1a132301dfe2dc3b66cae52cc",
+          "bytes": 3627
+        },
+        {
+          "local_path": ".build/ch20/run.y8dfn7/NO_OVERRIDE.log",
+          "public_path": "runs/ch20/NO_OVERRIDE.log",
+          "raw_sha256": "019cf5907637d064675707e5b584b0c6970b4e75eec95dd1fe8c29fb283d8f9a",
+          "public_sha256": "6c5fad09ba59b2659021345f628866e7fede7b480565e0e450fc2d346b9b76f6",
+          "bytes": 2302
+        },
+        {
+          "local_path": ".build/ch20/run.y8dfn7/NO_CFG.log",
+          "public_path": "runs/ch20/NO_CFG.log",
+          "raw_sha256": "da9ce08707a74ef8ce43fc6eaaacb7b782b7edd8979cdec2cac0846bdc7f64a1",
+          "public_sha256": "07457dbf064271819046c98c1b19c161389896af3490233036f7a1c24702d072",
+          "bytes": 2057
+        },
+        {
+          "local_path": ".build/ch20/run.y8dfn7/EARLY_DROP.log",
+          "public_path": "runs/ch20/EARLY_DROP.log",
+          "raw_sha256": "f45f848c7cab4400c87e20d9c201735716d797741ad437cbd11b7c0ac65b5db1",
+          "public_sha256": "0c0b6d01ff728bea719985f8b169cc658fc9e07e3d7ead1902d0614470777ba9",
+          "bytes": 3608
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch20.txt",
+          "public_path": "runs/ch20/runner.txt",
+          "raw_sha256": "373427f8b8aa99d55446017055ac904ba8730d45ca65dc1b5483fab66a8493f9",
+          "public_sha256": "b6e151ef5f062305068a117ca3076145bb66b8d2c50b710844de2c84350c0e33",
+          "bytes": 51678
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch20/normal.log",
+          "text": "UVM_INFO <REPO>/tb/ch20/tb_pwm_factory_config_objection.sv(410) @ 340000: uvm_test_top [RESULT] PASS CH20 factory=traced plan=2,6,0 applied=3 samples=24"
+        },
+        {
+          "log": "runs/ch20/normal.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch20/normal.log",
+          "text": "UVM_FATAL :    0"
+        },
+        {
+          "log": "runs/ch20/alt.log",
+          "text": "UVM_INFO <REPO>/tb/ch20/tb_pwm_factory_config_objection.sv(410) @ 340000: uvm_test_top [RESULT] PASS CH20 factory=traced plan=1,8,3 applied=3 samples=24"
+        },
+        {
+          "log": "runs/ch20/alt.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch20/alt.log",
+          "text": "UVM_FATAL :    0"
+        },
+        {
+          "log": "runs/ch20/NO_OVERRIDE.log",
+          "text": "UVM_FATAL <REPO>/tb/ch20/tb_pwm_factory_config_objection.sv(374) @ 30000: uvm_test_top [FACTORY] Driver type override was ignored"
+        },
+        {
+          "log": "runs/ch20/NO_OVERRIDE.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch20/NO_OVERRIDE.log",
+          "text": "UVM_FATAL :    1"
+        },
+        {
+          "log": "runs/ch20/NO_CFG.log",
+          "text": "UVM_FATAL <REPO>/tb/ch20/tb_pwm_factory_config_objection.sv(90) @ 0: uvm_test_top.env.ag.drv [NO_CFG] Driver config not found"
+        },
+        {
+          "log": "runs/ch20/NO_CFG.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch20/NO_CFG.log",
+          "text": "UVM_FATAL :    1"
+        },
+        {
+          "log": "runs/ch20/EARLY_DROP.log",
+          "text": "UVM_FATAL <REPO>/tb/ch20/tb_pwm_factory_config_objection.sv(400) @ 270000: uvm_test_top [COUNTS] Incomplete verification samples=17"
+        },
+        {
+          "log": "runs/ch20/EARLY_DROP.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch20/EARLY_DROP.log",
+          "text": "UVM_FATAL :    1"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "20"
+      ],
+      "sources_sha256": {
+        "reference_rtl/pwm_core.v": "b375e18220be7b06ac421a2b7076af5a88d34a7846c7bf4b0b266bab189050f4",
+        "scripts/run_ch20.sh": "0d3b18d217766b69a3b824598791e19f58eecefdaafd6d213a3702a4234fbf2e",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch20/tb_pwm_factory_config_objection.sv": "a6bdfad933a0ca56a135a060db0ea4da6bb5037b881ec4a00a93bc94ea0b9056"
+      }
+    },
+    {
+      "chapter": 21,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "21"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:21:03.588742+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch21/run.uqAkWh/normal.log",
+          "public_path": "legacy/ch21/normal.log",
+          "raw_sha256": "03cbad00f461c342e421c91e4d0f267b032c3883daa1b8cfd181641c0cb9a263",
+          "public_sha256": "cd9ef8238254652ad8c2bebf98b694762d171b0f739c8488eb477c27e6c01bc5",
+          "bytes": 2454
+        },
+        {
+          "local_path": ".build/ch21/run.uqAkWh/negative.log",
+          "public_path": "legacy/ch21/negative.log",
+          "raw_sha256": "95170eac44edeb0600433a63e2d4c81fabe6f411f84a734e5b34ba39eaf48cce",
+          "public_sha256": "3bc496a20f50e06bec8222f276771e27f6c3ee4aa30fdcf1ec86eb23d5f49bd0",
+          "bytes": 2298
+        },
+        {
+          "local_path": ".build/ch21/run.uqAkWh/elaborate.log",
+          "public_path": "legacy/ch21/elaborate.log",
+          "raw_sha256": "d19ea2b44c48c4d00feede78682f75ed41b6b92cacfe92f2894248622fc092e3",
+          "public_sha256": "d19ea2b44c48c4d00feede78682f75ed41b6b92cacfe92f2894248622fc092e3",
+          "bytes": 1072
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch21/run.1wcYqp/normal.log",
+          "public_path": "runs/ch21/normal.log",
+          "raw_sha256": "628aeac80a178cf8210b5fc4ce4f9574cca440222cbad212bfd598a670b333fb",
+          "public_sha256": "f57cb7c7926b0c75d7e58bfd0c4f7a6a1a9aefc31df2edb7a80586834692ac78",
+          "bytes": 2454
+        },
+        {
+          "local_path": ".build/ch21/run.1wcYqp/negative.log",
+          "public_path": "runs/ch21/negative.log",
+          "raw_sha256": "5c4d8ea367b8b71f1931c4584305cb236a32902de3af2cae93b2dc769ea9fbc5",
+          "public_sha256": "418bf8a72256ba1250ca13c8149226b4927fee0f4b144b3f9467650c39610e49",
+          "bytes": 2298
+        },
+        {
+          "local_path": ".build/ch21/run.1wcYqp/elaborate.log",
+          "public_path": "runs/ch21/elaborate.log",
+          "raw_sha256": "d19ea2b44c48c4d00feede78682f75ed41b6b92cacfe92f2894248622fc092e3",
+          "public_sha256": "d19ea2b44c48c4d00feede78682f75ed41b6b92cacfe92f2894248622fc092e3",
+          "bytes": 1072
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch21.txt",
+          "public_path": "runs/ch21/runner.txt",
+          "raw_sha256": "663a1f08942f7683ce1007737c1fc0f6e6a18ef4a1474cc5f3a6a12e9a983c1e",
+          "public_sha256": "7b1a296c48fba9c9fe60508f2ee4bd934ae376629435779461e148fa452941a8",
+          "bytes": 44770
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch21/normal.log",
+          "text": "UVM_INFO <REPO>/tb/ch21/tb_axi_uvm_ral.sv(386) @ 450000: uvm_test_top [RESULT] PASS CH21 RAL reads=7 writes=3"
+        },
+        {
+          "log": "runs/ch21/normal.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch21/normal.log",
+          "text": "UVM_FATAL :    0"
+        },
+        {
+          "log": "runs/ch21/negative.log",
+          "text": "UVM_FATAL <REPO>/tb/ch21/tb_axi_uvm_ral.sv(336) @ 170000: uvm_test_top [PREDICT_WRITE] addr=00000010 expected=11223344"
+        },
+        {
+          "log": "runs/ch21/negative.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch21/negative.log",
+          "text": "UVM_FATAL :    1"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "21"
+      ],
+      "sources_sha256": {
+        "reference_rtl/axi4lite_slave_adapter.v": "1fa68691b1e084bfc0106e2b8cc4176c34f453fb9c7e3a03445c73f55455dae1",
+        "reference_rtl/custom_register_bank.v": "8ab6ad93899d148d7dbf3d8ac965d0826f52a29e4f501616221ad7b0aab9d7a7",
+        "scripts/run_ch21.sh": "1d82c9583bdf93fe3da66bd9c068e4de130b0198e07ace0a2b7e2d579ee4e5bb",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch21/tb_axi_uvm_ral.sv": "76f29e07fb3eee50462f0581815f10690b43e4714e2bc9a85d378c6b2c160d24"
+      }
+    },
+    {
+      "chapter": 22,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "22"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:21:24.327353+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch22/run.bF30Mr/normal.log",
+          "public_path": "legacy/ch22/normal.log",
+          "raw_sha256": "ff379bb7b2830ae854627d1e569efde934d9273367ad49cdab42d94e19c262a7",
+          "public_sha256": "160408729cc8426c5dfa75006897f1e018d3c93607aefeca13980dab8c9aba1c",
+          "bytes": 2494
+        },
+        {
+          "local_path": ".build/ch22/run.bF30Mr/negative.log",
+          "public_path": "legacy/ch22/negative.log",
+          "raw_sha256": "d3c86cab04fdc6758bec46539e0a1640f8cdc0a4eb42fb4ab7607aff40666d9f",
+          "public_sha256": "ee06d087037fe41e783c308e6c64329f428a20f5456cb2f123de575d59b9c2ef",
+          "bytes": 2314
+        },
+        {
+          "local_path": ".build/ch22/run.bF30Mr/elaborate.log",
+          "public_path": "legacy/ch22/elaborate.log",
+          "raw_sha256": "88efa8add42a4131b0d6e6737347e2b190425e9120bb1aeba16324e61588e3d5",
+          "public_sha256": "88efa8add42a4131b0d6e6737347e2b190425e9120bb1aeba16324e61588e3d5",
+          "bytes": 1125
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch22/run.fSUw2O/normal.log",
+          "public_path": "runs/ch22/normal.log",
+          "raw_sha256": "7b2e9d5c15b2abd678fb77436f32dd9f1ce31c2c9eda9375710873bd5ef007cc",
+          "public_sha256": "71dd327317fc9069d50e8d6f209908d2c424c286b943c88a7c54e3fb871ceef3",
+          "bytes": 2494
+        },
+        {
+          "local_path": ".build/ch22/run.fSUw2O/negative.log",
+          "public_path": "runs/ch22/negative.log",
+          "raw_sha256": "1798029a7f35e49db1e6b4816b2b5072e0784b5a8b0b19e7c7ac7921dc6cac02",
+          "public_sha256": "943592429c3046b90b5c4c0fdf74e5a28bc41f4b39a378bd7237e012629b0c1e",
+          "bytes": 2314
+        },
+        {
+          "local_path": ".build/ch22/run.fSUw2O/elaborate.log",
+          "public_path": "runs/ch22/elaborate.log",
+          "raw_sha256": "88efa8add42a4131b0d6e6737347e2b190425e9120bb1aeba16324e61588e3d5",
+          "public_sha256": "88efa8add42a4131b0d6e6737347e2b190425e9120bb1aeba16324e61588e3d5",
+          "bytes": 1125
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch22.txt",
+          "public_path": "runs/ch22/runner.txt",
+          "raw_sha256": "6930c96b477bd33695bf38f6478335ac8557da997a6942f9c2e8b3d7418e4171",
+          "public_sha256": "0141c2b9391c90af68d495813f370dbb5dd67c047482cb7b1e74b29e2e1c22a2",
+          "bytes": 44923
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch22/normal.log",
+          "text": "UVM_INFO <REPO>/tb/ch22/tb_axi_multiagent_irq.sv(674) @ 1280000: uvm_test_top [RESULT] PASS CH22 AXI_W=6 AXI_R=13 IRQ=4 RESET=2 COLLISION=1 ZERO=1"
+        },
+        {
+          "log": "runs/ch22/normal.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch22/normal.log",
+          "text": "UVM_FATAL :    0"
+        },
+        {
+          "log": "runs/ch22/negative.log",
+          "text": "UVM_FATAL <REPO>/tb/ch22/tb_axi_multiagent_irq.sv(447) @ 716000: uvm_test_top.env.sb [IRQ_MISMATCH] status=10 expected=11 collisions=1"
+        },
+        {
+          "log": "runs/ch22/negative.log",
+          "text": "UVM_ERROR :    0"
+        },
+        {
+          "log": "runs/ch22/negative.log",
+          "text": "UVM_FATAL :    1"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "22"
+      ],
+      "sources_sha256": {
+        "reference_rtl/axi4lite_slave_adapter.v": "1fa68691b1e084bfc0106e2b8cc4176c34f453fb9c7e3a03445c73f55455dae1",
+        "reference_rtl/custom_register_bank.v": "8ab6ad93899d148d7dbf3d8ac965d0826f52a29e4f501616221ad7b0aab9d7a7",
+        "scripts/run_ch22.sh": "f980c7d915502c463806c63fa159ccba928dbe4cefb70201f285a08f08b6610e",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch22/tb_axi_multiagent_irq.sv": "7c83cc0fbe6e77b7dfaf35db4b453ad39af133adc13bc91f522f4c0bb0cc1b3f"
+      }
+    },
+    {
+      "chapter": 23,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "23"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:21:45.515464+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch23/simulation.log",
+          "public_path": "legacy/ch23/simulation.log",
+          "raw_sha256": "1d1c39bd1879f4632d460ced028dd953cea3ad967d6e1e83b6b5de7e093aadaa",
+          "public_sha256": "a0e72292d97e2fc69e117c02077e5b0e5790386c501d837522e69a2522e22d6c",
+          "bytes": 452
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch23/simulation.log",
+          "public_path": "runs/ch23/simulation.log",
+          "raw_sha256": "1d1c39bd1879f4632d460ced028dd953cea3ad967d6e1e83b6b5de7e093aadaa",
+          "public_sha256": "a0e72292d97e2fc69e117c02077e5b0e5790386c501d837522e69a2522e22d6c",
+          "bytes": 452
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch23.txt",
+          "public_path": "runs/ch23/runner.txt",
+          "raw_sha256": "144df73104ac66e4c26bbf3c1809f84e9685f0f0896c25e0b343114644ec11c2",
+          "public_sha256": "785a82b26c88f30da9c238c8f20f7e6bb9d88645da81df70c2b9b79265e17242",
+          "bytes": 40400
+        },
+        {
+          "local_path": ".build/ch23/ch23_npu_integrated.vcd",
+          "public_path": "waves/ch23_npu_integrated.vcd",
+          "raw_sha256": "b3b8ba87942e59abe7dfa8762b6925eeed63d972ad071e81c4699e14e07ba4c6",
+          "public_sha256": "b3b8ba87942e59abe7dfa8762b6925eeed63d972ad071e81c4699e14e07ba4c6",
+          "bytes": 106254
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch23/simulation.log",
+          "text": "REJECT len=0"
+        },
+        {
+          "log": "runs/ch23/simulation.log",
+          "text": "REJECT len=3"
+        },
+        {
+          "log": "runs/ch23/simulation.log",
+          "text": "REJECT len=65"
+        },
+        {
+          "log": "runs/ch23/simulation.log",
+          "text": "REJECT len=1"
+        },
+        {
+          "log": "runs/ch23/simulation.log",
+          "text": "PASS CH23 cases=8 rejected=4"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "23"
+      ],
+      "sources_sha256": {
+        "reference_rtl/dsp_multiplier.v": "48d1d35c2add3d0fccaf92c1917079873344320e23d0718e43539d13033f8093",
+        "reference_rtl/npu_dsp_mac_lane.v": "ffcadb6575ba84c7c6f32acf7d3860a2d25617946859da6dbd8582f1fcd3d4f5",
+        "reference_rtl/npu_engine4.v": "6469feff2d0686be890be33655170aab73e0a556d91c8f30e9d6e7657eeb3438",
+        "scripts/run_ch23.sh": "6463cdd1315f46c4249f384dca8544185d7f05f16d436a755f8299bbe4e7ccc2",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch23/tb_npu_integrated.sv": "2332122341a2767b8a689548fbc0c0cf42453eff4ce89fba688e9e0a54a3a50f"
+      }
+    },
+    {
+      "chapter": 24,
+      "command": [
+        "bash",
+        "-x",
+        "scripts/run_chapter.sh",
+        "24"
+      ],
+      "cwd": "<REPO>",
+      "started_utc": "2026-11-25T22:21:45.641189+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "legacy_exit_code": "NOT_RECORDED",
+      "legacy_logs": [
+        {
+          "local_path": ".build/ch24/run_1dofs29r/compile.log",
+          "public_path": "legacy/ch24/compile.log",
+          "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "public_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "local_path": ".build/ch24/run_1dofs29r/seed_1.log",
+          "public_path": "legacy/ch24/seed_1.log",
+          "raw_sha256": "873125649bf97ba068e1222daba28b8dbd5c0447399f5a8deb838b1b88afc078",
+          "public_sha256": "73a75abe06520fe0d6cf90aa0f2ad59d9c8692171e98bcab987ea200c3033db1",
+          "bytes": 164
+        },
+        {
+          "local_path": ".build/ch24/run_1dofs29r/seed_7.log",
+          "public_path": "legacy/ch24/seed_7.log",
+          "raw_sha256": "230c12fc8e8ad98b870b7d490ce4bf9aa2461faf985a3fc88e578445669659d0",
+          "public_sha256": "1ce9209dcee1c5c9a2d19035351fc14b14cc9c8026767bc7d6da4c69beb42039",
+          "bytes": 165
+        },
+        {
+          "local_path": ".build/ch24/run_1dofs29r/seed_42.log",
+          "public_path": "legacy/ch24/seed_42.log",
+          "raw_sha256": "bcf0783f87c64e74db87a3c67534593c5e0073f693c6fd66f07f61c14d208742",
+          "public_sha256": "45db5338455658c1bcc7c345ba40b7ba43851ad7b4de725237853f5bfb39796a",
+          "bytes": 166
+        },
+        {
+          "local_path": ".build/ch24/run_1dofs29r/negative.log",
+          "public_path": "legacy/ch24/negative.log",
+          "raw_sha256": "2dfccbdcc4ba9cf02f35b8cab768460c12114c81259dfb7192ba876a57fdcf97",
+          "public_sha256": "e81510a278d971a83e5e4e36abb97c2d470ae60c5af7cca09fa8344ee9e75a05",
+          "bytes": 142
+        },
+        {
+          "local_path": ".build/ch24/run_1dofs29r/report.json",
+          "public_path": "legacy/ch24/report.json",
+          "raw_sha256": "08b81e0db5b2d11af0653ff8ce8087fa15d7d624719ade6e9ba4f7544183a4c0",
+          "public_sha256": "08b81e0db5b2d11af0653ff8ce8087fa15d7d624719ade6e9ba4f7544183a4c0",
+          "bytes": 1434
+        }
+      ],
+      "logs": [
+        {
+          "local_path": ".build/ch24/run_bu2diavc/compile.log",
+          "public_path": "runs/ch24/compile.log",
+          "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "public_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "local_path": ".build/ch24/run_bu2diavc/seed_1.log",
+          "public_path": "runs/ch24/seed_1.log",
+          "raw_sha256": "873125649bf97ba068e1222daba28b8dbd5c0447399f5a8deb838b1b88afc078",
+          "public_sha256": "73a75abe06520fe0d6cf90aa0f2ad59d9c8692171e98bcab987ea200c3033db1",
+          "bytes": 164
+        },
+        {
+          "local_path": ".build/ch24/run_bu2diavc/seed_7.log",
+          "public_path": "runs/ch24/seed_7.log",
+          "raw_sha256": "230c12fc8e8ad98b870b7d490ce4bf9aa2461faf985a3fc88e578445669659d0",
+          "public_sha256": "1ce9209dcee1c5c9a2d19035351fc14b14cc9c8026767bc7d6da4c69beb42039",
+          "bytes": 165
+        },
+        {
+          "local_path": ".build/ch24/run_bu2diavc/seed_42.log",
+          "public_path": "runs/ch24/seed_42.log",
+          "raw_sha256": "bcf0783f87c64e74db87a3c67534593c5e0073f693c6fd66f07f61c14d208742",
+          "public_sha256": "45db5338455658c1bcc7c345ba40b7ba43851ad7b4de725237853f5bfb39796a",
+          "bytes": 166
+        },
+        {
+          "local_path": ".build/ch24/run_bu2diavc/negative.log",
+          "public_path": "runs/ch24/negative.log",
+          "raw_sha256": "2dfccbdcc4ba9cf02f35b8cab768460c12114c81259dfb7192ba876a57fdcf97",
+          "public_sha256": "e81510a278d971a83e5e4e36abb97c2d470ae60c5af7cca09fa8344ee9e75a05",
+          "bytes": 142
+        },
+        {
+          "local_path": ".build/ch24/run_bu2diavc/report.json",
+          "public_path": "runs/ch24/report.json",
+          "raw_sha256": "5623c83e297cd24a29fe79a824e41370e2d4c14996a3833458e58c20d872f02b",
+          "public_sha256": "5623c83e297cd24a29fe79a824e41370e2d4c14996a3833458e58c20d872f02b",
+          "bytes": 1434
+        },
+        {
+          "local_path": ".build/evidence_v59_ozrpk_z0/ch24.txt",
+          "public_path": "runs/ch24/runner.txt",
+          "raw_sha256": "db35e935af88eda60cc7716e73366471b1f4f516b0ddf6b39b16ad6add0f359b",
+          "public_sha256": "0c1e75a702155749c3bc7f36f2316b0bc649959393065f638ee0a72b63babd9a",
+          "bytes": 39303
+        }
+      ],
+      "key_log": [
+        {
+          "log": "runs/ch24/seed_1.log",
+          "text": "COVERAGE seed=1 idle=6 stall=12 accept=9 ready_idle=5"
+        },
+        {
+          "log": "runs/ch24/seed_1.log",
+          "text": "PASS CH24 seed=1 checks=32 accepted=9"
+        },
+        {
+          "log": "runs/ch24/seed_7.log",
+          "text": "COVERAGE seed=7 idle=9 stall=7 accept=11 ready_idle=5"
+        },
+        {
+          "log": "runs/ch24/seed_7.log",
+          "text": "PASS CH24 seed=7 checks=32 accepted=11"
+        },
+        {
+          "log": "runs/ch24/seed_42.log",
+          "text": "COVERAGE seed=42 idle=12 stall=5 accept=9 ready_idle=6"
+        },
+        {
+          "log": "runs/ch24/seed_42.log",
+          "text": "PASS CH24 seed=42 checks=32 accepted=9"
+        },
+        {
+          "log": "runs/ch24/negative.log",
+          "text": "FATAL: <REPO>/tb/ch24/tb_uart_regression.sv:56: DETECTED_INJECTED_FAULT case=9"
+        }
+      ],
+      "reproduction_command": [
+        "bash",
+        "scripts/run_chapter.sh",
+        "24"
+      ],
+      "sources_sha256": {
+        "reference_rtl/uart_echo_controller.v": "3eaed301742a18b8e8652e3f73fb87da9b7635b59a557ed07429d0481de7d0ef",
+        "scripts/run_ch24.py": "d63f987368a6e4b5454468ac6cb8f48083bb04574b11cf73d5361c86bea7f36c",
+        "scripts/run_ch24.sh": "3774109c27970773f56922b1c3760aa12543fdf0e772674f118dd79fa37f6087",
+        "scripts/run_chapter.sh": "cc6ee46cb0ff8777dbb2b65ed7bc054d2b62da6ac7eec25effcebfafa7d032e7",
+        "scripts/setup_env.sh": "a18eb1d1d9361d2a21f2317fae3aac5595c87f767c060dbcabea7723c1f0b1bc",
+        "tb/ch24/tb_uart_regression.sv": "2ce44426474e49274297ccf9f96d9dd870907443e67a3efd8bb308e7f969b735"
+      }
+    }
+  ],
+  "case_probes": [
+    {
+      "chapter": 10,
+      "name": "fault",
+      "command": [
+        "vvp",
+        "./sim.vvp",
+        "+INJECT_FAULT"
+      ],
+      "cwd": ".build/ch10",
+      "exit_code": 1,
+      "expected_marker": "DETECTED_INJECTED_FAULT",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch10_fault.txt",
+        "public_path": "probes/ch10_fault.txt",
+        "raw_sha256": "2b721c460b28acf42fea08eb98646ac3b2f490d76b3967b33b44ac9241edc89c",
+        "public_sha256": "3dffb31077eba579a10939a2b874e3cf39e5f13d91254b9f9efea3702c6b2660",
+        "bytes": 240
+      }
+    },
+    {
+      "chapter": 10,
+      "name": "timeout",
+      "command": [
+        "vvp",
+        "./sim.vvp",
+        "+INJECT_TIMEOUT"
+      ],
+      "cwd": ".build/ch10",
+      "exit_code": 1,
+      "expected_marker": "DETECTED_APPLY_TIMEOUT",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch10_timeout.txt",
+        "public_path": "probes/ch10_timeout.txt",
+        "raw_sha256": "721d4746a90a7c0e490ad1d224504e2cb8c27754b7efc890c8e398e962b248e8",
+        "public_sha256": "8c58d7074c4f449b266101f3322bc6a1d3af993abeff5f9caebc3ac4d5e963c2",
+        "bytes": 295
+      }
+    },
+    {
+      "chapter": 11,
+      "name": "sva",
+      "command": [
+        "xsim",
+        "ch11_sim",
+        "-runall",
+        "-onerror",
+        "quit",
+        "-testplusarg",
+        "INJECT_SVA_PENDING"
+      ],
+      "cwd": ".build/ch11/xsim",
+      "exit_code": 0,
+      "expected_marker": "DETECTED_SVA_PENDING t=55",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch11_sva.txt",
+        "public_path": "probes/ch11_sva.txt",
+        "raw_sha256": "ef9cc616ee483560f85fae75bcfde3ad227c948da1f64ad391e9fe753978a08b",
+        "public_sha256": "f42ac70605b29408ba7bed6f43af32f8d67502ccc8026cc7d9f4e31802e3e27e",
+        "bytes": 907
+      }
+    },
+    {
+      "chapter": 17,
+      "name": "NO_VIF",
+      "command": [
+        "xsim",
+        "ch17_sim",
+        "-runall",
+        "-onerror",
+        "quit",
+        "-testplusarg",
+        "NO_VIF"
+      ],
+      "cwd": ".build/ch17/run.D2yOid",
+      "exit_code": 0,
+      "expected_marker": "[NOVIF]",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch17_NO_VIF.txt",
+        "public_path": "probes/ch17_NO_VIF.txt",
+        "raw_sha256": "2e311213f3b5898428426227fb7402847709d56c8ea18f50323545befe299ca1",
+        "public_sha256": "814a1240efae4d8779716e9cdd4ee62a870d45fb77464e1b2bbf48a7901a4ea6",
+        "bytes": 2025
+      }
+    },
+    {
+      "chapter": 18,
+      "name": "INVALID_DUTY",
+      "command": [
+        "xsim",
+        "ch18_sim",
+        "-runall",
+        "-onerror",
+        "quit",
+        "-testplusarg",
+        "INVALID_DUTY"
+      ],
+      "cwd": ".build/ch18/run.btzHl3",
+      "exit_code": 0,
+      "expected_marker": "[INVALID_DUTY]",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch18_INVALID_DUTY.txt",
+        "public_path": "probes/ch18_INVALID_DUTY.txt",
+        "raw_sha256": "3032d4f3520b015f5ae14ff9692dfe3645fe48d3398d6225fdc668c7b8d1b6ff",
+        "public_sha256": "5a3be9cd3f1b6ba58e18c9a8d60d35eb32941195cbf4e06a17f6a4af6d99f8d5",
+        "bytes": 2434
+      }
+    },
+    {
+      "chapter": 19,
+      "name": "CORRUPT_SAMPLE",
+      "command": [
+        "xsim",
+        "ch19_sim",
+        "-runall",
+        "-onerror",
+        "quit",
+        "-testplusarg",
+        "CORRUPT_SAMPLE"
+      ],
+      "cwd": ".build/ch19/run.mNnQAN",
+      "exit_code": 0,
+      "expected_marker": "[SB_PWM]",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch19_CORRUPT_SAMPLE.txt",
+        "public_path": "probes/ch19_CORRUPT_SAMPLE.txt",
+        "raw_sha256": "226d2ce94925b3e48df9ed7a63c358aee0db3684eb3d33e59281a1041e3bacfe",
+        "public_sha256": "6fc77c646ecb46a2716c18e29e2d45bafbf9ab91a02d39ba1369aa8403f3d66b",
+        "bytes": 2669
+      }
+    },
+    {
+      "chapter": 20,
+      "name": "NO_OVERRIDE",
+      "command": [
+        "xsim",
+        "ch20_sim",
+        "-runall",
+        "-onerror",
+        "quit",
+        "-testplusarg",
+        "NO_OVERRIDE"
+      ],
+      "cwd": ".build/ch20/run.y8dfn7",
+      "exit_code": 0,
+      "expected_marker": "[FACTORY]",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch20_NO_OVERRIDE.txt",
+        "public_path": "probes/ch20_NO_OVERRIDE.txt",
+        "raw_sha256": "edf790237332514f37f41c2aa92959a6f2bfe8a6eacaac4664d718bd97cdf738",
+        "public_sha256": "06fe48ae8e3c6ae053b05f7fa81fa2e0372b5347877d6f4e15476440eb394843",
+        "bytes": 2302
+      }
+    },
+    {
+      "chapter": 20,
+      "name": "NO_CFG",
+      "command": [
+        "xsim",
+        "ch20_sim",
+        "-runall",
+        "-onerror",
+        "quit",
+        "-testplusarg",
+        "NO_CFG"
+      ],
+      "cwd": ".build/ch20/run.y8dfn7",
+      "exit_code": 0,
+      "expected_marker": "[NO_CFG]",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch20_NO_CFG.txt",
+        "public_path": "probes/ch20_NO_CFG.txt",
+        "raw_sha256": "4a8eb22137f0b27782e2a041f3dc8223270adbc4b4961f4782a313e3cc58f2b3",
+        "public_sha256": "34d4869eb8cbb8c55e36b191d424220237156779b1c93d9f7c399ef29e756cbf",
+        "bytes": 2057
+      }
+    },
+    {
+      "chapter": 20,
+      "name": "EARLY_DROP",
+      "command": [
+        "xsim",
+        "ch20_sim",
+        "-runall",
+        "-onerror",
+        "quit",
+        "-testplusarg",
+        "EARLY_DROP"
+      ],
+      "cwd": ".build/ch20/run.y8dfn7",
+      "exit_code": 0,
+      "expected_marker": "[COUNTS]",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch20_EARLY_DROP.txt",
+        "public_path": "probes/ch20_EARLY_DROP.txt",
+        "raw_sha256": "1bc9aa6f364cf7cc54c7b53aec363b45624d3488c832828671ed2a4e26310f6f",
+        "public_sha256": "54b0a4941a3043f55c81d99d3912c840588f9d0f16605d9718083bb65bfdb450",
+        "bytes": 3608
+      }
+    },
+    {
+      "chapter": 21,
+      "name": "NO_PREDICT",
+      "command": [
+        "xsim",
+        "ch21_sim",
+        "-runall",
+        "-onerror",
+        "quit",
+        "-testplusarg",
+        "NO_PREDICT"
+      ],
+      "cwd": ".build/ch21/run.1wcYqp",
+      "exit_code": 0,
+      "expected_marker": "[PREDICT_WRITE]",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch21_NO_PREDICT.txt",
+        "public_path": "probes/ch21_NO_PREDICT.txt",
+        "raw_sha256": "16759fa8fb4bd2d75ad26cc31e2bb7fd6e4c05959da7c67c91607eb6c0c9c04e",
+        "public_sha256": "4c9aa1963c608124bbabd6217763ee6839e0dab28b8c0e03a1b2db413cc9d8c7",
+        "bytes": 2298
+      }
+    },
+    {
+      "chapter": 22,
+      "name": "CORRUPT_IRQ",
+      "command": [
+        "xsim",
+        "ch22_sim",
+        "-runall",
+        "-onerror",
+        "quit",
+        "-testplusarg",
+        "CORRUPT_IRQ"
+      ],
+      "cwd": ".build/ch22/run.fSUw2O",
+      "exit_code": 0,
+      "expected_marker": "[IRQ_MISMATCH]",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch22_CORRUPT_IRQ.txt",
+        "public_path": "probes/ch22_CORRUPT_IRQ.txt",
+        "raw_sha256": "2307e69c11c895151eb29f419ae0f27a71a1242b8b082bbb24cd986337f8fb2e",
+        "public_sha256": "53ae089f05042381c9afead185f6673ee3856bd70ceb692a4471c9b0cc2fbfc8",
+        "bytes": 2314
+      }
+    },
+    {
+      "chapter": 24,
+      "name": "fault",
+      "command": [
+        "vvp",
+        "sim",
+        "+SEED=1",
+        "+INJECT_FAULT"
+      ],
+      "cwd": ".build/ch24/run_bu2diavc",
+      "exit_code": 1,
+      "expected_marker": "DETECTED_INJECTED_FAULT case=9",
+      "status": "PASS_NEG",
+      "log": {
+        "local_path": ".build/case_probes_0t1b0v8v/ch24_fault.txt",
+        "public_path": "probes/ch24_fault.txt",
+        "raw_sha256": "2dfccbdcc4ba9cf02f35b8cab768460c12114c81259dfb7192ba876a57fdcf97",
+        "public_sha256": "e81510a278d971a83e5e4e36abb97c2d470ae60c5af7cca09fa8344ee9e75a05",
+        "bytes": 142
+      }
+    }
+  ],
+  "redaction": "repository path, private home/tmp paths, email, tokens, local account and hostname; raw SHA256 is pre-redaction; public SHA256 is post-redaction"
+}

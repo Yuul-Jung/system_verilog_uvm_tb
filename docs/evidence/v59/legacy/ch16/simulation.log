@@ -1,0 +1,3 @@
+VCD info: dumpfile ch16_mac_integer.vcd opened for output.
+PASS CH16 cycles=21 basic_valid=12 pipe_valid=10
+<REPO>/tb/ch16/tb_mac_integer.sv:156: $finish called at 210000 (1ps)

@@ -1,0 +1,3 @@
+VCD info: dumpfile ch10_pwm_corner_reset_timeout.vcd opened for output.
+PASS CH10 requests=3 checks=48
+<REPO>/tb/ch10/tb_pwm_corner_reset_timeout.sv:181: $finish called at 736000 (1ps)

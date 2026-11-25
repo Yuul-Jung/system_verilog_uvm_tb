@@ -111,12 +111,14 @@ pre code {
   font-size: clamp(1.85rem, 3.7vw, 3rem);
   line-height: 1.2;
   letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
 }
 .hero p {
   color: #d6d9df;
   max-width: 780px;
   font-size: 0.98rem;
   margin: 12px 0 0;
+  overflow-wrap: anywhere;
 }
 .hero strong {
   color: var(--yellow);
@@ -133,6 +135,8 @@ pre code {
   font-size: 0.75rem;
   padding: 3px 9px;
   border-radius: 2px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 /* 4. 2단 배치와 좌측 탐색 — 장 목록·현재 페이지 목차 (site.js가 내용을 채움) */
@@ -323,6 +327,24 @@ pre code {
   width: 100%;
   margin: 17px 0;
   font-size: 0.88rem;
+}
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.section p,
+.section li,
+.section h2,
+.section h3,
+.codebar,
+.codebar span {
+  overflow-wrap: anywhere;
+}
+.codebar span {
+  min-width: 0;
+}
+.codebar button {
+  flex: none;
 }
 .section th,
 .section td {

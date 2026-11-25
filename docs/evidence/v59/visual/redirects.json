@@ -1,0 +1,332 @@
+[
+  {
+    "old": "ch01_testbench_basics_v01.html",
+    "target": "ch01_testbench_basics_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch01_testbench_basics_v02.html",
+    "target": "ch01_testbench_basics_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch01_testbench_basics_v03.html",
+    "target": "ch01_testbench_basics_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch01_testbench_basics_v04.html",
+    "target": "ch01_testbench_basics_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch02_clock_reset_events_v01.html",
+    "target": "ch02_clock_reset_events_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch02_clock_reset_events_v02.html",
+    "target": "ch02_clock_reset_events_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch02_clock_reset_events_v03.html",
+    "target": "ch02_clock_reset_events_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch03_reusable_stimulus_v02.html",
+    "target": "ch03_reusable_stimulus_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch03_reusable_stimulus_v03.html",
+    "target": "ch03_reusable_stimulus_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch04_pass_fail_automation_v02.html",
+    "target": "ch04_pass_fail_automation_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch04_pass_fail_automation_v03.html",
+    "target": "ch04_pass_fail_automation_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch04_pass_fail_automation_v04.html",
+    "target": "ch04_pass_fail_automation_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch05_verification_types_v02.html",
+    "target": "ch05_verification_types_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch05_verification_types_v03.html",
+    "target": "ch05_verification_types_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch05_verification_types_v04.html",
+    "target": "ch05_verification_types_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch06_arrays_queues_packages_v02.html",
+    "target": "ch06_arrays_queues_packages_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch06_arrays_queues_packages_v03.html",
+    "target": "ch06_arrays_queues_packages_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch06_arrays_queues_packages_v04.html",
+    "target": "ch06_arrays_queues_packages_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch07_interface_modport_clocking_v01.html",
+    "target": "ch07_interface_modport_clocking_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch07_interface_modport_clocking_v02.html",
+    "target": "ch07_interface_modport_clocking_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch07_interface_modport_clocking_v03.html",
+    "target": "ch07_interface_modport_clocking_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch08_objects_constraints_v01.html",
+    "target": "ch08_objects_constraints_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch08_objects_constraints_v02.html",
+    "target": "ch08_objects_constraints_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch08_objects_constraints_v03.html",
+    "target": "ch08_objects_constraints_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch09_reference_model_scoreboard_v02.html",
+    "target": "ch09_reference_model_scoreboard_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch09_reference_model_scoreboard_v03.html",
+    "target": "ch09_reference_model_scoreboard_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch10_corner_reset_timeout_v02.html",
+    "target": "ch10_corner_reset_timeout_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch10_corner_reset_timeout_v03.html",
+    "target": "ch10_corner_reset_timeout_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch10_corner_reset_timeout_v04.html",
+    "target": "ch10_corner_reset_timeout_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch11_temporal_assertions_v01.html",
+    "target": "ch11_temporal_assertions_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch11_temporal_assertions_v02.html",
+    "target": "ch11_temporal_assertions_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch11_temporal_assertions_v03.html",
+    "target": "ch11_temporal_assertions_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch12_functional_coverage_v01.html",
+    "target": "ch12_functional_coverage_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch12_functional_coverage_v02.html",
+    "target": "ch12_functional_coverage_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch13_uart_stream_verification_v01.html",
+    "target": "ch13_uart_stream_verification_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch13_uart_stream_verification_v02.html",
+    "target": "ch13_uart_stream_verification_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch14_fifo_flow_control_v01.html",
+    "target": "ch14_fifo_flow_control_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch14_fifo_flow_control_v02.html",
+    "target": "ch14_fifo_flow_control_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch15_axi4lite_register_verification_v01.html",
+    "target": "ch15_axi4lite_register_verification_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch15_axi4lite_register_verification_v02.html",
+    "target": "ch15_axi4lite_register_verification_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch16_mac_npu_integer_verification_v01.html",
+    "target": "ch16_mac_npu_integer_verification_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch16_mac_npu_integer_verification_v02.html",
+    "target": "ch16_mac_npu_integer_verification_v03.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch17_minimal_uvm_environment_v01.html",
+    "target": "ch17_minimal_uvm_environment_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch17_minimal_uvm_environment_v02.html",
+    "target": "ch17_minimal_uvm_environment_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch17_minimal_uvm_environment_v03.html",
+    "target": "ch17_minimal_uvm_environment_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch18_sequence_driver_v01.html",
+    "target": "ch18_sequence_driver_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch18_sequence_driver_v02.html",
+    "target": "ch18_sequence_driver_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch18_sequence_driver_v03.html",
+    "target": "ch18_sequence_driver_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch19_monitor_agent_scoreboard_v02.html",
+    "target": "ch19_monitor_agent_scoreboard_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch19_monitor_agent_scoreboard_v03.html",
+    "target": "ch19_monitor_agent_scoreboard_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch19_monitor_agent_scoreboard_v04.html",
+    "target": "ch19_monitor_agent_scoreboard_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch20_factory_config_objection_v01.html",
+    "target": "ch20_factory_config_objection_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch20_factory_config_objection_v02.html",
+    "target": "ch20_factory_config_objection_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch20_factory_config_objection_v03.html",
+    "target": "ch20_factory_config_objection_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch21_uvm_register_abstraction_v01.html",
+    "target": "ch21_uvm_register_abstraction_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch21_uvm_register_abstraction_v02.html",
+    "target": "ch21_uvm_register_abstraction_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch21_uvm_register_abstraction_v03.html",
+    "target": "ch21_uvm_register_abstraction_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch22_multi_agent_vip_v02.html",
+    "target": "ch22_multi_agent_vip_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch22_multi_agent_vip_v03.html",
+    "target": "ch22_multi_agent_vip_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch22_multi_agent_vip_v04.html",
+    "target": "ch22_multi_agent_vip_v05.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch23_npu_integrated_scoreboard_v01.html",
+    "target": "ch23_npu_integrated_scoreboard_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch23_npu_integrated_scoreboard_v02.html",
+    "target": "ch23_npu_integrated_scoreboard_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch23_npu_integrated_scoreboard_v03.html",
+    "target": "ch23_npu_integrated_scoreboard_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch24_regression_ci_reporting_v01.html",
+    "target": "ch24_regression_ci_reporting_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch24_regression_ci_reporting_v02.html",
+    "target": "ch24_regression_ci_reporting_v04.html",
+    "hash_preserved": true
+  },
+  {
+    "old": "ch24_regression_ci_reporting_v03.html",
+    "target": "ch24_regression_ci_reporting_v04.html",
+    "hash_preserved": true
+  }
+]

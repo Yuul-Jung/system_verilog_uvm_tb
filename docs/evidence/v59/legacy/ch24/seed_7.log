@@ -1,0 +1,3 @@
+COVERAGE seed=7 idle=9 stall=7 accept=11 ready_idle=5
+PASS CH24 seed=7 checks=32 accepted=11
+<REPO>/tb/ch24/tb_uart_regression.sv:108: $finish called at 32000 (1ps)

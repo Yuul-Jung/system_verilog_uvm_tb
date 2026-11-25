@@ -1,0 +1,4 @@
+VCD info: dumpfile ch10_pwm_corner_reset_timeout.vcd opened for output.
+INJECT: cfg_apply intentionally withheld
+FATAL: <REPO>/tb/ch10/tb_pwm_corner_reset_timeout.sv:121: DETECTED_APPLY_TIMEOUT duty=8 deadline=10clks
+       Time: 356000  Scope: tb_pwm_corner_reset_timeout.check_constant_window

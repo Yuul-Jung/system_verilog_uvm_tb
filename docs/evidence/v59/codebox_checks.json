@@ -1,0 +1,458 @@
+[
+  {
+    "chapter": 1,
+    "page": "ch01_testbench_basics_v05.html",
+    "source": "reference_rtl/uart_echo_controller.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 1,
+    "page": "ch01_testbench_basics_v05.html",
+    "source": "tb/ch01/tb_uart_echo_basics.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "page": "ch02_clock_reset_events_v04.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 2,
+    "page": "ch02_clock_reset_events_v04.html",
+    "source": "tb/ch02/tb_pwm_clock_reset.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 3,
+    "page": "ch03_reusable_stimulus_v04.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 3,
+    "page": "ch03_reusable_stimulus_v04.html",
+    "source": "tb/ch03/tb_pwm_reusable_stimulus.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 4,
+    "page": "ch04_pass_fail_automation_v05.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 4,
+    "page": "ch04_pass_fail_automation_v05.html",
+    "source": "tb/ch04/tb_pwm_pass_fail.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 5,
+    "page": "ch05_verification_types_v05.html",
+    "source": "reference_rtl/uart_echo_controller.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 5,
+    "page": "ch05_verification_types_v05.html",
+    "source": "tb/ch05/tb_uart_types.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 6,
+    "page": "ch06_arrays_queues_packages_v05.html",
+    "source": "reference_rtl/uart_echo_controller.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 6,
+    "page": "ch06_arrays_queues_packages_v05.html",
+    "source": "tb/ch06/uart_expect_pkg.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 6,
+    "page": "ch06_arrays_queues_packages_v05.html",
+    "source": "tb/ch06/tb_uart_arrays_queues.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "page": "ch07_interface_modport_clocking_v04.html",
+    "source": "reference_rtl/uart_echo_controller.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "page": "ch07_interface_modport_clocking_v04.html",
+    "source": "tb/ch07/uart_stream_if.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 7,
+    "page": "ch07_interface_modport_clocking_v04.html",
+    "source": "tb/ch07/tb_uart_interface.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 8,
+    "page": "ch08_objects_constraints_v04.html",
+    "source": "reference_rtl/uart_echo_controller.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 8,
+    "page": "ch08_objects_constraints_v04.html",
+    "source": "tb/ch08/tb_uart_objects.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 9,
+    "page": "ch09_reference_model_scoreboard_v04.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 9,
+    "page": "ch09_reference_model_scoreboard_v04.html",
+    "source": "tb/ch09/pwm_reference_model.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 9,
+    "page": "ch09_reference_model_scoreboard_v04.html",
+    "source": "tb/ch09/tb_pwm_scoreboard.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 10,
+    "page": "ch10_corner_reset_timeout_v05.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 10,
+    "page": "ch10_corner_reset_timeout_v05.html",
+    "source": "tb/ch10/tb_pwm_corner_reset_timeout.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 10,
+    "page": "ch10_corner_reset_timeout_v05.html",
+    "source": "scripts/run_ch10.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 11,
+    "page": "ch11_temporal_assertions_v04.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 11,
+    "page": "ch11_temporal_assertions_v04.html",
+    "source": "tb/ch11/tb_pwm_sva.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 12,
+    "page": "ch12_functional_coverage_v03.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 12,
+    "page": "ch12_functional_coverage_v03.html",
+    "source": "tb/ch12/tb_pwm_coverage.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 12,
+    "page": "ch12_functional_coverage_v03.html",
+    "source": "tb/ch12/run_ch12.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 13,
+    "page": "ch13_uart_stream_verification_v03.html",
+    "source": "reference_rtl/uart_echo_controller.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 13,
+    "page": "ch13_uart_stream_verification_v03.html",
+    "source": "tb/ch13/tb_uart_stream.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 13,
+    "page": "ch13_uart_stream_verification_v03.html",
+    "source": "scripts/run_ch13.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 14,
+    "page": "ch14_fifo_flow_control_v03.html",
+    "source": "reference_rtl/uart_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 14,
+    "page": "ch14_fifo_flow_control_v03.html",
+    "source": "reference_rtl/uart_rx.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 14,
+    "page": "ch14_fifo_flow_control_v03.html",
+    "source": "reference_rtl/uart_tx.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 14,
+    "page": "ch14_fifo_flow_control_v03.html",
+    "source": "tb/ch14/tb_uart_fifo_flow.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 14,
+    "page": "ch14_fifo_flow_control_v03.html",
+    "source": "scripts/run_ch14.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 15,
+    "page": "ch15_axi4lite_register_verification_v03.html",
+    "source": "reference_rtl/axi4lite_slave_adapter.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 15,
+    "page": "ch15_axi4lite_register_verification_v03.html",
+    "source": "reference_rtl/custom_register_bank.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 15,
+    "page": "ch15_axi4lite_register_verification_v03.html",
+    "source": "tb/ch15/tb_axi4lite_registers.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 15,
+    "page": "ch15_axi4lite_register_verification_v03.html",
+    "source": "scripts/run_ch15.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 16,
+    "page": "ch16_mac_npu_integer_verification_v03.html",
+    "source": "reference_rtl/mac_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 16,
+    "page": "ch16_mac_npu_integer_verification_v03.html",
+    "source": "reference_rtl/mac_pipeline_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 16,
+    "page": "ch16_mac_npu_integer_verification_v03.html",
+    "source": "tb/ch16/tb_mac_integer.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 16,
+    "page": "ch16_mac_npu_integer_verification_v03.html",
+    "source": "scripts/ch16_reference.py",
+    "status": "PASS"
+  },
+  {
+    "chapter": 16,
+    "page": "ch16_mac_npu_integer_verification_v03.html",
+    "source": "scripts/run_ch16.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 17,
+    "page": "ch17_minimal_uvm_environment_v04.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 17,
+    "page": "ch17_minimal_uvm_environment_v04.html",
+    "source": "tb/ch17/tb_pwm_uvm.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 17,
+    "page": "ch17_minimal_uvm_environment_v04.html",
+    "source": "scripts/run_ch17.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 18,
+    "page": "ch18_sequence_driver_v04.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 18,
+    "page": "ch18_sequence_driver_v04.html",
+    "source": "tb/ch18/tb_pwm_sequence_driver.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 18,
+    "page": "ch18_sequence_driver_v04.html",
+    "source": "scripts/run_ch18.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 19,
+    "page": "ch19_monitor_agent_scoreboard_v05.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 19,
+    "page": "ch19_monitor_agent_scoreboard_v05.html",
+    "source": "tb/ch19/tb_pwm_monitor_agent_scoreboard.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 19,
+    "page": "ch19_monitor_agent_scoreboard_v05.html",
+    "source": "scripts/run_ch19.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 20,
+    "page": "ch20_factory_config_objection_v04.html",
+    "source": "reference_rtl/pwm_core.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 20,
+    "page": "ch20_factory_config_objection_v04.html",
+    "source": "tb/ch20/tb_pwm_factory_config_objection.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 20,
+    "page": "ch20_factory_config_objection_v04.html",
+    "source": "scripts/run_ch20.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 21,
+    "page": "ch21_uvm_register_abstraction_v04.html",
+    "source": "reference_rtl/axi4lite_slave_adapter.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 21,
+    "page": "ch21_uvm_register_abstraction_v04.html",
+    "source": "reference_rtl/custom_register_bank.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 21,
+    "page": "ch21_uvm_register_abstraction_v04.html",
+    "source": "tb/ch21/tb_axi_uvm_ral.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 21,
+    "page": "ch21_uvm_register_abstraction_v04.html",
+    "source": "scripts/run_ch21.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 22,
+    "page": "ch22_multi_agent_vip_v05.html",
+    "source": "reference_rtl/axi4lite_slave_adapter.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 22,
+    "page": "ch22_multi_agent_vip_v05.html",
+    "source": "reference_rtl/custom_register_bank.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 22,
+    "page": "ch22_multi_agent_vip_v05.html",
+    "source": "tb/ch22/tb_axi_multiagent_irq.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 22,
+    "page": "ch22_multi_agent_vip_v05.html",
+    "source": "scripts/run_ch22.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 23,
+    "page": "ch23_npu_integrated_scoreboard_v04.html",
+    "source": "reference_rtl/npu_engine4.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 23,
+    "page": "ch23_npu_integrated_scoreboard_v04.html",
+    "source": "reference_rtl/npu_dsp_mac_lane.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 23,
+    "page": "ch23_npu_integrated_scoreboard_v04.html",
+    "source": "reference_rtl/dsp_multiplier.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 23,
+    "page": "ch23_npu_integrated_scoreboard_v04.html",
+    "source": "tb/ch23/tb_npu_integrated.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 23,
+    "page": "ch23_npu_integrated_scoreboard_v04.html",
+    "source": "scripts/run_ch23.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 24,
+    "page": "ch24_regression_ci_reporting_v04.html",
+    "source": "reference_rtl/uart_echo_controller.v",
+    "status": "PASS"
+  },
+  {
+    "chapter": 24,
+    "page": "ch24_regression_ci_reporting_v04.html",
+    "source": "tb/ch24/tb_uart_regression.sv",
+    "status": "PASS"
+  },
+  {
+    "chapter": 24,
+    "page": "ch24_regression_ci_reporting_v04.html",
+    "source": "scripts/run_ch24.sh",
+    "status": "PASS"
+  },
+  {
+    "chapter": 24,
+    "page": "ch24_regression_ci_reporting_v04.html",
+    "source": "scripts/run_ch24.py",
+    "status": "PASS"
+  },
+  {
+    "chapter": 24,
+    "page": "ch24_regression_ci_reporting_v04.html",
+    "source": ".github/workflows/ch24-regression.yml",
+    "status": "PASS"
+  }
+]

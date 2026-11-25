@@ -1,0 +1,496 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="제19장 UVM Monitor·Agent·Scoreboard 학습안내서"><title>제19장 · Monitor·Agent·Scoreboard · UVM 학습안내서</title><link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch19"><a class="access-skip" href="#main-content">본문 바로가기</a><button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div><header class="hero"><div class="hero-inner"><p class="kicker">제5부 · UVM 검증 환경</p><h1>제19장 · Monitor·Agent·Scoreboard</h1><p>기존 PWM RTL의 입력 구동·출력 관찰·독립 판정을 분리해 실무형 UVM 검증 구조를 완성합니다.</p><div class="chips"><span class="chip">PART 05 · CHAPTER 19</span><span class="chip">독립 관찰 · 34개 표본</span><span class="chip">원본 RTL 변경 없음</span></div></div></header><div class="wrap"><nav class="toc" id="course-nav" aria-label="부·장·절 탐색"></nav><main class="content" id="main-content">
+<section class="section" id="s00"><h2><span class="num">00</span>개요 · 구동·관찰·판정 분리</h2><p>제18장은 Driver 내부에서 PWM을 비교했습니다. 제19장은 Driver(드라이버, 입력 구동기), Monitor(모니터, 독립 관찰기), Scoreboard(스코어보드, 기대값 비교기)를 분리합니다. Agent(에이전트, 인터페이스 검증 구성 단위)는 Sequencer·Driver·Monitor를 묶습니다.</p><p><strong>선행 설계 학습안내서:</strong> amd_soc_p2 04.2장 RTL·AXI 풀이 02절 「설정 Shadow와 출력 Active를 분리」 및 06절 「독립 PWM Core 전체」. 원본 PWM을 사용하며 AXI와 보드는 범위 밖입니다.</p><div class="codeblock"><div class="codebar"><span>Ubuntu · 실습 폴더</span></div><pre tabindex="0"><code>mkdir -p ch19_lab/reference_rtl ch19_lab/tb/ch19 ch19_lab/scripts
+cd ch19_lab</code></pre></div><table><thead><tr><th>파일</th><th>역할</th></tr></thead><tbody><tr><td>reference_rtl/pwm_core.v</td><td>원본 DUT</td></tr><tr><td>tb/ch19/tb_pwm_monitor_agent_scoreboard.sv</td><td>전체 UVM 환경</td></tr><tr><td>scripts/run_ch19.sh</td><td>XSIM 정상/부정 실행</td></tr></tbody></table><p>01절·05절·06절의 전체 코드를 각 경로에 저장합니다.</p></section>
+<section class="section" id="s01"><h2><span class="num">01</span>원본 PWM RTL 전체</h2><p>10ns 클록, RESET_PERIOD=8입니다. cfg_apply는 상승 에지에서 Shadow를 저장하고 주기 경계에서 Active로 반영합니다. 리셋은 내부 상태에는 동기식이며 출력은 조합적으로 차단됩니다.</p><div class="codeblock"><div class="codebar"><span>reference_rtl/pwm_core.v · Verilog</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// P2-04: 보드와 무관한 단일 채널 범용 PWM 코어.
+// (추가) period와 duty는 클록 횟수 단위. 0%/100%는 지속 LOW/HIGH.
+// (추가) 설정은 주기 마지막 경계에서만 활성값으로 반영.
+module pwm_core #(
+    parameter [31:0] RESET_PERIOD = 32'd100000
+)(
+    input  wire        clk,
+    input  wire        resetn,
+    input  wire        cfg_apply,
+    input  wire [31:0] cfg_period,
+    input  wire [31:0] cfg_duty,
+    input  wire        cfg_enable,
+    input  wire        cfg_polarity,
+    output wire        pwm_out,
+    output reg         pending,
+    output reg [31:0] active_period,
+    output reg [31:0] active_duty,
+    output reg         active_enable,
+    output reg         active_polarity
+);
+    reg [31:0] counter;
+    reg [31:0] shadow_period;
+    reg [31:0] shadow_duty;
+    reg        shadow_enable;
+    reg        shadow_polarity;
+
+    wire boundary = (counter &gt;= active_period - 32'd1);
+    wire duty_high = (counter &lt; active_duty);
+
+    // (주의) enable=0이면 polarity와 관계없이 LOW로 차단.
+    // (설명) 기본 polarity에서 active_duty=0이면 항상 LOW,
+    //         active_duty=active_period이면 항상 HIGH.
+    assign pwm_out = resetn &amp;&amp; active_enable &amp;&amp;
+                     (active_polarity ? !duty_high : duty_high);
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            counter         &lt;= 32'd0;
+            active_period   &lt;= RESET_PERIOD;
+            active_duty     &lt;= 32'd0;
+            active_enable   &lt;= 1'b0;
+            active_polarity &lt;= 1'b0;
+            shadow_period   &lt;= RESET_PERIOD;
+            shadow_duty     &lt;= 32'd0;
+            shadow_enable   &lt;= 1'b0;
+            shadow_polarity &lt;= 1'b0;
+            pending         &lt;= 1'b0;
+        end else begin
+            if (boundary) begin
+                counter &lt;= 32'd0;
+                if (pending) begin
+                    active_period   &lt;= shadow_period;
+                    active_duty     &lt;= shadow_duty;
+                    active_enable   &lt;= shadow_enable;
+                    active_polarity &lt;= shadow_polarity;
+                    pending         &lt;= 1'b0;
+                end
+            end else begin
+                counter &lt;= counter + 32'd1;
+            end
+            // (추가) 경계와 APPLY가 겹치면 새 값은 다음 경계에 적용.
+            // 여러 APPLY가 겹치면 최종 요청값을 우선하는 단일 Shadow 구조.
+            if (cfg_apply) begin
+                shadow_period   &lt;= cfg_period;
+                shadow_duty     &lt;= cfg_duty;
+                shadow_enable   &lt;= cfg_enable;
+                shadow_polarity &lt;= cfg_polarity;
+                pending         &lt;= 1'b1;
+            end
+        end
+    end
+endmodule
+</code></pre></div><p>기본 극성·주기 8·듀티 2, 6, 0의 순차 요청을 검증합니다. DUT의 내부 counter와 Shadow 레지스터는 읽지 않습니다.</p></section>
+<section class="section" id="s02"><h2><span class="num">02</span>Agent·Analysis Port·Scoreboard 연결</h2><figure style="overflow-x:auto;margin:16px 0"><div style="min-width:700px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 355" role="img" aria-labelledby="ch19title"><title id="ch19title">구동과 독립 관찰 경로</title><rect width="960" height="355" fill="white"/><defs><marker id="ch19arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs><g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle"><text x="480" y="30" font-size="20" font-weight="bold">pwm19_env · 구동과 독립 판정</text><rect x="220" y="48" width="326" height="278" rx="4" fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"/><text x="383" y="69" font-size="15" font-weight="bold">pwm19_agent · ag</text><rect x="24" y="82" width="170" height="76" rx="4" fill="white" stroke="#1F3A5F" stroke-width="1.8"/><text x="109" y="111" font-size="14" font-weight="bold">pwm19_sequence</text><text x="109" y="133" font-size="12">duty 2, 6, 0</text><rect x="240" y="82" width="130" height="76" rx="4" fill="white" stroke="#1F3A5F" stroke-width="1.8"/><text x="305" y="111" font-size="14" font-weight="bold">sqr</text><text x="305" y="133" font-size="12">seq_item_export</text><rect x="395" y="82" width="130" height="76" rx="4" fill="white" stroke="#1F3A5F" stroke-width="1.8"/><text x="460" y="111" font-size="14" font-weight="bold">drv</text><text x="460" y="133" font-size="12">seq_item_port</text><rect x="600" y="82" width="170" height="76" rx="4" fill="white" stroke="#1F3A5F" stroke-width="1.8"/><text x="685" y="111" font-size="14" font-weight="bold">pwm19_if · bus</text><text x="685" y="133" font-size="12">cfg_* / active_*</text><rect x="805" y="82" width="125" height="76" rx="4" fill="white" stroke="#1F3A5F" stroke-width="1.8"/><text x="867.5" y="111" font-size="14" font-weight="bold">pwm_core</text><text x="867.5" y="133" font-size="12">pending · PWM</text><rect x="395" y="225" width="130" height="76" rx="4" fill="white" stroke="#1F3A5F" stroke-width="1.8"/><text x="460" y="254" font-size="14" font-weight="bold">mon</text><text x="460" y="276" font-size="12">posedge + 1ns</text><rect x="600" y="225" width="330" height="76" rx="4" fill="white" stroke="#1F3A5F" stroke-width="1.8"/><text x="765" y="254" font-size="14" font-weight="bold">pwm19_scoreboard · sb</text><text x="765" y="276" font-size="12">write() · cycles % 8</text><g fill="none" stroke="#5A1E1E" stroke-width="2" marker-end="url(#ch19arr)"><path d="M194 120H240"/><path d="M370 120H395"/><path d="M525 120H600"/><path d="M770 113H805"/><path d="M805 140H770"/><path d="M685 158V190H460V225"/><path d="M525 263H600"/></g><text x="754" y="183" font-size="12">공개 신호 관찰</text><text x="563" y="253" font-size="12">ap</text><text x="480" y="344" font-size="13">ap.write(sample) → analysis_export → sb.write(sample)</text></g></svg>
+</div><figcaption>ag 내부의 sqr, drv, mon 및 env의 sb. 요청 전달과 공개 신호 관찰 경로를 분리합니다.</figcaption></figure><table><thead><tr><th>구성</th><th>실제 책임</th></tr></thead><tbody><tr><td>pwm19_sequence</td><td>설정 거래 생성</td></tr><tr><td>pwm19_sequencer · sqr</td><td>거래 중개</td></tr><tr><td>pwm19_driver · drv</td><td>신호 구동 및 다음 요청 시점 제어</td></tr><tr><td>pwm19_monitor · mon</td><td>매 상승 에지 +1ns 관찰</td></tr><tr><td>pwm19_scoreboard · sb</td><td>독립 기대값 비교</td></tr><tr><td>pwm19_agent · ag</td><td>sqr·drv·mon 생성 및 연결</td></tr><tr><td>pwm19_env · env</td><td>ag·sb 및 분석 연결</td></tr><tr><td>pwm19_test</td><td>리셋·시퀀스·종료 판정</td></tr></tbody></table><p>Agent는 항상 능동형이며 수동형 전환 기능은 없습니다. <code>drv.seq_item_port.connect(sqr.seq_item_export)</code>는 요청/완료의 연결입니다. <code>ag.mon.ap.connect(sb.analysis_export)</code>는 관찰 전달 연결입니다. Analysis Port(애널리시스 포트, 분석 데이터 발행 포트)의 write는 시간을 소비하지 않는 함수이며 Analysis Imp(애널리시스 임프, 수신 구현 포트)가 sb.write를 호출합니다. 매 클록 새 객체를 생성하므로 이전 관찰값과 객체 참조가 뒤섞이지 않습니다.</p></section>
+<section class="section" id="s03"><h2><span class="num">03</span>독립 기대 모델 · 매 클록 비교</h2><p>Driver는 하강 에지에서 입력을 구동합니다. Monitor는 상승 에지 1ns 뒤 비차단 대입이 반영된 공개 신호를 수집합니다. pending 변화만 관찰하면 잘못된 pending 때문에 표본 자체가 누락될 수 있습니다. 따라서 매 에지의 원시 신호를 전달합니다.</p><table><thead><tr><th>Scoreboard 단계</th><th>동작</th></tr></thead><tbody><tr><td>초기 3개 리셋 표본</td><td>공개 출력 6개 초기값 비교</td></tr><tr><td>cycles 증가</td><td>리셋 후 클록 집계</td></tr><tr><td>phase_idx = cycles % 8</td><td>독립 위상 계산</td></tr><tr><td>phase_idx == 0</td><td>이전 요청의 예상 적용</td></tr><tr><td>cfg_apply 관찰</td><td>독립 planned_duty와 요청 비교</td></tr><tr><td>매 에지</td><td>active_* 4개, pending, pwm 비교</td></tr><tr><td>samples 증가</td><td>예상 활성 상태 24개 표본 집계</td></tr></tbody></table><p>기대 모델은 고정 주기 8에서 유효합니다. 경계와 요청이 겹치면 이전 요청을 먼저 처리하고 새 요청을 저장합니다. DUT의 pending이나 active_duty에 맞춰 기대 시점을 변경하지 않습니다. 조기·지연 적용, 위상 오류, X/Z 값은 <code>!==</code>로 검사합니다. 초기 리셋 이후 추가 리셋과 모든 중첩 요청·임의 주기는 시험하지 않습니다.</p></section>
+<section class="section" id="s04"><h2><span class="num">04</span>거래별 시간 계약과 부정 시험</h2><table><thead><tr><th>듀티</th><th>요청 관찰(ns)</th><th>적용 관찰(ns)</th><th>표본(ns)</th><th>기대 출력</th></tr></thead><tbody><tr><td>2</td><td>46</td><td>106</td><td>106~176</td><td>11000000</td></tr><tr><td>6</td><td>126</td><td>186</td><td>186~256</td><td>11111100</td></tr><tr><td>0</td><td>206</td><td>266</td><td>266~336</td><td>00000000</td></tr></tbody></table><p>관찰은 상승 에지보다 1ns 늦습니다. 제18장과 달리 Driver는 pending 해제 후 다음 거래를 진행합니다. 시간 없는 UVM 거래 전달을 가정한 예상 시각입니다. 리셋 표본 6/16/26ns 3개, 정상 표본 36~336ns 31개(비활성 7개, 활성 24개)로 총 34개를 검사합니다.</p><p>CORRUPT_SAMPLE 부정 시험은 126ns(첫 듀티 2의 위상 2)에서 Monitor의 관찰 객체 pwm만 반전합니다. 정상 출력은 LOW이며 Scoreboard는 SB_PWM을 발생시켜야 합니다. DUT 자체를 변경하는 변이 시험과 구분합니다.</p></section>
+<section class="section" id="s05"><h2><span class="num">05</span>전체 SystemVerilog/UVM 테스트벤치</h2><div class="codeblock"><div class="codebar"><span>tb/ch19/tb_pwm_monitor_agent_scoreboard.sv · SystemVerilog / UVM</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제19장: Sequence → Sequencer → Driver와 분리된 Monitor/Agent/Scoreboard.
+// 원본 pwm_core.v의 포트·RTL은 수정하지 않는다.
+// 입력 요청 2→6→0의 기대값은 Scoreboard가 독립적으로 관리한다.
+
+interface pwm19_if(input logic clk);
+    logic resetn = 1'b0;
+    logic cfg_apply = 1'b0;
+    logic [31:0] cfg_period = 32'd8;
+    logic [31:0] cfg_duty = 32'd0;
+    logic cfg_enable = 1'b0;
+    logic cfg_polarity = 1'b0;
+    wire pwm_out, pending, active_enable, active_polarity;
+    wire [31:0] active_period, active_duty;
+endinterface
+
+package ch19_uvm_pkg;
+    import uvm_pkg::*;
+    `include &quot;uvm_macros.svh&quot;
+
+    // (추가) Sequence가 Driver로 보내는 설정 거래.
+    class pwm19_item extends uvm_sequence_item;
+        bit [31:0] duty;
+        `uvm_object_utils(pwm19_item)
+        function new(string name=&quot;pwm19_item&quot;);
+            super.new(name);
+        endfunction
+    endclass
+
+    // (추가) Monitor가 관찰한 공개 신호를 담는 별도 거래.
+    class pwm19_sample extends uvm_sequence_item;
+        // (변경) 매 에지의 입력과 출력 모두 보존. X/Z도 유지한다.
+        logic resetn, cfg_apply;
+        logic [31:0] cfg_duty, cfg_period;
+        logic cfg_enable, cfg_polarity;
+        logic [31:0] duty, period;
+        logic enable, polarity, pending, pwm;
+        time sampled_at;
+        `uvm_object_utils(pwm19_sample)
+        function new(string name=&quot;pwm19_sample&quot;);
+            super.new(name);
+        endfunction
+    endclass
+
+    // (유지/확장) 제18장의 2, 6, 0 듀티 순서를 그대로 재사용.
+    class pwm19_sequence extends uvm_sequence #(pwm19_item);
+        `uvm_object_utils(pwm19_sequence)
+        function new(string name=&quot;pwm19_sequence&quot;);
+            super.new(name);
+        endfunction
+        task body();
+            pwm19_item req;
+            for (int i=0; i&lt;3; i++) begin
+                req = pwm19_item::type_id::create($sformatf(&quot;req_%0d&quot;, i));
+                start_item(req);
+                case (i)
+                    0: req.duty = 32'd2;
+                    1: req.duty = 32'd6;
+                    default: req.duty = 32'd0;
+                endcase
+                finish_item(req);
+            end
+        endtask
+    endclass
+
+    class pwm19_sequencer extends uvm_sequencer #(pwm19_item);
+        `uvm_component_utils(pwm19_sequencer)
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+    endclass
+
+    // (변경) Driver는 입력 신호만 구동하고 응답의 정답 판정은 하지 않는다.
+    class pwm19_driver extends uvm_driver #(pwm19_item);
+        `uvm_component_utils(pwm19_driver)
+        virtual pwm19_if vif;
+        int unsigned driven = 0;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (!uvm_config_db#(virtual pwm19_if)::get(this, &quot;&quot;, &quot;vif&quot;, vif))
+                `uvm_fatal(&quot;NOVIF&quot;, &quot;pwm19_if missing&quot;)
+        endfunction
+        task drive_one(pwm19_item req);
+            int guard;
+            @(negedge vif.clk);
+            vif.cfg_period = 32'd8;
+            vif.cfg_duty = req.duty;
+            vif.cfg_enable = 1'b1;
+            vif.cfg_polarity = 1'b0;
+            vif.cfg_apply = 1'b1;
+            @(negedge vif.clk);
+            vif.cfg_apply = 1'b0;
+
+            // 대기 신호를 통해 다음 요청을 언제 보낼지만 제어한다.
+            // 실제 적용 듀티·출력 판정은 Monitor/Scoreboard의 책임.
+            guard = 0;
+            while (vif.pending !== 1'b0) begin
+                @(negedge vif.clk);
+                guard++;
+                if (guard &gt; 12)
+                    `uvm_fatal(&quot;DRV_TIMEOUT&quot;, &quot;pending was not cleared&quot;)
+            end
+            driven++;
+        endtask
+        task run_phase(uvm_phase phase);
+            pwm19_item req;
+            forever begin
+                seq_item_port.get_next_item(req);
+                drive_one(req);
+                seq_item_port.item_done();
+            end
+        endtask
+    endclass
+
+    // (추가) Monitor는 DUT 출력/입력을 관찰할 뿐 신호를 구동하지 않는다.
+    class pwm19_monitor extends uvm_monitor;
+        `uvm_component_utils(pwm19_monitor)
+        virtual pwm19_if vif;
+        uvm_analysis_port #(pwm19_sample) ap;
+
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+            ap = new(&quot;ap&quot;, this);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if (!uvm_config_db#(virtual pwm19_if)::get(this, &quot;&quot;, &quot;vif&quot;, vif))
+                `uvm_fatal(&quot;NOVIF&quot;, &quot;pwm19_if missing&quot;)
+        endfunction
+        task run_phase(uvm_phase phase);
+            pwm19_sample sample;
+            forever begin
+                @(posedge vif.clk);
+                #1; // DUT의 비차단 대입 완료 이후 공개 출력 관찰
+                // (변경) 이벤트를 추론하지 않고 매 에지마다 새 객체를 전송한다.
+                sample = pwm19_sample::type_id::create(&quot;cycle_sample&quot;);
+                sample.resetn = vif.resetn;
+                sample.cfg_apply = vif.cfg_apply;
+                sample.cfg_duty = vif.cfg_duty;
+                sample.cfg_period = vif.cfg_period;
+                sample.cfg_enable = vif.cfg_enable;
+                sample.cfg_polarity = vif.cfg_polarity;
+                sample.duty = vif.active_duty;
+                sample.period = vif.active_period;
+                sample.enable = vif.active_enable;
+                sample.polarity = vif.active_polarity;
+                sample.pending = vif.pending;
+                sample.pwm = vif.pwm_out;
+                sample.sampled_at = $time;
+                // (추가) 정상 DUT가 아닌 관찰 객체만 변경하는 부정 시험.
+                if ($test$plusargs(&quot;CORRUPT_SAMPLE&quot;) &amp;&amp; sample.sampled_at == 126)
+                    sample.pwm = ~sample.pwm;
+                ap.write(sample);
+            end
+        endtask
+    endclass
+
+    // (추가) Analysis Imp를 통해 Monitor의 관찰 거래를 받는다.
+    // '정답 2→6→0'은 DUT에서 읽지 않고 검증 기준으로 별도 보관.
+    class pwm19_scoreboard extends uvm_scoreboard;
+        `uvm_component_utils(pwm19_scoreboard)
+        uvm_analysis_imp #(pwm19_sample, pwm19_scoreboard) analysis_export;
+        int unsigned requests = 0;
+        int unsigned applied = 0;
+        bit [31:0] planned_duty[3] = '{32'd2, 32'd6, 32'd0};
+        time request_time[3];
+        int unsigned reset_samples = 0, cycles = 0, samples = 0;
+        int unsigned phase_idx = 0;
+        bit expected_pending = 0, expected_enable = 0;
+        bit [31:0] expected_duty = 0;
+        bit expected_pwm;
+
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+            analysis_export = new(&quot;analysis_export&quot;, this);
+        endfunction
+
+        // (변경) 예상 위상은 DUT의 pending/counter가 아니라 리셋 후
+        // 관찰 클록 수의 나머지로 계산한다. 이 실습은 period=8 고정.
+        function void write(pwm19_sample sample);
+            if (sample.resetn === 1'b0) begin
+                if (cycles != 0)
+                    `uvm_fatal(&quot;SB_RESET&quot;, &quot;Unexpected reset during transactions&quot;)
+                reset_samples++;
+                if (sample.period !== 32'd8 || sample.duty !== 32'd0 ||
+                    sample.enable !== 1'b0 || sample.polarity !== 1'b0 ||
+                    sample.pending !== 1'b0 || sample.pwm !== 1'b0)
+                    `uvm_fatal(&quot;SB_RESET&quot;, &quot;Reset output mismatch&quot;)
+                return;
+            end
+            if (sample.resetn !== 1'b1 || reset_samples != 3)
+                `uvm_fatal(&quot;SB_RESET&quot;, &quot;Reset sequence mismatch&quot;)
+            cycles++;
+            phase_idx = cycles % 8;
+
+            // 주기 경계에서는 이전 요청만 적용된다.
+            if (phase_idx == 0 &amp;&amp; expected_pending) begin
+                if (applied &gt;= requests || applied &gt;= 3)
+                    `uvm_fatal(&quot;SB_ORDER&quot;, &quot;Apply without request&quot;)
+                expected_duty = planned_duty[applied];
+                expected_enable = 1;
+                expected_pending = 0;
+                if (sample.sampled_at - request_time[applied] &gt; 80)
+                    `uvm_fatal(&quot;SB_LATENCY&quot;, &quot;Apply exceeded one period&quot;)
+                applied++;
+                `uvm_info(&quot;SB&quot;, $sformatf(&quot;APPLIED %0d duty=%0d&quot;,
+                    applied, expected_duty), UVM_LOW)
+            end
+            // 요청의 예상 순서는 Driver의 거래 객체에 의존하지 않는다.
+            if (sample.cfg_apply === 1'b1) begin
+                if (requests &gt;= 3 || expected_pending)
+                    `uvm_fatal(&quot;SB_EXTRA&quot;, &quot;Unexpected or overlapping request&quot;)
+                if (sample.cfg_period !== 32'd8 ||
+                    sample.cfg_duty !== planned_duty[requests] ||
+                    sample.cfg_enable !== 1'b1 || sample.cfg_polarity !== 1'b0)
+                    `uvm_fatal(&quot;SB_REQUEST&quot;, &quot;Unexpected PWM request content&quot;)
+                request_time[requests] = sample.sampled_at;
+                requests++;
+                expected_pending = 1;
+                `uvm_info(&quot;SB&quot;, $sformatf(&quot;REQUEST %0d duty=%0d&quot;,
+                    requests, sample.cfg_duty), UVM_LOW)
+            end else if (sample.cfg_apply !== 1'b0)
+                `uvm_fatal(&quot;SB_REQUEST&quot;, &quot;Unknown cfg_apply&quot;)
+
+            // 실제 공개 출력과 독립 기대값을 매 에지에서 대조한다.
+            if (sample.period !== 32'd8 || sample.duty !== expected_duty ||
+                sample.enable !== expected_enable || sample.polarity !== 1'b0 ||
+                sample.pending !== expected_pending)
+                `uvm_fatal(&quot;SB_STATE&quot;, $sformatf(&quot;t=%0d phase=%0d&quot;,
+                    sample.sampled_at, phase_idx))
+            expected_pwm = expected_enable &amp;&amp; (phase_idx &lt; expected_duty);
+            if (sample.pwm !== expected_pwm)
+                `uvm_fatal(&quot;SB_PWM&quot;, $sformatf(&quot;t=%0d phase=%0d expected=%0b got=%0b&quot;,
+                    sample.sampled_at, phase_idx, expected_pwm, sample.pwm))
+            if (expected_enable) samples++;
+        endfunction
+    endclass
+
+    // (추가) Agent가 Sequencer, Driver, Monitor를 한 단위로 묶는다.
+    class pwm19_agent extends uvm_agent;
+        `uvm_component_utils(pwm19_agent)
+        pwm19_sequencer sqr;
+        pwm19_driver drv;
+        pwm19_monitor mon;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            sqr = pwm19_sequencer::type_id::create(&quot;sqr&quot;, this);
+            drv = pwm19_driver::type_id::create(&quot;drv&quot;, this);
+            mon = pwm19_monitor::type_id::create(&quot;mon&quot;, this);
+        endfunction
+        function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+            drv.seq_item_port.connect(sqr.seq_item_export);
+        endfunction
+    endclass
+
+    class pwm19_env extends uvm_env;
+        `uvm_component_utils(pwm19_env)
+        pwm19_agent ag;
+        pwm19_scoreboard sb;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            ag = pwm19_agent::type_id::create(&quot;ag&quot;, this);
+            sb = pwm19_scoreboard::type_id::create(&quot;sb&quot;, this);
+        endfunction
+        function void connect_phase(uvm_phase phase);
+            super.connect_phase(phase);
+            ag.mon.ap.connect(sb.analysis_export);
+        endfunction
+    endclass
+
+    class pwm19_test extends uvm_test;
+        `uvm_component_utils(pwm19_test)
+        virtual pwm19_if vif;
+        pwm19_env env;
+        bit seq_finished = 0;
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            env = pwm19_env::type_id::create(&quot;env&quot;, this);
+            if (!uvm_config_db#(virtual pwm19_if)::get(this, &quot;&quot;, &quot;vif&quot;, vif))
+                `uvm_fatal(&quot;NOVIF&quot;, &quot;pwm19_if missing in test&quot;)
+        endfunction
+        task run_phase(uvm_phase phase);
+            pwm19_sequence seq;
+            phase.raise_objection(this);
+            repeat (3) @(negedge vif.clk);
+            if (vif.active_period !== 32'd8 ||
+                vif.active_duty !== 32'd0 || vif.pending !== 1'b0)
+                `uvm_fatal(&quot;RESET&quot;, &quot;PWM reset did not complete&quot;)
+            vif.resetn = 1'b1;
+            seq = pwm19_sequence::type_id::create(&quot;seq&quot;);
+            seq.start(env.ag.sqr);
+            seq_finished = 1;
+            // (변경) 마지막 거래 적용 이후 전체 주기의 관찰까지 기다린다.
+            wait (env.sb.samples == 24);
+            @(negedge vif.clk);
+            phase.drop_objection(this);
+        endtask
+        function void check_phase(uvm_phase phase);
+            super.check_phase(phase);
+            if (!seq_finished || env.ag.drv.driven != 3 ||
+                env.sb.requests != 3 || env.sb.applied != 3 ||
+                env.sb.samples != 24 || env.sb.cycles != 31 ||
+                env.sb.reset_samples != 3 || env.sb.expected_pending)
+                `uvm_fatal(&quot;SB_COUNT&quot;, &quot;Missing or extra observations&quot;)
+        endfunction
+        function void report_phase(uvm_phase phase);
+            super.report_phase(phase);
+            if (uvm_report_server::get_server().get_severity_count(UVM_ERROR) != 0 ||
+                uvm_report_server::get_server().get_severity_count(UVM_FATAL) != 0)
+                `uvm_fatal(&quot;REPORT&quot;, &quot;UVM error or fatal reported&quot;)
+            `uvm_info(&quot;RESULT&quot;, &quot;PASS CH19 requests=3 applied=3 samples=24&quot;, UVM_NONE)
+        endfunction
+    endclass
+endpackage
+
+module tb_pwm_monitor_agent_scoreboard;
+    import uvm_pkg::*;
+    import ch19_uvm_pkg::*;
+
+    logic clk = 1'b0;
+    always #5 clk = ~clk;
+    pwm19_if bus(clk);
+
+    pwm_core #(.RESET_PERIOD(32'd8)) dut (
+        .clk(clk), .resetn(bus.resetn), .cfg_apply(bus.cfg_apply),
+        .cfg_period(bus.cfg_period), .cfg_duty(bus.cfg_duty),
+        .cfg_enable(bus.cfg_enable), .cfg_polarity(bus.cfg_polarity),
+        .pwm_out(bus.pwm_out), .pending(bus.pending),
+        .active_period(bus.active_period), .active_duty(bus.active_duty),
+        .active_enable(bus.active_enable),
+        .active_polarity(bus.active_polarity)
+    );
+
+    initial begin
+        uvm_config_db#(virtual pwm19_if)::set(null, &quot;uvm_test_top&quot;, &quot;vif&quot;, bus);
+        uvm_config_db#(virtual pwm19_if)::set(null, &quot;uvm_test_top.env.ag.drv&quot;, &quot;vif&quot;, bus);
+        uvm_config_db#(virtual pwm19_if)::set(null, &quot;uvm_test_top.env.ag.mon&quot;, &quot;vif&quot;, bus);
+        run_test(&quot;pwm19_test&quot;);
+    end
+    initial begin
+        #2000;
+        $fatal(1, &quot;FAIL CH19 GLOBAL_TIMEOUT&quot;);
+    end
+endmodule
+</code></pre></div><table><thead><tr><th>구문</th><th>풀이</th></tr></thead><tbody><tr><td>pwm19_item</td><td>Driver용 설정 거래</td></tr><tr><td>pwm19_sample</td><td>4상태 원시 관찰값과 시각</td></tr><tr><td>ap.write(sample)</td><td>관찰값 발행</td></tr><tr><td>uvm_analysis_imp</td><td>Scoreboard write 호출</td></tr><tr><td>planned_duty</td><td>독립 기대 순서</td></tr><tr><td>phase_idx</td><td>경과 클록의 위상</td></tr><tr><td>expected_pending / expected_duty</td><td>예상 요청 및 적용 상태</td></tr><tr><td>seq_finished / samples</td><td>완료 동기화</td></tr><tr><td>check_phase</td><td>누락·추가 표본 및 완료 수</td></tr></tbody></table><p>APPLIED 메시지는 해당 에지의 예상 적용 사건입니다. 바로 이어 공개 상태와 PWM을 검사하므로 메시지만으로 성공을 판정하지 않습니다. 마지막 거래의 전체 8개 표본까지 Objection(옵젝션, 종료 보류 요청)을 유지하며 최종 PASS 및 오류 누계를 검사합니다.</p></section>
+<section class="section" id="s06"><h2><span class="num">06</span>Ubuntu · Vivado XSIM 실행</h2><p>제17~18장과 같은 Vivado 내장 UVM 라이브러리를 사용합니다. xvlog와 xelab에 -L uvm을 적용합니다. 설치 버전에서 UVM과 매크로 지원을 확인합니다.</p><div class="codeblock"><div class="codebar"><span>scripts/run_ch19.sh · Bash</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 제19장: Vivado XSIM 내장 UVM 라이브러리 사용.
+set -euo pipefail
+ROOT=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)/..&quot; &amp;&amp; pwd)&quot;
+RTL=&quot;${DUT_PATH:-$ROOT/reference_rtl/pwm_core.v}&quot;
+if [[ ! -f &quot;$RTL&quot; ]]; then
+  echo &quot;NOT_RUN: DUT missing&quot; &gt;&amp;2
+  exit 2
+fi
+RTL=&quot;$(realpath &quot;$RTL&quot;)&quot;
+for tool in xvlog xelab xsim; do
+  if ! command -v &quot;$tool&quot; &gt;/dev/null 2&gt;&amp;1; then
+    echo &quot;NOT_RUN: $tool missing; source Vivado settings64.sh&quot; &gt;&amp;2
+    exit 2
+  fi
+done
+mkdir -p &quot;$ROOT/.build/ch19&quot;
+OUT=&quot;$(mktemp -d &quot;$ROOT/.build/ch19/run.XXXXXX&quot;)&quot;
+cd &quot;$OUT&quot;
+xvlog &quot;$RTL&quot; 2&gt;&amp;1 | tee rtl.log
+xvlog -sv -L uvm &quot;$ROOT/tb/ch19/tb_pwm_monitor_agent_scoreboard.sv&quot; 2&gt;&amp;1 | tee tb.log
+xelab -timescale 1ns/1ps -L uvm -debug typical tb_pwm_monitor_agent_scoreboard -s ch19_sim 2&gt;&amp;1 | tee elaborate.log
+xsim ch19_sim -runall -onerror quit 2&gt;&amp;1 | tee normal.log
+grep -Eq '\[RESULT\][[:space:]]+PASS CH19 requests=3 applied=3 samples=24[[:space:]]*$' normal.log
+grep -Eq 'UVM_ERROR[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log
+grep -Eq 'UVM_FATAL[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log
+# 부정 시험: 126ns의 관찰 객체 PWM을 반전하여 Scoreboard를 시험한다.
+# UVM $finish에 따른 종료 코드 차이가 있으므로 전용 진단도 검사한다.
+rc=0
+xsim ch19_sim -runall -onerror quit -testplusarg CORRUPT_SAMPLE &gt; negative.log 2&gt;&amp;1 || rc=$?
+grep -Eq 'UVM_FATAL.*\[SB_PWM\].*t=126 phase=2 expected=0 got=1' negative.log
+if grep -q 'PASS CH19\|FAIL CH19 GLOBAL_TIMEOUT' negative.log; then
+  echo &quot;FAIL: unexpected negative result&quot; &gt;&amp;2
+  exit 1
+fi
+echo &quot;PASS CH19 HARNESS (negative exit=$rc)&quot;
+echo &quot;Logs: $OUT&quot;
+</code></pre></div><div class="codeblock"><div class="codebar"><span>Ubuntu · 실습 루트</span></div><pre tabindex="0"><code># Vivado 설치 경로의 settings64.sh를 source한 뒤 실행
+command -v xvlog xelab xsim
+bash scripts/run_ch19.sh</code></pre></div><table><thead><tr><th>명령</th><th>기능</th></tr></thead><tbody><tr><td>xvlog</td><td>RTL 및 UVM 분석</td></tr><tr><td>xelab</td><td>연결 및 스냅샷 생성</td></tr><tr><td>xsim</td><td>정상·부정 실행</td></tr><tr><td>grep</td><td>완료 및 오류 진단 확인</td></tr><tr><td>mktemp</td><td>새 로그 폴더 생성</td></tr></tbody></table><p>실행 폴더에 normal.log와 negative.log를 저장합니다. 해당 폴더에서 xsim ch19_sim -gui를 실행하고 bus.cfg_apply, bus.cfg_duty, bus.pending, bus.active_duty, bus.pwm_out을 관찰합니다. 공식 참고: <a href="https://docs.amd.com/r/en-US/ug900-vivado-logic-simulation/Universal-Verification-Methodology-UVM-Support">AMD UG900 UVM 지원</a>.</p></section>
+<section class="section" id="s07"><h2><span class="num">07</span>예상 결과와 장애 분석</h2><p>독립 시간 계산에 따른 기대 메시지입니다. 실제 시뮬레이션 로그가 아닙니다.</p><div class="codeblock"><div class="codebar"><span>정상 시험</span></div><pre tabindex="0"><code>REQUEST 1 duty=2
+APPLIED 1 duty=2
+REQUEST 2 duty=6
+APPLIED 2 duty=6
+REQUEST 3 duty=0
+APPLIED 3 duty=0
+[RESULT] PASS CH19 requests=3 applied=3 samples=24
+UVM_ERROR : 0
+UVM_FATAL : 0</code></pre></div><div class="codeblock"><div class="codebar"><span>부정 시험</span></div><pre tabindex="0"><code>[SB_PWM] t=126 phase=2 expected=0 got=1
+PASS CH19 HARNESS (negative exit=...)</code></pre></div><table><thead><tr><th>진단</th><th>점검</th></tr></thead><tbody><tr><td>NOVIF</td><td>config_db 경로 및 타입</td></tr><tr><td>SB_RESET</td><td>리셋 초기값 및 횟수</td></tr><tr><td>SB_REQUEST / SB_EXTRA</td><td>순서·값·중복 요청</td></tr><tr><td>SB_STATE</td><td>독립 적용 시점 및 상태</td></tr><tr><td>SB_PWM</td><td>위상별 출력 오류</td></tr><tr><td>SB_COUNT</td><td>3거래·31정상 표본·24활성 표본·3리셋 표본</td></tr><tr><td>DRV_TIMEOUT / GLOBAL_TIMEOUT</td><td>무한 대기</td></tr><tr><td>REPORT</td><td>UVM 오류 누계</td></tr></tbody></table><p>다음 제20장은 Factory(팩토리, 객체 생성·교체), Config DB(설정 전달), Objection(종료 보류 요청)을 이용해 UVM 환경을 구성하고 완료 조건을 관리합니다.</p>
+<div class="execution-evidence" data-evidence="v59"><h3>2026-11-26 실제 실행 결과</h3><p>Vivado XSIM 2024.2 · 종료 코드 0 · <strong>PASS</strong>. 정상 실행과 정의된 오류 검출 조건을 장별 실행기로 확인했습니다.</p><div class="codeblock"><div class="codebar"><span>저장소 루트 · Bash · 실행 재현 명령</span></div><pre tabindex="0"><code>bash scripts/run_chapter.sh 19</code></pre></div><div class="codeblock"><div class="codebar"><span>실제 로그 발췌 · 예상 출력과 구별</span></div><pre tabindex="0"><code>[RESULT] PASS CH19 requests=3 applied=3 samples=24
+UVM_ERROR :    0
+UVM_FATAL :    0
+UVM_FATAL [SB_PWM] t=126 phase=2 expected=0 got=1
+UVM_FATAL :    1</code></pre></div><p><a href="docs/evidence/v59/README.md#ch19">실행 명령·종료 코드·공개 로그 및 해시 확인</a>. 위의 예상 파형은 코드에서 계산한 도식이며, 실측 파형 이미지는 별도로 수록하지 않았습니다.</p></div>
+</section>
+<div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH19 v05 · PASS</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v05.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v04.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v04.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v05.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v05.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v05.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v04.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v04.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v04.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v05.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v04.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v03.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v03.html"},{"id":"ch14","number":14,"title":"FIFO 및 흐름 제어","file":"ch14_fifo_flow_control_v03.html"},{"id":"ch15","number":15,"title":"AXI4-Lite 레지스터 검증","file":"ch15_axi4lite_register_verification_v03.html"},{"id":"ch16","number":16,"title":"MAC·NPU 정수 연산 검증","file":"ch16_mac_npu_integer_verification_v03.html"},{"id":"ch17","number":17,"title":"최소 UVM 환경","file":"ch17_minimal_uvm_environment_v04.html"},{"id":"ch18","number":18,"title":"Sequence에서 Driver까지","file":"ch18_sequence_driver_v04.html"},{"id":"ch19","number":19,"title":"Monitor·Agent·Scoreboard","file":"ch19_monitor_agent_scoreboard_v05.html"},{"id":"ch20","number":20,"title":"Factory·Config·Objection","file":"ch20_factory_config_objection_v04.html"},{"id":"ch21","number":21,"title":"UVM 레지스터 추상화","file":"ch21_uvm_register_abstraction_v04.html"},{"id":"ch22","number":22,"title":"다중 Agent·VIP","file":"ch22_multi_agent_vip_v05.html"},{"id":"ch23","number":23,"title":"NPU 통합 정답 비교","file":"ch23_npu_integrated_scoreboard_v04.html"},{"id":"ch24","number":24,"title":"회귀·CI·검증 보고","file":"ch24_regression_ci_reporting_v04.html"}]};</script><script src="assets/site.js"></script></body></html>

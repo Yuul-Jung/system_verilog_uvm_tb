@@ -1,0 +1,78 @@
+{
+  "chapter": 24,
+  "timestamp_utc": "2026-11-25T22:21:45.729362+00:00",
+  "dut_path": "reference_rtl/uart_echo_controller.v",
+  "dut_blob_sha": "28160c34522e47fbd961466651598da063bc74ae",
+  "expected_dut_blob_sha": "28160c34522e47fbd961466651598da063bc74ae",
+  "tb_blob_sha": "ee4a1c705a6f2f20f23f25f36680604eefc49afe",
+  "simulator": "Icarus Verilog",
+  "seeds": [
+    1,
+    7,
+    42
+  ],
+  "cases": [
+    {
+      "name": "seed_1",
+      "status": "PASS",
+      "exit_code": 0,
+      "accepted": 9,
+      "coverage": [
+        6,
+        12,
+        9,
+        5
+      ],
+      "expected_coverage": [
+        6,
+        12,
+        9,
+        5
+      ]
+    },
+    {
+      "name": "seed_7",
+      "status": "PASS",
+      "exit_code": 0,
+      "accepted": 11,
+      "coverage": [
+        9,
+        7,
+        11,
+        5
+      ],
+      "expected_coverage": [
+        9,
+        7,
+        11,
+        5
+      ]
+    },
+    {
+      "name": "seed_42",
+      "status": "PASS",
+      "exit_code": 0,
+      "accepted": 9,
+      "coverage": [
+        12,
+        5,
+        9,
+        6
+      ],
+      "expected_coverage": [
+        12,
+        5,
+        9,
+        6
+      ]
+    },
+    {
+      "name": "negative_injection",
+      "status": "PASS",
+      "exit_code": 1,
+      "expected": "비정상 종료 및 지정된 오류 마커"
+    }
+  ],
+  "status": "PASS",
+  "simulator_version": "Icarus Verilog version 12.0 (stable) ()"
+}

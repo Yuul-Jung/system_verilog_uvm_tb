@@ -1,0 +1,14 @@
+VCD info: dumpfile ch04_pwm_pass_fail.vcd opened for output.
+=== CH04 PWM SELF-CHECK START ===
+APPLIED duty=0 t=96 ns
+CHECK duty=0 high=0/8 expected=0/8
+APPLIED duty=2 t=256 ns
+CHECK duty=2 high=2/8 expected=2/8
+APPLIED duty=4 t=416 ns
+CHECK duty=4 high=4/8 expected=4/8
+APPLIED duty=6 t=576 ns
+CHECK duty=6 high=6/8 expected=6/8
+APPLIED duty=8 t=736 ns
+CHECK duty=8 high=8/8 expected=8/8
+PASS checks=11 errors=0
+<REPO>/tb/ch04/tb_pwm_pass_fail.sv:111: $finish called at 810000 (1ps)

@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v58",
+  "version": "v59",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -11,7 +11,7 @@
       "title": "테스트벤치의 첫 실행",
       "subtitle": "UART Echo 테스트벤치 기초",
       "slug": "ch01_testbench_basics",
-      "version": "v04",
+      "version": "v05",
       "source": "tb/ch01/tb_uart_echo_basics.sv"
     },
     {
@@ -20,7 +20,7 @@
       "title": "Clock·Reset·이벤트",
       "subtitle": "기존 PWM 코어의 클록·리셋·주기 경계",
       "slug": "ch02_clock_reset_events",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch02/tb_pwm_clock_reset.sv"
     },
     {
@@ -29,7 +29,7 @@
       "title": "반복 자극과 작업 분리",
       "subtitle": "기존 PWM에 task·function·repeat·for·wait 적용",
       "slug": "ch03_reusable_stimulus",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch03/tb_pwm_reusable_stimulus.sv"
     },
     {
@@ -38,7 +38,7 @@
       "title": "PASS/FAIL 자동 판정",
       "subtitle": "기존 PWM 코어의 기대값·실제 출력 자동 비교",
       "slug": "ch04_pass_fail_automation",
-      "version": "v04",
+      "version": "v05",
       "source": "tb/ch04/tb_pwm_pass_fail.sv"
     },
     {
@@ -47,7 +47,7 @@
       "title": "검증 자료형과 타입",
       "subtitle": "logic·bit·enum·struct·typedef로 UART 데이터와 상태 모델링",
       "slug": "ch05_verification_types",
-      "version": "v04",
+      "version": "v05",
       "source": "tb/ch05/tb_uart_types.sv"
     },
     {
@@ -56,7 +56,7 @@
       "title": "배열·큐·패키지",
       "subtitle": "packed/unpacked 배열·queue·package로 UART 기대 데이터 관리",
       "slug": "ch06_arrays_queues_packages",
-      "version": "v04",
+      "version": "v05",
       "source": "tb/ch06/tb_uart_arrays_queues.sv"
     },
     {
@@ -65,7 +65,7 @@
       "title": "인터페이스·타이밍 분리",
       "subtitle": "interface·modport·clocking block 기반 UART Byte Stream 검증",
       "slug": "ch07_interface_modport_clocking",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch07/tb_uart_interface.sv"
     },
     {
@@ -74,7 +74,7 @@
       "title": "객체와 제약 기반 입력",
       "subtitle": "class·new·extends·rand·constraint 기반 UART 거래 객체",
       "slug": "ch08_objects_constraints",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch08/tb_uart_objects.sv"
     },
     {
@@ -83,7 +83,7 @@
       "title": "참조 모델·스코어보드",
       "subtitle": "독립 PWM 참조 모델과 사이클 단위 6출력 자동 비교",
       "slug": "ch09_reference_model_scoreboard",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch09/tb_pwm_scoreboard.sv"
     },
     {
@@ -92,7 +92,7 @@
       "title": "경계조건·오류 주입",
       "subtitle": "PWM 0%·100%·동작 중 리셋 및 두 가지 오류 주입 검출",
       "slug": "ch10_corner_reset_timeout",
-      "version": "v04",
+      "version": "v05",
       "source": "tb/ch10/tb_pwm_corner_reset_timeout.sv"
     },
     {
@@ -101,7 +101,7 @@
       "title": "시간적 속성 검사",
       "subtitle": "SVA 속성으로 PWM 시간 계약 검증",
       "slug": "ch11_temporal_assertions",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch11/tb_pwm_sva.sv"
     },
     {
@@ -110,7 +110,7 @@
       "title": "기능 커버리지",
       "subtitle": "PWM 설정 조합 covergroup·cross와 8클록 파형 검증",
       "slug": "ch12_functional_coverage",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch12/tb_pwm_coverage.sv"
     },
     {
@@ -119,7 +119,7 @@
       "title": "UART 스트림 검증",
       "subtitle": "BFM·바이트 프레임·Backpressure·4상태 전파 검증",
       "slug": "ch13_uart_stream_verification",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch13/tb_uart_stream.sv"
     },
     {
@@ -128,7 +128,7 @@
       "title": "FIFO 및 흐름 제어",
       "subtitle": "실제 UART RX/TX FIFO 16바이트, ready/valid, backpressure 검증",
       "slug": "ch14_fifo_flow_control",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch14/tb_uart_fifo_flow.sv"
     },
     {
@@ -137,7 +137,7 @@
       "title": "AXI4-Lite 레지스터 검증",
       "subtitle": "독립 AW/W, B/R backpressure, WSTRB, 원본 레지스터 맵",
       "slug": "ch15_axi4lite_register_verification",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch15/tb_axi4lite_registers.sv"
     },
     {
@@ -146,7 +146,7 @@
       "title": "MAC·NPU 정수 연산 검증",
       "subtitle": "INT8 signed·누산 wrap-around·pipeline·Python 독립 모델",
       "slug": "ch16_mac_npu_integer_verification",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch16/tb_mac_integer.sv"
     },
     {
@@ -155,7 +155,7 @@
       "title": "최소 UVM 환경",
       "subtitle": "기존 PWM 코어의 uvm_test·uvm_env·phase·objection 검증",
       "slug": "ch17_minimal_uvm_environment",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch17/tb_pwm_uvm.sv"
     },
     {
@@ -164,7 +164,7 @@
       "title": "Sequence에서 Driver까지",
       "subtitle": "pwm18_item·Sequence·Sequencer·Driver로 기존 PWM 설정 거래 구동",
       "slug": "ch18_sequence_driver",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch18/tb_pwm_sequence_driver.sv"
     },
     {
@@ -173,7 +173,7 @@
       "title": "Monitor·Agent·Scoreboard",
       "subtitle": "Monitor의 매 클록 관찰과 독립 Scoreboard의 3개 거래·24개 PWM 표본 검증",
       "slug": "ch19_monitor_agent_scoreboard",
-      "version": "v04",
+      "version": "v05",
       "source": "tb/ch19/tb_pwm_monitor_agent_scoreboard.sv"
     },
     {
@@ -182,7 +182,7 @@
       "title": "Factory·Config·Objection",
       "subtitle": "Factory 타입 교체·Config DB 설정 변경·Objection 종료 계약 및 정상 2/부정 3 시나리오",
       "slug": "ch20_factory_config_objection",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch20/tb_pwm_factory_config_objection.sv"
     },
     {
@@ -191,7 +191,7 @@
       "title": "UVM 레지스터 추상화",
       "subtitle": "RAL·독립 Monitor/Predictor·CONTROL 필드 모델 및 Frontdoor 10거래 검증",
       "slug": "ch21_uvm_register_abstraction",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch21/tb_axi_uvm_ral.sv"
     },
     {
@@ -200,7 +200,7 @@
       "title": "다중 Agent·VIP",
       "subtitle": "다중 Agent·Virtual Sequence·동일 에지 IRQ/W1C 우선순위 및 19거래 검증",
       "slug": "ch22_multi_agent_vip",
-      "version": "v04",
+      "version": "v05",
       "source": "tb/ch22/tb_axi_multiagent_irq.sv"
     },
     {
@@ -209,7 +209,7 @@
       "title": "NPU 통합 정답 비교",
       "subtitle": "4뉴런 독립 정수 모델·정확한 지연·최대 길이 64·동점·거부 조건",
       "slug": "ch23_npu_integrated_scoreboard",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch23/tb_npu_integrated.sv"
     },
     {
@@ -218,7 +218,7 @@
       "title": "회귀·CI·검증 보고",
       "subtitle": "시드 재현·독립 커버리지 계산·비교기 오류 검출·실제 SHA·CI 보고",
       "slug": "ch24_regression_ci_reporting",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch24/tb_uart_regression.sv"
     }
   ]

@@ -20,4 +20,6 @@ fi
 verilator --binary --timing --sv -Wno-TIMESCALEMOD --top-module tb_uart_objects \
   --Mdir "$OUT/obj_dir" "$DUT_PATH" "$TB_PATH" 2>&1 | tee "$OUT/build.log"
 (cd "$OUT" && ./obj_dir/Vtb_uart_objects | tee output.log)
+# (추가) 조기 정상 종료도 네 사례 완료로 오인하지 않는다.
+grep -Fxq 'CH08 PASS: 4 cases checked' "$OUT/output.log"
 echo "실행 기록: $OUT/output.log"

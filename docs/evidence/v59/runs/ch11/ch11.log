@@ -1,0 +1,18 @@
+
+****** xsim v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Thu Nov 26 07:19:19 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/ch11_sim/xsim_script.tcl
+# xsim {ch11_sim} -autoloadwcfg -runall -onerror quit
+Time resolution is 1 ps
+run -all
+ACTIVATION reset=5 disabled=16 apply=4 zero=16 full=8
+PASS CH11 SVA checks=4
+$finish called at time : 620 ns : File "<REPO>/tb/ch11/tb_pwm_sva.sv" Line 132
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Nov 26 07:19:21 2026...

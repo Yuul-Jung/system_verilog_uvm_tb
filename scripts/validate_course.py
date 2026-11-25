@@ -1,106 +1,146 @@
 #!/usr/bin/env python3
-"""Check the published course index against its source files."""
+"""발행 링크·절·SVG별 이름·실제 주 TB를 독립적으로 대조한다."""
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
-import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent.parent
+VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link",
+        "meta", "param", "source", "track", "wbr", "path", "rect", "line", "polyline"}
+
+
+class Element:
+    def __init__(self, tag, attrs=()):
+        self.tag = tag
+        self.attrs = dict(attrs)
+        self.children = []
+        self.text = ""
+
+    def find(self, tag):
+        return [child for node in self.children
+                for child in ([node] if node.tag == tag else []) + node.find(tag)]
 
 
 class CoursePageParser(HTMLParser):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.code_depth = 0
-        self.code_buffer: list[str] = []
-        self.code_blocks: list[str] = []
+        self.root = Element("document")
+        self.stack = [self.root]
 
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag == "code":
-            self.code_depth += 1
-            self.code_buffer = []
+    def handle_starttag(self, tag, attrs):
+        node = Element(tag, attrs)
+        self.stack[-1].children.append(node)
+        if tag not in VOID:
+            self.stack.append(node)
 
-    def handle_endtag(self, tag: str) -> None:
-        if tag == "code" and self.code_depth:
-            self.code_blocks.append(normalize("".join(self.code_buffer)))
-            self.code_depth -= 1
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        if self.stack[-1].tag == tag and tag not in VOID:
+            self.stack.pop()
 
-    def handle_data(self, data: str) -> None:
-        if self.code_depth:
-            self.code_buffer.append(data)
+    def handle_endtag(self, tag):
+        for index in range(len(self.stack) - 1, 0, -1):
+            if self.stack[index].tag == tag:
+                del self.stack[index:]
+                break
+
+    def handle_data(self, data):
+        for node in self.stack:
+            node.text += data
 
 
-def normalize(text: str) -> str:
+def parse(text):
+    parser = CoursePageParser()
+    parser.feed(text)
+    return parser.root
+
+
+def normalize(text):
     return text.replace("\r\n", "\n").strip()
 
 
-def fail(message: str, failures: list[str]) -> None:
-    failures.append(message)
-    print(f"FAIL: {message}", file=sys.stderr)
-
-
-def main() -> int:
-    failures: list[str] = []
-    course = json.loads((ROOT / "course.json").read_text(encoding="utf-8"))
+def validate(root):
+    errors = []
+    course = json.loads((root / "course.json").read_text())
     chapters = course["chapters"]
-
-    if len(chapters) != 24:
-        fail(f"course.json contains {len(chapters)} chapters, expected 24", failures)
-
-    if [chapter["number"] for chapter in chapters] != list(range(1, 25)):
-        fail("chapter numbers are not the contiguous range 1..24", failures)
-
-    navigation_text = "\n".join(
-        (ROOT / name).read_text(encoding="utf-8")
-        for name in ("README.md", "index.html", "assets/site.js")
-    )
-
-    for chapter in chapters:
-        page_name = f"{chapter['slug']}_{chapter['version']}.html"
-        page_path = ROOT / page_name
-        source_path = ROOT / chapter["source"]
-
-        if not page_path.is_file():
-            fail(f"{chapter['id']}: missing latest page {page_name}", failures)
+    if len(chapters) != 24 or [c["number"] for c in chapters] != list(range(1, 25)):
+        errors.append("course.json: expected chapters 1..24")
+    if [c["id"] for c in chapters] != [f"ch{i:02d}" for i in range(1, 25)]:
+        errors.append("course.json: invalid or duplicate chapter IDs")
+    readme = (root / "README.md").read_text()
+    readme = re.sub(r"<!--.*?-->|```.*?```", "", readme, flags=re.S)
+    readme_links = re.findall(r'\]\(([^)\s]+)\)', readme)
+    index_links = [e.attrs.get("href") for e in parse((root / "index.html").read_text()).find("a")]
+    script = (root / "assets/site.js").read_text()
+    # (변경) 세 문서를 합치지 않고 각각 실제 링크/스냅샷 필드를 검사한다.
+    fallback = re.search(r'^\s*const fallback\s*=\s*(\{.*?\});', script, re.S | re.M)
+    fallback_files = []
+    if fallback:
+        try:
+            fallback_files = [c["file"] for c in json.loads(fallback[1])["chapters"]]
+        except (ValueError, KeyError):
+            pass
+    for c in chapters:
+        page_name = f"{c['slug']}_{c['version']}.html"
+        for name, links in (("README", readme_links), ("INDEX", index_links),
+                            ("site.js fallback", fallback_files)):
+            if page_name not in links:
+                errors.append(f"{c['id']}: missing actual link in {name}")
+        path = root / page_name
+        source = root / c["source"]
+        if not path.is_file() or not source.is_file():
+            errors.append(f"{c['id']}: missing HTML/source")
             continue
-        if not source_path.is_file():
-            fail(f"{chapter['id']}: missing source {chapter['source']}", failures)
+        document = parse(path.read_text())
+        mains = document.find("main")
+        if len(mains) != 1 or mains[0].attrs.get("id") != "main-content":
+            errors.append(f"{c['id']}: expected one main#main-content")
             continue
-        if page_name not in navigation_text:
-            fail(f"{chapter['id']}: latest page absent from navigation", failures)
+        sections = mains[0].find("section")
+        if not sections or [s.attrs.get("id") for s in sections] != [
+                f"s{i:02d}" for i in range(len(sections))]:
+            errors.append(f"{c['id']}: missing/duplicate/noncontiguous sections")
+        for i, section in enumerate(sections):
+            headings = [e for e in section.children if e.tag == "h2"]
+            if len(headings) != 1 or not re.fullmatch(
+                    rf"{i:02d}\s*\S.*", headings[0].text.strip(), re.S):
+                errors.append(f"{c['id']}: section {i} missing numbered title")
+        svgs = mains[0].find("svg")
+        if not svgs:
+            errors.append(f"{c['id']}: missing SVG")
+        for i, svg in enumerate(svgs):
+            titles = [e for e in svg.children if e.tag == "title" and e.text.strip()]
+            labelled = svg.attrs.get("aria-labelledby", "").split()
+            named_ids = {e.attrs.get("id") for tag in ("title", "text", "desc")
+                         for e in svg.find(tag) if e.text.strip()}
+            name_ok = (svg.attrs.get("aria-label", "").strip() or titles or
+                       (labelled and all(x in named_ids for x in labelled)))
+            if svg.attrs.get("role") != "img" or not name_ok:
+                errors.append(f"{c['id']}: SVG {i + 1} missing own role/name")
+        blocks = [normalize(e.text) for e in document.find("code")]
+        if normalize(source.read_text()) not in blocks:
+            errors.append(f"{c['id']}: primary source differs from HTML code")
+    return errors
 
-        page = page_path.read_text(encoding="utf-8")
-        if "<main" not in page:
-            fail(f"{chapter['id']}: main element is missing", failures)
 
-        section_ids = [int(value) for value in re.findall(r'<section[^>]+id="s(\d\d)"', page)]
-        if section_ids != list(range(len(section_ids))):
-            fail(f"{chapter['id']}: section IDs are not contiguous: {section_ids}", failures)
-
-        svg_tags = re.findall(r"<svg\b[^>]*>", page)
-        for index, svg_tag in enumerate(svg_tags, start=1):
-            if 'role="img"' not in svg_tag:
-                fail(f"{chapter['id']}: SVG {index} lacks role=img", failures)
-            has_label = 'aria-label="' in svg_tag or 'aria-labelledby="' in svg_tag
-            if not has_label and "<title" not in page:
-                fail(f"{chapter['id']}: SVG {index} lacks an accessible label", failures)
-
-        parser = CoursePageParser()
-        parser.feed(page)
-        source = normalize(source_path.read_text(encoding="utf-8"))
-        if source not in parser.code_blocks:
-            fail(f"{chapter['id']}: primary source is not an exact HTML code block", failures)
-
-    if failures:
-        print(f"FAIL course validation: {len(failures)} issue(s)", file=sys.stderr)
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=ROOT)
+    args = parser.parse_args()
+    try:
+        errors = validate(args.root)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        errors = [str(exc)]
+    for error in errors:
+        print(f"FAIL: {error}")
+    if errors:
         return 1
-
-    print(f"PASS course validation: {len(chapters)} chapters, source and navigation aligned")
+    print("PASS course validation: 24 chapters; per-file links, sections, SVG names, TB")
     return 0
 
 

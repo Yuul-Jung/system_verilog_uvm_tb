@@ -1,0 +1,29 @@
+
+****** xsim v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Thu Nov 26 00:46:17 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/ch12_sim/xsim_script.tcl
+# xsim {ch12_sim} -cov_db_dir . -cov_db_name ch12_cov -autoloadwcfg -runall
+Time resolution is 1 ps
+run -all
+CHECK duty=0 en=0 pol=0 highs=0
+CHECK duty=0 en=0 pol=1 highs=0
+CHECK duty=0 en=1 pol=0 highs=0
+CHECK duty=0 en=1 pol=1 highs=8
+CHECK duty=4 en=0 pol=0 highs=0
+CHECK duty=4 en=0 pol=1 highs=0
+CHECK duty=4 en=1 pol=0 highs=4
+CHECK duty=4 en=1 pol=1 highs=4
+CHECK duty=8 en=0 pol=0 highs=0
+CHECK duty=8 en=0 pol=1 highs=0
+CHECK duty=8 en=1 pol=0 highs=8
+CHECK duty=8 en=1 pol=1 highs=0
+PASS CH12 cases=12 coverage=100.00%
+$finish called at time : 1950 ns : File "<REPO>/tb/ch12/tb_pwm_coverage.sv" Line 154
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Nov 26 00:46:19 2026...

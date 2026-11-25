@@ -1,0 +1,7 @@
+VCD info: dumpfile ch14_uart_fifo.vcd opened for output.
+T1_TX_FIFO_PASS accepted=18 received=18
+T2_RX_BACKPRESSURE_PASS checked=16
+T3_RX_OVERRUN_PASS kept=17 dropped=1
+T4_RESET_PASS
+PASS CH14 tx=18 rx=16+17 overrun=1 reset=1
+<REPO>/tb/ch14/tb_uart_fifo_flow.sv:216: $finish called at 58460000 (1ps)

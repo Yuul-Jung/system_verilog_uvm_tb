@@ -4,7 +4,8 @@
     {
       "label": "UVM TB: 환경 확인",
       "type": "shell",
-      "command": "source scripts/setup_env.sh",
+      "command": "bash",
+      "args": ["-c", "source scripts/setup_env.sh"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -13,7 +14,8 @@
     {
       "label": "UVM TB: 장 실행",
       "type": "shell",
-      "command": "source scripts/setup_env.sh && bash scripts/run_ch${input:chapter}.sh",
+      "command": "bash",
+      "args": ["scripts/run_chapter.sh", "${input:chapter}"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -23,9 +25,10 @@
   "inputs": [
     {
       "id": "chapter",
-      "type": "promptString",
+      "type": "pickString",
       "description": "실행할 장 번호(01~24)",
-      "default": "01"
+      "default": "01",
+      "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"]
     }
   ]
 }

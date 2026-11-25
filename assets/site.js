@@ -7,6 +7,17 @@
  */
 (async () => {
   "use strict";
+  // (추가) 긴 신호명·파일명을 가진 표는 모바일에서 표 안에서만 스크롤한다.
+  document.querySelectorAll("main table").forEach((table) => {
+    if (table.parentElement.classList.contains("table-wrap")) return;
+    const wrapper = document.createElement("div");
+    wrapper.className = "table-wrap";
+    wrapper.tabIndex = 0;
+    wrapper.setAttribute("role", "region");
+    wrapper.setAttribute("aria-label", "표 가로 스크롤");
+    table.before(wrapper);
+    wrapper.append(table);
+  });
   // (변경) 과정 목차는 course.json을 우선 사용한다. 오프라인에서도 현재 발행본을 탐색할 수 있도록 스냅샷을 보존한다.
   const fallback = {
     "title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
@@ -17,145 +28,145 @@
         "id": "ch01",
         "number": 1,
         "title": "테스트벤치의 첫 실행",
-        "file": "ch01_testbench_basics_v04.html"
+        "file": "ch01_testbench_basics_v05.html"
       },
       {
         "id": "ch02",
         "number": 2,
         "title": "Clock·Reset·이벤트",
-        "file": "ch02_clock_reset_events_v03.html"
+        "file": "ch02_clock_reset_events_v04.html"
       },
       {
         "id": "ch03",
         "number": 3,
         "title": "반복 자극과 작업 분리",
-        "file": "ch03_reusable_stimulus_v03.html"
+        "file": "ch03_reusable_stimulus_v04.html"
       },
       {
         "id": "ch04",
         "number": 4,
         "title": "PASS/FAIL 자동 판정",
-        "file": "ch04_pass_fail_automation_v04.html"
+        "file": "ch04_pass_fail_automation_v05.html"
       },
       {
         "id": "ch05",
         "number": 5,
         "title": "검증 자료형과 타입",
-        "file": "ch05_verification_types_v04.html"
+        "file": "ch05_verification_types_v05.html"
       },
       {
         "id": "ch06",
         "number": 6,
         "title": "배열·큐·패키지",
-        "file": "ch06_arrays_queues_packages_v04.html"
+        "file": "ch06_arrays_queues_packages_v05.html"
       },
       {
         "id": "ch07",
         "number": 7,
         "title": "인터페이스·타이밍 분리",
-        "file": "ch07_interface_modport_clocking_v03.html"
+        "file": "ch07_interface_modport_clocking_v04.html"
       },
       {
         "id": "ch08",
         "number": 8,
         "title": "객체와 제약 기반 입력",
-        "file": "ch08_objects_constraints_v03.html"
+        "file": "ch08_objects_constraints_v04.html"
       },
       {
         "id": "ch09",
         "number": 9,
         "title": "참조 모델·스코어보드",
-        "file": "ch09_reference_model_scoreboard_v03.html"
+        "file": "ch09_reference_model_scoreboard_v04.html"
       },
       {
         "id": "ch10",
         "number": 10,
         "title": "경계조건·오류 주입",
-        "file": "ch10_corner_reset_timeout_v04.html"
+        "file": "ch10_corner_reset_timeout_v05.html"
       },
       {
         "id": "ch11",
         "number": 11,
         "title": "시간적 속성 검사",
-        "file": "ch11_temporal_assertions_v03.html"
+        "file": "ch11_temporal_assertions_v04.html"
       },
       {
         "id": "ch12",
         "number": 12,
         "title": "기능 커버리지",
-        "file": "ch12_functional_coverage_v02.html"
+        "file": "ch12_functional_coverage_v03.html"
       },
       {
         "id": "ch13",
         "number": 13,
         "title": "UART 스트림 검증",
-        "file": "ch13_uart_stream_verification_v02.html"
+        "file": "ch13_uart_stream_verification_v03.html"
       },
       {
         "id": "ch14",
         "number": 14,
         "title": "FIFO 및 흐름 제어",
-        "file": "ch14_fifo_flow_control_v02.html"
+        "file": "ch14_fifo_flow_control_v03.html"
       },
       {
         "id": "ch15",
         "number": 15,
         "title": "AXI4-Lite 레지스터 검증",
-        "file": "ch15_axi4lite_register_verification_v02.html"
+        "file": "ch15_axi4lite_register_verification_v03.html"
       },
       {
         "id": "ch16",
         "number": 16,
         "title": "MAC·NPU 정수 연산 검증",
-        "file": "ch16_mac_npu_integer_verification_v02.html"
+        "file": "ch16_mac_npu_integer_verification_v03.html"
       },
       {
         "id": "ch17",
         "number": 17,
         "title": "최소 UVM 환경",
-        "file": "ch17_minimal_uvm_environment_v03.html"
+        "file": "ch17_minimal_uvm_environment_v04.html"
       },
       {
         "id": "ch18",
         "number": 18,
         "title": "Sequence에서 Driver까지",
-        "file": "ch18_sequence_driver_v03.html"
+        "file": "ch18_sequence_driver_v04.html"
       },
       {
         "id": "ch19",
         "number": 19,
         "title": "Monitor·Agent·Scoreboard",
-        "file": "ch19_monitor_agent_scoreboard_v04.html"
+        "file": "ch19_monitor_agent_scoreboard_v05.html"
       },
       {
         "id": "ch20",
         "number": 20,
         "title": "Factory·Config·Objection",
-        "file": "ch20_factory_config_objection_v03.html"
+        "file": "ch20_factory_config_objection_v04.html"
       },
       {
         "id": "ch21",
         "number": 21,
         "title": "UVM 레지스터 추상화",
-        "file": "ch21_uvm_register_abstraction_v03.html"
+        "file": "ch21_uvm_register_abstraction_v04.html"
       },
       {
         "id": "ch22",
         "number": 22,
         "title": "다중 Agent·VIP",
-        "file": "ch22_multi_agent_vip_v04.html"
+        "file": "ch22_multi_agent_vip_v05.html"
       },
       {
         "id": "ch23",
         "number": 23,
         "title": "NPU 통합 정답 비교",
-        "file": "ch23_npu_integrated_scoreboard_v03.html"
+        "file": "ch23_npu_integrated_scoreboard_v04.html"
       },
       {
         "id": "ch24",
         "number": 24,
         "title": "회귀·CI·검증 보고",
-        "file": "ch24_regression_ci_reporting_v03.html"
+        "file": "ch24_regression_ci_reporting_v04.html"
       }
     ]
   };

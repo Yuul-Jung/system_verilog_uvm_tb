@@ -1,0 +1,66 @@
+$date
+	Thu Nov 26 07:19:13 2026
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module tb_uart_echo_basics $end
+$var wire 1 ! tx_valid_o $end
+$var wire 8 " tx_data_o [7:0] $end
+$var wire 1 # rx_ready_o $end
+$var reg 8 $ rx_data_i [7:0] $end
+$var reg 1 % rx_valid_i $end
+$var reg 1 & tx_ready_i $end
+$scope module dut $end
+$var wire 8 ' rx_data_i [7:0] $end
+$var wire 1 # rx_ready_o $end
+$var wire 1 % rx_valid_i $end
+$var wire 8 ( tx_data_o [7:0] $end
+$var wire 1 & tx_ready_i $end
+$var wire 1 ! tx_valid_o $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+b0 (
+b0 '
+0&
+0%
+b0 $
+0#
+b0 "
+0!
+$end
+#10000
+1#
+1&
+1!
+1%
+b1000001 "
+b1000001 (
+b1000001 $
+b1000001 '
+#20000
+0#
+0&
+b1011010 "
+b1011010 (
+b1011010 $
+b1011010 '
+#30000
+1#
+1&
+0!
+0%
+b0 "
+b0 (
+b0 $
+b0 '
+#40000

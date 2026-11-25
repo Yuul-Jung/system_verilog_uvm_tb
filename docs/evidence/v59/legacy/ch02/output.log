@@ -1,0 +1,29 @@
+VCD info: dumpfile ch02_pwm_clock_reset.vcd opened for output.
+=== CH02 PWM CLOCK / RESET START ===
+POS t=6 ns rst=0 apply=0 pending=0 period=8 duty=0 en=0 pwm=0
+POS t=16 ns rst=0 apply=0 pending=0 period=8 duty=0 en=0 pwm=0
+POS t=26 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0
+POS t=36 ns rst=1 apply=1 pending=1 period=8 duty=0 en=0 pwm=0
+POS t=46 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0
+POS t=56 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0
+POS t=66 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0
+POS t=76 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0
+POS t=86 ns rst=1 apply=0 pending=1 period=8 duty=0 en=0 pwm=0
+POS t=96 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1
+POS t=106 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1
+POS t=116 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1
+POS t=126 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0
+POS t=136 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0
+POS t=146 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0
+POS t=156 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0
+POS t=166 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=0
+POS t=176 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1
+POS t=186 ns rst=1 apply=0 pending=0 period=8 duty=3 en=1 pwm=1
+EVENT t=191 ns resetn=0 active_duty=3 pwm=0
+POS t=196 ns rst=0 apply=0 pending=0 period=8 duty=0 en=0 pwm=0
+POS t=206 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0
+POS t=216 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0
+POS t=226 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0
+POS t=236 ns rst=1 apply=0 pending=0 period=8 duty=0 en=0 pwm=0
+=== CH02 END: OBSERVATION ONLY ===
+<REPO>/tb/ch02/tb_pwm_clock_reset.sv:95: $finish called at 240000 (1ps)

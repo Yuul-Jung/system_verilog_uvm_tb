@@ -1,0 +1,10 @@
+=== CH08 OBJECT / CONSTRAINT START ===
+PASS DIRECT_A data=41 valid=1 ready=1
+PASS RANDOM_IDLE data=2d valid=0 ready=1
+PASS RANDOM_STALL data=72 valid=1 ready=0
+PASS POLYMORPHIC_STALL data=72 valid=1 ready=0
+CH08 PASS: 4 cases checked
+- <REPO>/tb/ch08/tb_uart_objects.sv:101: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.054 2026-11-01
+- Verilator: $finish at 4ns; walltime 0.034 s; speed 117.453 ns/s
+- Verilator: cpu 0.001 s on 1 threads; allocated 4 MB

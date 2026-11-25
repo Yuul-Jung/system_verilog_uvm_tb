@@ -1,0 +1,11 @@
+VCD info: dumpfile ch09_pwm_scoreboard.vcd opened for output.
+=== CH09 PWM MODEL / SCOREBOARD START ===
+REQUEST case=1 t=30 duty=2 en=1 pol=0
+REQUEST case=2 t=140 duty=6 en=1 pol=0
+REQUEST case=3 t=250 duty=6 en=1 pol=1
+REQUEST case=4 t=360 duty=6 en=0 pol=1
+REQUEST case=5 t=470 duty=8 en=1 pol=0
+RESET_GATE PASS t=581
+REQUEST case=6 t=610 duty=0 en=1 pol=0
+PASS CH09 score_cycles=72 scenarios=6
+<REPO>/tb/ch09/tb_pwm_scoreboard.sv:143: $finish called at 720000 (1ps)

@@ -1,0 +1,283 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="제11장 SVA 시간적 속성 검사: 기존 PWM RTL의 핸드셰이크 및 출력 규칙"><title>제11장 · 시간적 속성 검사 · RTL 검증 학습안내서</title><link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch11"><a class="access-skip" href="#main-content" style="position:absolute;left:-9999px;top:0">본문 바로가기</a><button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div><header class="hero"><div class="hero-inner"><p class="kicker">제3부 · 자동 검증·속성·커버리지</p><h1>제11장 · 시간적 속성 검사</h1><p>기존 PWM 코어의 시간 계약을 SVA로 기술하고, 자동으로 위반을 탐지합니다.</p><div class="chips"><span class="chip">PART 03 · CHAPTER 11</span><span class="chip">SVA · 샘플링 계약</span><span class="chip">DUT 원본 보존</span></div></div></header><div class="wrap"><nav class="toc" id="course-nav" aria-label="부·장·절 탐색"></nav><main class="content" id="main-content">
+<section class="section" id="s00"><h2><span class="num">00</span>개요 · 파형을 시간 규칙으로 표현한다</h2><p>SVA(SystemVerilog Assertions, 시스템베릴로그 어설션)는 신호 사이의 시간 관계를 선언하고 위반을 자동 검사하는 문법입니다. 제09장에서는 매 클록 기대값을 비교했고 제10장에서는 오류 검출 경로를 확인했습니다. 이제 <strong>어떤 조건이 성립하면 언제까지 어떤 결과가 나타나야 하는가</strong>를 속성으로 표현합니다.</p><p><strong>선행 설계 학습안내서:</strong> 제2부 사용자 AXI IP와 주변장치(<code>amd_soc_p2</code>), 04.2장 「RTL · AXI 풀이」 02절 「설정 Shadow와 출력 Active를 분리」 및 06절 「독립 PWM Core 전체」, <code>pwm_core.v</code>. AXI 래퍼는 검증 대상이 아닙니다.</p><div class="codeblock"><div class="codebar"><span>Ubuntu · 폴더 준비</span></div><pre tabindex="0"><code>mkdir -p ch11_lab/reference_rtl ch11_lab/tb/ch11
+cd ch11_lab</code></pre></div><table><thead><tr><th>저장 파일</th><th>역할</th></tr></thead><tbody><tr><td>reference_rtl/pwm_core.v</td><td>원본 RTL</td></tr><tr><td>tb/ch11/tb_pwm_sva.sv</td><td>속성·자극·절차 검사</td></tr><tr><td>tb/ch11/run_ch11.sh</td><td>XSIM 실행 스크립트</td></tr></tbody></table><p>01절, 05절, 06절의 전체 코드를 각각 저장합니다.</p></section>
+<section class="section" id="s01"><h2><span class="num">01</span>원본 RTL과 시간 계약</h2><p>원본은 상승 에지에서 요청을 Shadow에 저장하고 주기 경계에서 기존 대기 설정을 Active로 반영합니다. 동기 리셋과 조합 출력 차단을 구별합니다. 실습은 주기 8클록, 클록 10ns, 정상 극성으로 제한합니다.</p><div class="codeblock"><div class="codebar"><span>reference_rtl/pwm_core.v · Verilog</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// P2-04: 보드와 무관한 단일 채널 범용 PWM 코어.
+// (추가) period와 duty는 클록 횟수 단위. 0%/100%는 지속 LOW/HIGH.
+// (추가) 설정은 주기 마지막 경계에서만 활성값으로 반영.
+module pwm_core #(
+    parameter [31:0] RESET_PERIOD = 32'd100000
+)(
+    input  wire        clk,
+    input  wire        resetn,
+    input  wire        cfg_apply,
+    input  wire [31:0] cfg_period,
+    input  wire [31:0] cfg_duty,
+    input  wire        cfg_enable,
+    input  wire        cfg_polarity,
+    output wire        pwm_out,
+    output reg         pending,
+    output reg [31:0] active_period,
+    output reg [31:0] active_duty,
+    output reg         active_enable,
+    output reg         active_polarity
+);
+    reg [31:0] counter;
+    reg [31:0] shadow_period;
+    reg [31:0] shadow_duty;
+    reg        shadow_enable;
+    reg        shadow_polarity;
+
+    wire boundary = (counter &gt;= active_period - 32'd1);
+    wire duty_high = (counter &lt; active_duty);
+
+    // (주의) enable=0이면 polarity와 관계없이 LOW로 차단.
+    // (설명) 기본 polarity에서 active_duty=0이면 항상 LOW,
+    //         active_duty=active_period이면 항상 HIGH.
+    assign pwm_out = resetn &amp;&amp; active_enable &amp;&amp;
+                     (active_polarity ? !duty_high : duty_high);
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            counter         &lt;= 32'd0;
+            active_period   &lt;= RESET_PERIOD;
+            active_duty     &lt;= 32'd0;
+            active_enable   &lt;= 1'b0;
+            active_polarity &lt;= 1'b0;
+            shadow_period   &lt;= RESET_PERIOD;
+            shadow_duty     &lt;= 32'd0;
+            shadow_enable   &lt;= 1'b0;
+            shadow_polarity &lt;= 1'b0;
+            pending         &lt;= 1'b0;
+        end else begin
+            if (boundary) begin
+                counter &lt;= 32'd0;
+                if (pending) begin
+                    active_period   &lt;= shadow_period;
+                    active_duty     &lt;= shadow_duty;
+                    active_enable   &lt;= shadow_enable;
+                    active_polarity &lt;= shadow_polarity;
+                    pending         &lt;= 1'b0;
+                end
+            end else begin
+                counter &lt;= counter + 32'd1;
+            end
+            // (추가) 경계와 APPLY가 겹치면 새 값은 다음 경계에 적용.
+            // 여러 APPLY가 겹치면 최종 요청값을 우선하는 단일 Shadow 구조.
+            if (cfg_apply) begin
+                shadow_period   &lt;= cfg_period;
+                shadow_duty     &lt;= cfg_duty;
+                shadow_enable   &lt;= cfg_enable;
+                shadow_polarity &lt;= cfg_polarity;
+                pending         &lt;= 1'b1;
+            end
+        end
+    end
+endmodule
+</code></pre></div><p>DUT(디유티, 검증 대상 회로)의 7개 입력과 6개 출력을 그대로 사용합니다. 어설션은 내부 counter를 읽지 않으며 원본을 변경하지 않습니다.</p></section>
+<section class="section" id="s02"><h2><span class="num">02</span>같은 샘플과 다음 샘플 · |-> / |=></h2><p>동시 어설션은 상승 에지의 Preponed(프리폰드, 선행 샘플링 영역)에서 값을 샘플링합니다. DUT의 비차단 대입은 NBA(Nonblocking Assignment, 비차단 대입 갱신 영역)에서 반영되므로 해당 에지에서 샘플한 값과 갱신된 값은 다릅니다.</p><table><thead><tr><th>표현</th><th>단일 클록 선행 조건에서의 뜻</th></tr></thead><tbody><tr><td><code>A |-&gt; B</code></td><td>A가 참이면 같은 샘플에서 B 검사</td></tr><tr><td><code>A |=&gt; B</code></td><td>A가 참이면 다음 상승 에지 샘플에서 B 검사</td></tr><tr><td><code>disable iff (!resetn)</code></td><td>리셋 중 속성 시도를 비활성화하거나 진행 중 시도를 취소</td></tr></tbody></table><figure style="overflow-x:auto;margin:16px 0"><div style="min-width:650px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 330" role="img" aria-labelledby="ch11title ch11desc">
+<title id="ch11title">요청과 pending의 샘플링 관계</title><desc id="ch11desc">40ns에 요청하고 45ns 상승 에지에서 샘플링한다. pending은 45ns 비차단 갱신 이후 1이 되고 55ns에서 다음 샘플로 검사한다.</desc>
+<defs><marker id="ch11arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<rect width="940" height="330" fill="white"/>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" font-size="15">
+<text x="470" y="30" text-anchor="middle" font-size="20" font-weight="bold">cfg_apply |=> pending · 예상 시간 관계</text>
+<g stroke="#aab6c4" stroke-width="1" stroke-dasharray="4 4"><path d="M250 60V255 M400 60V255 M550 60V255 M700 60V255 M850 60V255"/></g>
+<g text-anchor="middle" font-size="13"><text x="250" y="276">40</text><text x="400" y="276">45</text><text x="550" y="276">50</text><text x="700" y="276">55</text><text x="850" y="276">60 ns</text></g>
+<text x="24" y="99">clk</text><text x="24" y="149">cfg_apply</text><text x="24" y="199">pending</text>
+<g stroke="#1F3A5F" stroke-width="2.5" fill="none"><path d="M200 78H250V110H400V78H550V110H700V78H850V110H910"/><path d="M200 160H250V128H550V160H910"/><path d="M200 210H400V178H910"/></g>
+<g fill="#5A1E1E" text-anchor="middle" font-size="13"><text x="400" y="52">요청 샘플</text><text x="700" y="52">다음 샘플 검사</text><text x="550" y="239">|=&gt; 다음 상승 에지</text></g>
+<path d="M400 224H700" stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch11arr)"/>
+<g fill="#5A1E1E" font-size="12"><text x="410" y="205">NBA 갱신 후 1</text></g>
+<text x="470" y="307" text-anchor="middle" font-size="13">45ns 직전 pending은 0 · 55ns 직전 pending은 1 (에지 내부 시간차는 확대하지 않음)</text>
+</g></svg>
+</div><figcaption>첫 cfg_apply 요청의 예상 시간 관계. 45ns의 NBA 이후 pending은 1이지만 45ns의 SVA 샘플은 이전 값을 읽습니다. 55ns의 샘플에서 pending을 검사합니다.</figcaption></figure><p>리셋 출력 자체를 검사하는 ap_reset_low에는 disable iff를 사용하지 않습니다. disable iff는 일반 속성의 샘플값과 달리 비샘플 조건으로 리셋에 반응할 수 있습니다. 이 실습의 리셋은 상승 에지와 겹치지 않게 구동합니다.</p></section>
+<section class="section" id="s03"><h2><span class="num">03</span>다섯 속성의 의미와 적용 범위</h2><table><thead><tr><th>속성 이름</th><th>선행 조건</th><th>검사할 결론</th></tr></thead><tbody><tr><td>ap_reset_low</td><td>!resetn</td><td>같은 샘플 !pwm_out</td></tr><tr><td>ap_disabled_low</td><td>!active_enable</td><td>같은 샘플 !pwm_out</td></tr><tr><td>ap_apply_pending</td><td>cfg_apply</td><td>다음 샘플 pending</td></tr><tr><td>ap_zero_duty</td><td>enable·정상 극성·duty 0</td><td>같은 샘플 LOW</td></tr><tr><td>ap_full_duty</td><td>enable·정상 극성·period 8·duty 8</td><td>같은 샘플 HIGH</td></tr></tbody></table><p>cfg_apply가 주기 경계와 겹쳐도 마지막 NBA 대입이 pending을 1로 설정하므로 다음 샘플에서 확인할 수 있습니다. 단, 해당 시도가 리셋으로 취소되지 않는 경우입니다. 이 속성만으로 설정이 정확한 경계에 반영되었다는 사실까지 증명하지는 못합니다.</p><p>Vacuous pass(배큐어스 패스, 선행 조건이 거짓이라 위반 없이 통과하는 경우)는 정상적인 논리 의미이지만 검증 입력이 부족하다는 사실을 가릴 수 있습니다. 예를 들어 100% 듀티를 한 번도 적용하지 않아도 ap_full_duty가 위반되지 않습니다. 따라서 각 선행 조건이 실제로 발생하는지 별도 카운터로 집계합니다. 이는 SVA 엔진의 성공 횟수나 정식 기능 커버리지와 다릅니다.</p></section>
+<section class="section" id="s04"><h2><span class="num">04</span>시나리오와 독립 시간표</h2><table><thead><tr><th>듀티</th><th>요청 ns</th><th>수락 상승 에지 ns</th><th>반영 상승 에지 ns</th><th>pending 다음 샘플 ns</th><th>절차 확인 ns</th></tr></thead><tbody><tr><td>0</td><td>40</td><td>45</td><td>105</td><td>55</td><td>170</td></tr><tr><td>8</td><td>180</td><td>185</td><td>265</td><td>195</td><td>310</td></tr><tr><td>4</td><td>320</td><td>325</td><td>345</td><td>335</td><td>450</td></tr><tr><td>2</td><td>490</td><td>495</td><td>555</td><td>505</td><td>620</td></tr></tbody></table><p>두 번째 요청은 185ns 경계와 동시에 수락되며 새 값은 265ns에 적용됩니다. 455ns의 갱신 후 듀티 4에서 counter는 3이므로 출력은 HIGH입니다. 460ns에 리셋을 인가하고 461ns에 LOW인지 확인합니다. 다음 상승 에지 465ns에서 내부 상태가 초기화됩니다. 480ns에 리셋을 해제하고 마지막 듀티 2를 시험합니다.</p><p>이 시간표는 고정 8클록 경계와 TB의 하강 에지 대기를 계산한 예상값입니다. 12클록 대기 후의 검사로 최종 적용을 확인하지만 정확한 반영 시점 전체를 검증하는 속성은 아닙니다.</p></section>
+<section class="section" id="s05"><h2><span class="num">05</span>테스트벤치 전체 코드</h2><div class="codeblock"><div class="codebar"><span>tb/ch11/tb_pwm_sva.sv · SystemVerilog</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제11장: 기존 pwm_core 공개 포트에 SVA 시간 계약을 적용한다.
+// SVA를 지원하는 SystemVerilog 시뮬레이터에서만 실행한다.
+module tb_pwm_sva;
+  logic clk = 0, resetn = 0, cfg_apply = 0;
+  logic [31:0] cfg_period = 8, cfg_duty = 0;
+  logic cfg_enable = 1, cfg_polarity = 0;
+  wire pwm_out, pending, active_enable, active_polarity;
+  wire [31:0] active_period, active_duty;
+  integer checks = 0;
+  // (추가) 어설션 관찰 경로의 의도된 실패 시험. DUT는 수정하지 않는다.
+  bit inject_sva_pending = 0;
+  // (추가) 속성의 선행 조건 발생 횟수. SVA 엔진의 통과 횟수와 구별한다.
+  integer reset_hits = 0, disabled_hits = 0, apply_hits = 0;
+  integer zero_hits = 0, full_hits = 0;
+
+  pwm_core #(.RESET_PERIOD(32'd8)) dut (
+    .clk(clk), .resetn(resetn), .cfg_apply(cfg_apply),
+    .cfg_period(cfg_period), .cfg_duty(cfg_duty),
+    .cfg_enable(cfg_enable), .cfg_polarity(cfg_polarity),
+    .pwm_out(pwm_out), .pending(pending),
+    .active_period(active_period), .active_duty(active_duty),
+    .active_enable(active_enable), .active_polarity(active_polarity)
+  );
+  always #5 clk = ~clk;
+
+  // 리셋 중 출력은 LOW. 조합 차단은 별도 즉시 검사로 보강한다.
+  ap_reset_low: assert property (
+    @(posedge clk) !resetn |-&gt; !pwm_out
+  ) else $fatal(1, &quot;FAIL SVA reset output&quot;);
+
+  // Enable=0이면 극성과 무관하게 출력은 LOW.
+  ap_disabled_low: assert property (
+    @(posedge clk) disable iff (!resetn)
+      !active_enable |-&gt; !pwm_out
+  ) else $fatal(1, &quot;FAIL SVA disabled output&quot;);
+
+  // cfg_apply는 상승 에지에 캡처되고 pending은 다음 샘플에 1.
+  // 경계와 겹쳐도 cfg_apply 대입이 마지막이므로 pending=1.
+  ap_apply_pending: assert property (
+    @(posedge clk) disable iff (!resetn)
+      cfg_apply |=&gt; (pending &amp;&amp; !inject_sva_pending)
+  ) else begin
+    // (추가) 실제 샘플 pending이 1인데 관찰 경로만 차단했을 때의 진단.
+    if (inject_sva_pending &amp;&amp; ($sampled(pending) === 1'b1))
+      $fatal(1, &quot;DETECTED_SVA_PENDING t=%0d&quot;, $time);
+    else
+      $fatal(1, &quot;FAIL SVA apply pending&quot;);
+  end
+
+  // 주기·듀티가 8/0이고 정상 극성이면 출력은 LOW.
+  ap_zero_duty: assert property (
+    @(posedge clk) disable iff (!resetn)
+      (active_enable &amp;&amp; !active_polarity &amp;&amp;
+       active_duty == 32'd0) |-&gt; !pwm_out
+  ) else $fatal(1, &quot;FAIL SVA zero duty&quot;);
+
+  // 8/8의 100% 듀티는 정상 극성에서 HIGH.
+  ap_full_duty: assert property (
+    @(posedge clk) disable iff (!resetn)
+      (active_enable &amp;&amp; !active_polarity &amp;&amp;
+       active_period == 32'd8 &amp;&amp;
+       active_duty == 32'd8) |-&gt; pwm_out
+  ) else $fatal(1, &quot;FAIL SVA full duty&quot;);
+
+  // (추가) 상승 에지 직전 상태를 읽는 선행 조건 집계.
+  // TB 자극은 하강 에지, DUT 상태 갱신은 NBA에서 수행한다.
+  always @(posedge clk) begin
+    if (!resetn)
+      reset_hits++;
+    else begin
+      if ((^{pwm_out, pending, active_period, active_duty,
+             active_enable, active_polarity}) === 1'bx)
+        $fatal(1, &quot;FAIL UNKNOWN_OUTPUT&quot;);
+      if (!active_enable) disabled_hits++;
+      if (cfg_apply) apply_hits++;
+      if (active_enable &amp;&amp; !active_polarity &amp;&amp;
+          active_duty == 32'd0) zero_hits++;
+      if (active_enable &amp;&amp; !active_polarity &amp;&amp;
+          active_period == 32'd8 &amp;&amp; active_duty == 32'd8)
+        full_hits++;
+    end
+  end
+
+  task automatic apply_duty(input logic [31:0] duty);
+    @(negedge clk);
+    cfg_duty = duty;
+    cfg_apply = 1;
+    @(negedge clk);
+    cfg_apply = 0;
+    repeat (12) @(negedge clk);
+    if (active_duty !== duty || pending !== 1'b0)
+      $fatal(1, &quot;FAIL APPLY duty=%0d actual=%0d pending=%b&quot;,
+             duty, active_duty, pending);
+    checks++;
+  endtask
+
+  initial begin
+    #2000;
+    $fatal(1, &quot;FAIL GLOBAL_TIMEOUT&quot;);
+  end
+  initial begin
+    inject_sva_pending = $test$plusargs(&quot;INJECT_SVA_PENDING&quot;);
+`ifdef VCD
+    $dumpfile(&quot;ch11_pwm_sva.vcd&quot;);
+    $dumpvars(0, tb_pwm_sva);
+`endif
+    repeat (3) @(negedge clk);
+    resetn = 1;
+    apply_duty(32'd0);
+    apply_duty(32'd8);
+    apply_duty(32'd4);
+    // 클록 사이에서 LOW 리셋을 걸면 PWM 출력은 즉시 차단된다.
+    @(negedge clk);
+    // (추가) 정상 HIGH 상태에서 리셋을 인가해야 출력 차단을 시험할 수 있다.
+    if (pwm_out !== 1'b1)
+      $fatal(1, &quot;FAIL RESET_PRECONDITION&quot;);
+    resetn = 0;
+    #1;
+    if (pwm_out !== 1'b0)
+      $fatal(1, &quot;FAIL RESET_GATE&quot;);
+    repeat (2) @(negedge clk);
+    resetn = 1;
+    apply_duty(32'd2);
+    // (추가) 선행 조건 미발생으로 인한 공허한 통과를 방지한다.
+    if (checks != 4 || apply_hits != 4 || reset_hits == 0 ||
+        disabled_hits == 0 || zero_hits == 0 || full_hits == 0)
+      $fatal(1, &quot;FAIL SVA ACTIVATION&quot;);
+    $display(&quot;ACTIVATION reset=%0d disabled=%0d apply=%0d zero=%0d full=%0d&quot;,
+             reset_hits, disabled_hits, apply_hits, zero_hits, full_hits);
+    $display(&quot;PASS CH11 SVA checks=%0d&quot;, checks);
+    $finish;
+  end
+endmodule
+</code></pre></div><h3>핵심 코드 풀이</h3><table><thead><tr><th>구문</th><th>역할</th></tr></thead><tbody><tr><td>assert property</td><td>동시 어설션 선언</td></tr><tr><td>else $fatal</td><td>속성 위반 시 오류 종료</td></tr><tr><td>always @(posedge clk)</td><td>선행 조건의 발생 횟수 집계 및 미정값 검사</td></tr><tr><td>apply_duty()</td><td>한 클록 요청 후 12번 하강 에지 대기</td></tr><tr><td>RESET_PRECONDITION / RESET_GATE</td><td>리셋 전 HIGH 및 조합 차단 검사</td></tr><tr><td>checks</td><td>절차적 듀티 적용 검사 횟수</td></tr><tr><td>*_hits</td><td>각 선행 조건 발생 횟수. 엔진 PASS 횟수 아님</td></tr></tbody></table><p>초기화가 끝난 정상 입력에서도 공개 출력이 X/Z라면 별도 실패 처리합니다. 조건식이 미정값이면 어설션의 선행 조건이 참이 되지 않을 수 있기 때문입니다. 다섯 속성의 선행 조건이 모두 한 번 이상 발생하고 네 번의 절차 검사를 완료해야 마지막 PASS를 출력합니다.</p></section>
+<section class="section" id="s06"><h2><span class="num">06</span>실행 · Vivado XSIM</h2><p><strong>어설션 활성화 검증:</strong> 정상 실행 외에 <code>+INJECT_SVA_PENDING</code>을 전달하는 부정 시험을 수행합니다. <code>ap_apply_pending</code>의 결론을 의도적으로 거짓으로 만들어, 정상 DUT의 pending이 1인 상태에서 55ns에 <code>DETECTED_SVA_PENDING</code>이 발생하는지 확인합니다. 실제 DUT 출력은 수정하지 않습니다. 이 검사는 해당 속성의 실패 경로를 입증하는 시험이며, 다섯 속성 전체의 검증을 보장하지 않습니다.</p><p>AMD UG900 2024.1 및 2026.1의 지원표에서 concurrent assertion, implication, assert statement, disable iff 지원이 명시되어 있습니다. 설치된 버전에서 직접 확인합니다. Icarus의 전체 동시 어설션 지원을 전제하지 않습니다.</p><div class="codeblock"><div class="codebar"><span>Ubuntu · Vivado XSIM 실행 스크립트</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 제11장: 독립 저장소의 원본 RTL과 SVA 테스트벤치를 XSIM으로 실행.
+set -euo pipefail
+ROOT=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)/../..&quot; &amp;&amp; pwd)&quot;
+RTL=&quot;${1:-$ROOT/reference_rtl/pwm_core.v}&quot;
+TB=&quot;$ROOT/tb/ch11/tb_pwm_sva.sv&quot;
+OUT=&quot;$ROOT/.build/ch11/xsim&quot;
+if [[ ! -f &quot;$RTL&quot; || ! -f &quot;$TB&quot; ]]; then
+  echo &quot;FAIL: RTL 또는 TB 파일 없음&quot; &gt;&amp;2
+  exit 1
+fi
+# (변경) 상대 경로도 작업 폴더 이동 전에 절대 경로로 변환.
+RTL=&quot;$(realpath &quot;$RTL&quot;)&quot;
+for tool in xvlog xelab xsim; do
+  if ! command -v &quot;$tool&quot; &gt;/dev/null 2&gt;&amp;1; then
+    echo &quot;NOT_RUN: $tool 미설치 또는 Vivado 환경 미설정&quot; &gt;&amp;2
+    exit 2
+  fi
+done
+mkdir -p &quot;$OUT&quot;
+cd &quot;$OUT&quot;
+xvlog &quot;$RTL&quot;
+xvlog -sv &quot;$TB&quot;
+xelab -debug typical tb_pwm_sva -s ch11_sim
+xsim ch11_sim -runall -onerror quit 2&gt;&amp;1 | tee ch11.log
+grep -q '^PASS CH11 SVA checks=4$' ch11.log
+if grep -q 'FAIL SVA\|FAIL APPLY\|FAIL RESET\|FAIL UNKNOWN\|FAIL GLOBAL\|DETECTED_SVA_PENDING' ch11.log; then
+  echo &quot;FAIL: 검증 오류 로그 발견&quot; &gt;&amp;2
+  exit 1
+fi
+
+# (추가) 어설션 엔진의 의도된 실패 경로를 별도 실행으로 확인한다.
+# XSIM 종료 코드의 버전 차이를 고려해 진단과 정상 완료 부재를 검사한다.
+rc=0
+xsim ch11_sim -runall -onerror quit -testplusarg INJECT_SVA_PENDING \
+  &gt; ch11_negative.log 2&gt;&amp;1 || rc=$?
+grep -q 'DETECTED_SVA_PENDING t=55' ch11_negative.log
+if grep -q 'PASS CH11 SVA\|FAIL SVA\|FAIL APPLY\|FAIL RESET\|FAIL UNKNOWN\|FAIL GLOBAL' ch11_negative.log; then
+  echo &quot;FAIL: 부정 시험에서 기대하지 않은 결과 발생&quot; &gt;&amp;2
+  exit 1
+fi
+echo &quot;PASS CH11 HARNESS: SVA 오류 검출 (xsim exit=$rc)&quot;
+</code></pre></div><div class="codeblock"><div class="codebar"><span>Ubuntu · 실습 루트에서 실행</span></div><pre tabindex="0"><code># Vivado 설치 경로의 settings64.sh를 source한 뒤 실행
+bash tb/ch11/run_ch11.sh
+# 파형 확인
+cd .build/ch11/xsim
+xsim ch11_sim -gui</code></pre></div><table><thead><tr><th>명령</th><th>기능</th></tr></thead><tbody><tr><td>xvlog</td><td>원본 Verilog 및 SV 테스트벤치 분석</td></tr><tr><td>xelab</td><td>최상위 TB elaboration 및 스냅샷 생성</td></tr><tr><td>xsim</td><td>동시 어설션 포함 시뮬레이션 및 GUI 관찰</td></tr><tr><td>grep</td><td>완료 로그 및 오류 진단 확인</td></tr></tbody></table><p>GUI에서 clk, resetn, cfg_apply, pending, active_duty, active_enable, pwm_out을 추가합니다. 명령 참고: <a href="https://docs.amd.com/r/en-US/ug900-vivado-logic-simulation/Test-Bench-Feature">AMD UG900 · Test Bench Feature</a>. 기존 xrun 실행 전용 절차는 XSIM 우선으로 교체했습니다. xrun 등 다른 SVA 지원 도구는 별도 설치 및 라이선스가 필요합니다.</p></section>
+<section class="section" id="s07"><h2><span class="num">07</span>예상 결과와 반례</h2><p>부정 시험의 예상 진단은 <code>DETECTED_SVA_PENDING t=55</code>이며 정상 완료 문구가 없어야 합니다. 부정 시험도 정상 PASS로 끝난다면 어설션 무시 옵션 또는 속성 활성화를 확인합니다.</p><div class="codeblock"><div class="codebar"><span>독립 시간 계산에 따른 예상 로그 · 실제 실행 로그 아님</span></div><pre tabindex="0"><code>ACTIVATION reset=5 disabled=16 apply=4 zero=16 full=8
+PASS CH11 SVA checks=4</code></pre></div><p>위 카운터는 정상 입력의 에지 직전 조건을 계산한 예상값입니다. 네 번의 적용 검사와 다섯 속성의 활성 여부를 구별합니다.</p><table><thead><tr><th>반례</th><th>예상 검출</th></tr></thead><tbody><tr><td>cfg_apply 직후 pending을 0으로 유지</td><td>다음 상승 에지 ap_apply_pending</td></tr><tr><td>100%에서 출력 LOW</td><td>ap_full_duty</td></tr><tr><td>리셋 직전부터 출력 LOW</td><td>RESET_PRECONDITION</td></tr><tr><td>100% 자극 누락</td><td>full_hits=0 또는 절차 적용 검사 실패</td></tr><tr><td>정상 동작 중 X/Z 발생</td><td>UNKNOWN_OUTPUT</td></tr></tbody></table><p>반례는 논리적으로 분석한 예상 검출입니다. 실제 오류 주입 시험을 별도로 수행해야 검증 환경이 어설션을 실행하는지 확인할 수 있습니다. 샘플 사이 글리치나 일반 주기 변경, 전체 PWM 위상에 대한 정식 증명은 이 장의 범위 밖입니다. 다음 장에서는 Functional Coverage(펑셔널 커버리지, 기능별 시험 범위 측정)로 입력 조합의 누락 여부를 확인합니다.</p>
+<div class="execution-evidence" data-evidence="v59"><h3>2026-11-26 실제 실행 결과</h3><p>Vivado XSIM 2024.2 · 종료 코드 0 · <strong>PASS</strong>. 정상 실행과 정의된 오류 검출 조건을 장별 실행기로 확인했습니다.</p><div class="codeblock"><div class="codebar"><span>저장소 루트 · Bash · 실행 재현 명령</span></div><pre tabindex="0"><code>bash scripts/run_chapter.sh 11</code></pre></div><div class="codeblock"><div class="codebar"><span>실제 로그 발췌 · 예상 출력과 구별</span></div><pre tabindex="0"><code>PASS CH11 SVA checks=4
+Fatal: DETECTED_SVA_PENDING t=55</code></pre></div><p><a href="docs/evidence/v59/README.md#ch11">실행 명령·종료 코드·공개 로그 및 해시 확인</a>. 위의 예상 파형은 코드에서 계산한 도식이며, 실측 파형 이미지는 별도로 수록하지 않았습니다.</p></div>
+</section>
+<div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH11 v04 · PASS</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v05.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v04.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v04.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v05.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v05.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v05.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v04.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v04.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v04.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v05.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v04.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v03.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v03.html"},{"id":"ch14","number":14,"title":"FIFO 및 흐름 제어","file":"ch14_fifo_flow_control_v03.html"},{"id":"ch15","number":15,"title":"AXI4-Lite 레지스터 검증","file":"ch15_axi4lite_register_verification_v03.html"},{"id":"ch16","number":16,"title":"MAC·NPU 정수 연산 검증","file":"ch16_mac_npu_integer_verification_v03.html"},{"id":"ch17","number":17,"title":"최소 UVM 환경","file":"ch17_minimal_uvm_environment_v04.html"},{"id":"ch18","number":18,"title":"Sequence에서 Driver까지","file":"ch18_sequence_driver_v04.html"},{"id":"ch19","number":19,"title":"Monitor·Agent·Scoreboard","file":"ch19_monitor_agent_scoreboard_v05.html"},{"id":"ch20","number":20,"title":"Factory·Config·Objection","file":"ch20_factory_config_objection_v04.html"},{"id":"ch21","number":21,"title":"UVM 레지스터 추상화","file":"ch21_uvm_register_abstraction_v04.html"},{"id":"ch22","number":22,"title":"다중 Agent·VIP","file":"ch22_multi_agent_vip_v05.html"},{"id":"ch23","number":23,"title":"NPU 통합 정답 비교","file":"ch23_npu_integrated_scoreboard_v04.html"},{"id":"ch24","number":24,"title":"회귀·CI·검증 보고","file":"ch24_regression_ci_reporting_v04.html"}]};</script><script src="assets/site.js"></script></body></html>

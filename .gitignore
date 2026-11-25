@@ -2,9 +2,11 @@
 .tools/
 obj_dir/
 *.vcd
+!docs/evidence/**/*.vcd
 *.vvp
 *.out
 *.log
+!docs/evidence/**/*.log
 *.pb
 __pycache__/
 .DS_Store

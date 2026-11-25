@@ -1,0 +1,9 @@
+VCD info: dumpfile ch05_uart_types.vcd opened for output.
+=== CH05 SYSTEMVERILOG TYPES START ===
+MATCH kind=0 data=00 valid=0 ready=1
+MATCH kind=1 data=41 valid=1 ready=1
+MATCH kind=2 data=42 valid=1 ready=0
+MATCH kind=3 data=x5 valid=1 ready=1
+TYPE logic=x5 bit=05
+PASS checks=6 failures=0
+<REPO>/tb/ch05/tb_uart_types.sv:121: $finish called at 4000 (1ps)

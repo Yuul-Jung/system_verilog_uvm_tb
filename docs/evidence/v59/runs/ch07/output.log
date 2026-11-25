@@ -1,0 +1,10 @@
+=== CH07 INTERFACE / MODPORT / CLOCKING START ===
+PASS A_ACCEPT: data=41 valid=1 ready=1
+PASS Z_STALL: data=5a valid=1 ready=0
+PASS Z_ACCEPT: data=5a valid=1 ready=1
+PASS IDLE: data=5a valid=0 ready=1
+CH07 PASS: 4 cases checked
+- <REPO>/tb/ch07/tb_uart_interface.sv:86: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.054 2026-11-01
+- Verilator: $finish at 45ns; walltime 0.000 s; speed 374.052 us/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 4 MB

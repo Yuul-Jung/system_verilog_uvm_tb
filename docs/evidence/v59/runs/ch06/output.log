@@ -1,0 +1,12 @@
+VCD info: dumpfile ch06_uart_arrays_queues.vcd opened for output.
+=== CH06 ARRAYS QUEUES PACKAGES START ===
+ARRAY packed=41424344 first=41 last=44
+QUEUE size=4
+HOLD t=1 ns kind=0 valid=0 ready=1
+ACCEPT t=2 ns data=41 remain=3
+HOLD t=3 ns kind=2 valid=1 ready=0
+ACCEPT t=4 ns data=42 remain=2
+ACCEPT t=5 ns data=43 remain=1
+ACCEPT t=6 ns data=44 remain=0
+PASS checks=11 failures=0 queue=0
+<REPO>/tb/ch06/tb_uart_arrays_queues.sv:136: $finish called at 6000 (1ps)

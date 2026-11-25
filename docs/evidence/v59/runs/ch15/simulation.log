@@ -1,0 +1,8 @@
+VCD info: dumpfile ch15_axi4lite.vcd opened for output.
+T1_AW_BEFORE_W_PASS
+T2_W_BEFORE_AW_WSTRB_PASS
+T3_CONTROL_RO_PASS
+T4_ZERO_RO_ALIAS_PASS
+T5_RESET_PENDING_PASS
+PASS CH15 commits=7 checks=18
+<REPO>/tb/ch15/tb_axi4lite_registers.sv:264: $finish called at 1450000 (1ps)

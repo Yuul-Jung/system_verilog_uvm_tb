@@ -1,0 +1,62 @@
+[
+  {
+    "repo": "amd_soc_npu",
+    "path": "common/rtl/uart_echo_controller.v",
+    "exit_code": 0,
+    "git_blob_sha": "76269e771295fadcd0ddf160bee4556fdfa62e56"
+  },
+  {
+    "repo": "amd_soc_npu",
+    "path": "common/rtl/uart_core.v",
+    "exit_code": 0,
+    "git_blob_sha": "1572cda5d31ec8e26dc20a512e2606e6809669e0"
+  },
+  {
+    "repo": "amd_soc_npu",
+    "path": "common/rtl/uart_rx.v",
+    "exit_code": 0,
+    "git_blob_sha": "70f3261694a8dec31f44e41cdad2ca511afdb778"
+  },
+  {
+    "repo": "amd_soc_npu",
+    "path": "common/rtl/uart_tx.v",
+    "exit_code": 0,
+    "git_blob_sha": "8b5fc5c391b6715f0ed04582a71953101c008c62"
+  },
+  {
+    "repo": "amd_soc_npu",
+    "path": "ch01/rtl/mac_core.v",
+    "exit_code": 0,
+    "git_blob_sha": "d3f911b882f65e8f6096d76d31a2b710c18ae38d"
+  },
+  {
+    "repo": "amd_soc_npu",
+    "path": "ch03/rtl/mac_pipeline_core.v",
+    "exit_code": 0,
+    "git_blob_sha": "f690b2db2a16626a43e0bb9f3c859d616e57116d"
+  },
+  {
+    "repo": "amd_soc_npu",
+    "path": "mini_npu/rtl/npu_engine4.v",
+    "exit_code": 0,
+    "git_blob_sha": "62d66ff7a54d99734b0c3546b2d881ddf553a2ed"
+  },
+  {
+    "repo": "amd_soc_npu",
+    "path": "mini_npu/rtl/npu_dsp_mac_lane.v",
+    "exit_code": 0,
+    "git_blob_sha": "cc673c0836e98dca47f95e7ecc638684c88f5f29"
+  },
+  {
+    "repo": "amd_soc_npu",
+    "path": "ch02/rtl/dsp_multiplier.v",
+    "exit_code": 0,
+    "git_blob_sha": "3dfb157f0e34dfb548fff7b3a6e5911ba664d504"
+  },
+  {
+    "repo": "amd_soc_p2",
+    "path": "legacy/part02_1/ch04/rtl/pwm_core.v",
+    "exit_code": 0,
+    "git_blob_sha": "e813f3fb107bd327054d11e0b397817b8e7bd813"
+  }
+]

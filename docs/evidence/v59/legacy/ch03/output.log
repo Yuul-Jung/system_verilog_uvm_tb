@@ -1,0 +1,59 @@
+VCD info: dumpfile ch03_pwm_reusable_stimulus.vcd opened for output.
+=== CH03 REUSABLE STIMULUS START ===
+REQUEST t=30 ns duty=0
+APPLIED t=96 ns duty=0 percent=0
+SAMPLE duty=0 cycle=0 pwm=0
+SAMPLE duty=0 cycle=1 pwm=0
+SAMPLE duty=0 cycle=2 pwm=0
+SAMPLE duty=0 cycle=3 pwm=0
+SAMPLE duty=0 cycle=4 pwm=0
+SAMPLE duty=0 cycle=5 pwm=0
+SAMPLE duty=0 cycle=6 pwm=0
+SAMPLE duty=0 cycle=7 pwm=0
+OBSERVED duty=0 HIGH=0/8
+REQUEST t=180 ns duty=2
+APPLIED t=256 ns duty=2 percent=25
+SAMPLE duty=2 cycle=0 pwm=1
+SAMPLE duty=2 cycle=1 pwm=1
+SAMPLE duty=2 cycle=2 pwm=0
+SAMPLE duty=2 cycle=3 pwm=0
+SAMPLE duty=2 cycle=4 pwm=0
+SAMPLE duty=2 cycle=5 pwm=0
+SAMPLE duty=2 cycle=6 pwm=0
+SAMPLE duty=2 cycle=7 pwm=0
+OBSERVED duty=2 HIGH=2/8
+REQUEST t=340 ns duty=4
+APPLIED t=416 ns duty=4 percent=50
+SAMPLE duty=4 cycle=0 pwm=1
+SAMPLE duty=4 cycle=1 pwm=1
+SAMPLE duty=4 cycle=2 pwm=1
+SAMPLE duty=4 cycle=3 pwm=1
+SAMPLE duty=4 cycle=4 pwm=0
+SAMPLE duty=4 cycle=5 pwm=0
+SAMPLE duty=4 cycle=6 pwm=0
+SAMPLE duty=4 cycle=7 pwm=0
+OBSERVED duty=4 HIGH=4/8
+REQUEST t=500 ns duty=6
+APPLIED t=576 ns duty=6 percent=75
+SAMPLE duty=6 cycle=0 pwm=1
+SAMPLE duty=6 cycle=1 pwm=1
+SAMPLE duty=6 cycle=2 pwm=1
+SAMPLE duty=6 cycle=3 pwm=1
+SAMPLE duty=6 cycle=4 pwm=1
+SAMPLE duty=6 cycle=5 pwm=1
+SAMPLE duty=6 cycle=6 pwm=0
+SAMPLE duty=6 cycle=7 pwm=0
+OBSERVED duty=6 HIGH=6/8
+REQUEST t=660 ns duty=8
+APPLIED t=736 ns duty=8 percent=100
+SAMPLE duty=8 cycle=0 pwm=1
+SAMPLE duty=8 cycle=1 pwm=1
+SAMPLE duty=8 cycle=2 pwm=1
+SAMPLE duty=8 cycle=3 pwm=1
+SAMPLE duty=8 cycle=4 pwm=1
+SAMPLE duty=8 cycle=5 pwm=1
+SAMPLE duty=8 cycle=6 pwm=1
+SAMPLE duty=8 cycle=7 pwm=1
+OBSERVED duty=8 HIGH=8/8
+=== CH03 END: OBSERVATION ONLY ===
+<REPO>/tb/ch03/tb_pwm_reusable_stimulus.sv:139: $finish called at 810000 (1ps)

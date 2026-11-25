@@ -1,0 +1,15 @@
+VCD info: dumpfile ch23_npu_integrated.vcd opened for output.
+CHECK len=2 cycles=6 class=0
+CHECK len=2 cycles=6 class=1
+CHECK len=2 cycles=6 class=2
+CHECK len=2 cycles=6 class=3
+CHECK len=2 cycles=6 class=3
+CHECK len=1 cycles=4 class=3
+REJECT len=0
+REJECT len=3
+REJECT len=65
+CHECK len=1 cycles=4 class=0
+CHECK len=64 cycles=130 class=0
+REJECT len=1
+PASS CH23 cases=8 rejected=4
+<REPO>/tb/ch23/tb_npu_integrated.sv:221: $finish called at 8916000 (1ps)

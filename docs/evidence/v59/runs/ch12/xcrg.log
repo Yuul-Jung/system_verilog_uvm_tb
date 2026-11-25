@@ -1,0 +1,28 @@
+
+ Options Set are : 
+
+   Command Line               : xcrg -dir . -db_name ch12_cov -report_dir report -report_format html
+   Report Format              : html
+   Log File                   : xcrg.log
+   Functional Coverage Dir[s] : .
+   Functional Coverage DB[s]  : ch12_cov
+
+
+
+********************************************************
+                  Functional Coverage Report 
+********************************************************
+
+ Restoring Functional Coverage DB[s] from : 
+  1	./xsim.covdb/ch12_cov/xsim.covinfo
+
+ Created Coverage Report Directory    : report/functionalCoverageReport
+
+ Functional Coverage HTML Report directory        : report/functionalCoverageReport
+
+ Creating dashboard.html 
+
+ Creating groups.html 
+
+ Creating grp0.html 
+

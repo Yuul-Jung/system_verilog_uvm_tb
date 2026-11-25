@@ -1,0 +1,3 @@
+VCD info: dumpfile ch10_pwm_corner_reset_timeout.vcd opened for output.
+FATAL: <REPO>/tb/ch10/tb_pwm_corner_reset_timeout.sv:65: DETECTED_INJECTED_FAULT dut=1 measured=0
+       Time: 336000  Scope: tb_pwm_corner_reset_timeout.check_outputs

@@ -1,0 +1,7 @@
+VCD info: dumpfile ch13_uart_stream.vcd opened for output.
+ACCEPT t=15 ns data=41
+ACCEPT t=55 ns data=5a
+ACCEPT t=85 ns data=0a
+MONITOR stalled=3 unknown_ready=2
+PASS CH13 accepted=3 checks=14
+<REPO>/tb/ch13/tb_uart_stream.sv:150: $finish called at 131000 (1ps)
