@@ -209,3 +209,7 @@
 ## 제06장 v03 · 배열·큐·패키지
 - amd_soc_npu 제1장 03절 UART 에코 원본 및 패키지 유지. 구조체 비트 연결 대체 표현, 조건부 VCD·시간 단위·XSIM 절차 보완. 제05장과 필드 순서 차이 명시.
 - ch06_arrays_queues_packages_v03.html; [검증 기록](docs/CH06_VALIDATION_v03.md). 독립 큐 추적·SVG 단독 렌더링·원격 정적 검사 PASS. 실제 RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
+
+## 제07장 v02 · 인터페이스·타이밍 분리
+- amd_soc_npu 제1장 03절 UART 에코 원본 및 uart_stream_if 유지. 조건부 VCD와 XSIM 우선 실행, Verilator 한계, 실제 clocking 관찰·구동 시간 관계 보완.
+- ch07_interface_modport_clocking_v02.html; [검증 기록](docs/CH07_VALIDATION_v02.md). 독립 이벤트 계산·SVG 단독 렌더·원격 정적 검사 PASS. 실제 RTL_SIM 및 전체 HTML 렌더링 NOT_RUN.
