@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 350" role="img" aria-labelledby="ch09title ch09desc">
+<title id="ch09title">PWM 참조 모델과 스코어보드</title><desc id="ch09desc">동일한 입력 7개를 DUT와 참조 모델에 전달하고 상승 에지 1ns 후 공개 출력 6개를 비교한다.</desc>
+<defs><marker id="ch09arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<rect width="940" height="350" fill="white"/>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle">
+<text x="470" y="30" font-size="20" font-weight="bold">같은 입력 · 독립 상태 · 공개 출력 비교</text>
+<g fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"><rect x="24" y="122" width="230" height="100" rx="4"/><rect x="345" y="55" width="250" height="94" rx="4"/><rect x="345" y="195" width="250" height="94" rx="4"/><rect x="686" y="122" width="224" height="100" rx="4"/></g>
+<g font-size="16" font-weight="bold"><text x="139" y="146">request_config()</text><text x="470" y="80">pwm_core · dut</text><text x="470" y="220">pwm_reference_model</text><text x="798" y="146">Scoreboard</text></g>
+<g font-size="13"><text x="139" y="166">cfg_apply · cfg_period</text><text x="139" y="185">cfg_duty · cfg_enable</text><text x="139" y="204">cfg_polarity · clk · resetn</text><text x="470" y="103">counter · shadow_*</text><text x="470" y="123">실제 출력 6개</text><text x="470" y="243">golden · phase · queued_*</text><text x="470" y="263">기대 출력 ref_* 6개</text><text x="798" y="166">posedge clk → #1</text><text x="798" y="185">!== · score_cycles</text><text x="798" y="204">불일치 → $fatal</text></g>
+<g stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch09arr)"><path d="M254 152H300V102H345"/><path d="M254 192H300V242H345"/><path d="M595 102H640V152H686"/><path d="M595 242H640V192H686"/></g>
+<text x="470" y="323" font-size="14">입력은 하강 에지에서 변경 · 비교는 상승 에지 이후에 수행</text>
+</g></svg>
