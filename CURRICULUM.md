@@ -30,7 +30,7 @@
 |---|---|---|---|
 | 09 | 참조 모델·스코어보드 | reference model·scoreboard | 기존 PWM 출력 6개 매 클록 자동 비교 |
 | 10 | 경계조건·오류 주입 | corner case·reset·timeout·negative test | PWM 0/100%, 중간 리셋, 관찰 오류·요청 누락 검출 |
-| 11 | 시간적 속성 검사 | SVA·assert property·disable iff | Handshake와 FSM 규칙 |
+| 11 | 시간적 속성 검사 | SVA·assert property·disable iff | PWM 공개 포트의 시간 계약 |
 | 12 | 기능 커버리지 | covergroup·coverpoint·bins·cross | PWM 설정 조합 기록 |
 
 ## 제4부 · 인터페이스·연산기 검증
@@ -38,10 +38,10 @@
 
 | 장 | 주제 | 핵심 문법·기술 | 기존 DUT 실습 |
 |---|---|---|---|
-| 13 | UART 스트림 검증 | BFM·프레임·전송 오류 | UART Echo·Command |
+| 13 | UART 스트림 검증 | BFM·프레임·전송 오류 | UART Echo 6포트 조합 전달기 |
 | 14 | FIFO 및 흐름 제어 | full/empty·ready/valid·backpressure | UART FIFO |
 | 15 | AXI4-Lite 레지스터 검증 | AW/W/B/AR/R·WSTRB | 기존 사용자 AXI IP |
-| 16 | MAC·NPU 정수 연산 검증 | INT8·signed·pipeline·Python 모델 | MAC·BRAM·NPU Engine |
+| 16 | MAC·NPU 정수 연산 검증 | INT8·signed·pipeline·Python 모델 | mac_core·mac_pipeline_core |
 
 ## 제5부 · UVM 검증 환경
 재사용 가능한 Agent와 Environment
