@@ -1,7 +1,7 @@
 # 설계 학습안내서 ↔ 검증 학습안내서 24장 대응표
 
 ## 기준
-- 주 설계 참조: `Yuul-Jung/amd_soc_npu`의 실제 발행 안내서. 이전 `amd_soc_rtl`은 원본 출처 추적용.
+- 주 설계 참조: `Yuul-Jung/amd_soc_npu` 및 독립 분리된 `Yuul-Jung/amd_soc_p1`, `Yuul-Jung/amd_soc_p2`의 실제 발행 안내서. 이전 `amd_soc_rtl`은 원본 출처 추적용. 제1·2부 분리는 amd_soc_npu 커밋 `ba576381f82ba8ba80432d6ae3edaa65cdb20cb9`에서 확인했다. 제2부 PWM 04.2장 및 원본은 새 저장소에서 재확인했다. AXI 관련 개념 참조는 각 장 개정 시 새 저장소에서 다시 확인한다.
 - 검증 과정은 기존 24장 순서를 유지한다. 설계 1개 장/절에 여러 검증 장이 대응할 수 있으며 강제로 1:1 장 번호를 맞추지 않는다.
 - 아래 표는 원격 안내서의 실제 절 제목, 모듈 선언, 장별 실행 스크립트의 RTL 입력 파일을 확인한 결과다. 전체 RTL 시뮬레이션은 NOT_RUN. 개별 TB 계약과 실제 결과는 각 장 개정 시 별도 검증한다.
 - EXACT_BLOB: 현행 설계 파일과 검증 스냅샷의 Git Blob SHA 동일. COMMENT_ONLY: SHA는 다르지만 주석 및 공백 제거 후 코드 문자열 동일하고 주석 제외 행 차이 없음(형식적 등가검증 아님). CONCEPT_ONLY: 관련 설계 개념만 대응, 동일 DUT 원본 경로 확인 못함. RTL_CHANGED: 실제 RTL 로직 차이 확인.
@@ -37,16 +37,16 @@
 
 ## 설계 페이지 근거 및 실제 RTL 경로
 - **E**: NPU 제1장 UART 계산기 · 03절 / 1-1 UART 에코 — `p01_uart_calc_v01.html`. 실제 모듈 전체 확인. 주석 제외 코드 동일. UART PHY 통합 검증이 아님.
-- **P**: 제2부 04.2장 RTL·AXI 풀이 · 06절 독립 PWM Core 전체 — `part02/p2_04_2_rtl_v02.html`. 원본 SHA 일치. PWM 단위 검증이며 AXI 래퍼나 보드 검증은 아님.
+- **P**: 제2부 04.2장 RTL·AXI 풀이 · 06절 독립 PWM Core 전체 — `amd_soc_p2/p2_04_2_rtl_v02.html`. 원본 SHA 일치. PWM 단위 검증이며 AXI 래퍼나 보드 검증은 아님.
 - **U**: NPU 제1장 UART 계산기 · 03절 / 1-1 UART 에코 — `p01_uart_calc_v01.html`. 3개 모듈 모두 주석 제외 코드 일치. FIFO·8N1 경로.
-- **A**: 제2부 04.2장 03~04절 및 10.3장 §2~3 (AXI/레지스터 개념), 03.2장 IRQ 참고 — `part02/p2_04_2_rtl_v02.html` / `part02/p2_10_3_ip_library_v02.html` / `part02/p2_03_2_rtl_v02.html`. 설계 안내서의 RTL은 개별 IP 래퍼로 별개 모듈. 동일한 RMAP 원본의 현행 경로 미확인. 기존 스냅샷을 사용하고 직접 대응으로 표시하지 않음.
+- **A**: 제2부 04.2장 03~04절 및 10.3장 §2~3 (AXI/레지스터 개념), 03.2장 IRQ 참고 — `amd_soc_p2/p2_04_2_rtl_v02.html` / `amd_soc_p2/p2_10_3_ip_library_v02.html` / `amd_soc_p2/p2_03_2_rtl_v02.html`. 설계 안내서의 RTL은 개별 IP 래퍼로 별개 모듈. 동일한 RMAP 원본의 현행 경로 미확인. 기존 스냅샷을 사용하고 직접 대응으로 표시하지 않음.
 - **M**: NPU 제1장 UART 계산기 · 04절 / 1-2 MAC 누산, 06절 / 1-4 MAC 파이프라인 — `p01_uart_calc_v01.html`. 두 RTL SHA 일치.
 - **N**: NPU 제2장 4뉴런 NPU 보드 · 10절 / 2-8 통합 NPU Top; 제1장 05절 / 1-3 DSP 곱셈 — `p02_npu4_board_v01.html` / `p01_uart_calc_v01.html`. engine4의 CMP1/CMP2 추가로 완료 시간 변경. 기존 TB의 지연 계약 재계산·재검증 필요. lane 주석 제외 동일, multiplier SHA 동일.
 
 | 검증 RTL | amd_soc_npu 실제 파일 | 검증 스냅샷 SHA | 현행 설계 SHA |
 |---|---|---|---|
 | uart_echo_controller.v | common/rtl/uart_echo_controller.v | 28160c34522e47fbd961466651598da063bc74ae | 76269e771295fadcd0ddf160bee4556fdfa62e56 |
-| pwm_core.v | part02/legacy/part02_1/ch04/rtl/pwm_core.v | e813f3fb107bd327054d11e0b397817b8e7bd813 | e813f3fb107bd327054d11e0b397817b8e7bd813 |
+| pwm_core.v | amd_soc_p2: legacy/part02_1/ch04/rtl/pwm_core.v | e813f3fb107bd327054d11e0b397817b8e7bd813 | e813f3fb107bd327054d11e0b397817b8e7bd813 |
 | uart_core.v | common/rtl/uart_core.v | 5390c312b186c27abb2b2818f76ec76d164c75f1 | 1572cda5d31ec8e26dc20a512e2606e6809669e0 |
 | uart_rx.v | common/rtl/uart_rx.v | f0d2f9fcdf84aec913720103fb373738417bf7d1 | 70f3261694a8dec31f44e41cdad2ca511afdb778 |
 | uart_tx.v | common/rtl/uart_tx.v | dfcb0cf10293a2a66ab7d704621a5219144673eb | 8b5fc5c391b6715f0ed04582a71953101c008c62 |
@@ -59,6 +59,7 @@
 | dsp_multiplier.v | ch02/rtl/dsp_multiplier.v | 3dfb157f0e34dfb548fff7b3a6e5911ba664d504 | 3dfb157f0e34dfb548fff7b3a6e5911ba664d504 |
 
 ## 적대적 검증에서 발견한 핵심 사항
+- 2026-11-25: 설계 제2부가 amd_soc_p2로 독립 이동했다. `p2_04_2_rtl_v02.html` 및 PWM 원본을 새 저장소에서 직접 재확인했다. 04.2장 02·06절 유지, 원본 SHA 동일.
 - 검증 13장도 실제 DUT는 `uart_echo_controller` 하나다. 14장의 UART FIFO/PHY와 혼동하지 않는다.
 - 검증 11·12장의 실행 스크립트는 `tb/ch11/run_ch11.sh`, `tb/ch12/run_ch12.sh`에 존재한다. `scripts/` 공통 경로로 잘못 안내하지 않는다.
 - 검증 24장의 Bash 스크립트는 `scripts/run_ch24.py`로 위임하며 실제 대상은 UART Echo 하나다. 과정 전체 자동 회귀라고 과장하지 않는다.
