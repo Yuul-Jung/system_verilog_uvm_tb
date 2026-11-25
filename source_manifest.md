@@ -225,3 +225,7 @@
 ## 제10장 v03 · 경계조건·오류 주입
 - amd_soc_p2 04.2장 PWM 원본 유지. 리셋 전 HIGH·극성 초기화·타임아웃 기준 상태·최종 횟수 확인 추가. XSIM 및 Icarus 세 모드 실행 절차와 조건부 VCD.
 - ch10_corner_reset_timeout_v03.html; [검증 기록](docs/CH10_VALIDATION_v03.md). 독립 시간 계산·SVG 단독 렌더·원격 정적 검사 PASS. 실제 RTL_SIM·오류 주입 및 전체 페이지 렌더링 NOT_RUN.
+
+## 제11장 v02 · 시간적 속성 검사
+- amd_soc_p2 04.2장 PWM 원본 및 다섯 SVA 속성 유지. 선행 조건 집계, 미정값 및 리셋 전 HIGH 검사 추가. 독립 XSIM 실행 절차로 변경.
+- ch11_temporal_assertions_v02.html; [검증 기록](docs/CH11_VALIDATION_v02.md). 독립 시간 계산·SVG 단독 렌더·원격 정적 검사 PASS. 실제 RTL_SIM·SVA 실행 및 전체 페이지 렌더링 NOT_RUN.
