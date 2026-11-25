@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="ch15title">
+<title id="ch15title">AXI4-Lite 어댑터와 레지스터 뱅크의 연결</title><rect width="960" height="360" fill="white"/>
+<defs><marker id="ch15arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<g fill="#172439" font-family="Noto Sans CJK KR,sans-serif" text-anchor="middle">
+<text x="480" y="30" font-size="20" font-weight="bold">AXI4-Lite · 주소와 데이터의 독립 수락</text>
+<g fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"><rect x="24" y="60" width="170" height="254" rx="4"/><rect x="340" y="60" width="278" height="254" rx="4"/><rect x="758" y="60" width="178" height="254" rx="4"/></g>
+<g font-size="16" font-weight="bold"><text x="109" y="86">테스트벤치</text><text x="479" y="86">axi4lite_slave_adapter</text><text x="847" y="86">register bank</text></g>
+<g font-size="12"><text x="109" y="108">독립 BFM</text><text x="847" y="106">custom_register_bank</text><text x="267" y="112">AWADDR / VALID</text><text x="267" y="146">WDATA / WSTRB</text><text x="267" y="180">BVALID / BRESP</text><text x="267" y="214">ARADDR / VALID</text><text x="267" y="248">RDATA / RRESP</text><text x="688" y="128">wr_en / offset</text><text x="688" y="174">wr_data / strb</text><text x="688" y="236">rd_offset</text><text x="688" y="282">rd_data</text></g>
+<g fill="white" stroke="#1F3A5F" stroke-width="1.4"><rect x="361" y="109" width="112" height="48"/><rect x="485" y="109" width="112" height="48"/><rect x="361" y="174" width="236" height="48"/><rect x="361" y="237" width="236" height="54"/></g>
+<g font-size="13"><text x="417" y="130">aw_stored</text><text x="417" y="146">awaddr_stored</text><text x="541" y="130">w_stored</text><text x="541" y="146">wdata / wstrb</text><text x="479" y="195" font-weight="bold">write_commit</text><text x="479" y="211">두 저장 플래그 · B 대기 없음</text><text x="479" y="257" font-weight="bold">s_axi_rdata / rvalid</text><text x="479" y="276">AR 수락 시 읽기값 캡처</text><text x="847" y="156">CONTROL</text><text x="847" y="180">DATA_IN · COMMAND</text><text x="847" y="204">IRQ_STATUS</text><text x="847" y="254">rd_data 조합 선택</text><text x="109" y="285">READY / VALID</text><text x="109" y="300">상승 에지 관찰</text></g>
+<g fill="none" stroke="#5A1E1E" stroke-width="2" marker-end="url(#ch15arr)"><path d="M194 120H340"/><path d="M194 154H340"/><path d="M340 188H194"/><path d="M194 222H340"/><path d="M340 256H194"/><path d="M618 136H758"/><path d="M618 182H758"/><path d="M618 244H758"/><path d="M758 290H618"/></g>
+<text x="480" y="340" font-size="13">채널별 READY는 VALID와 반대 방향 · 도식은 주요 payload 방향을 표시</text>
+</g></svg>
