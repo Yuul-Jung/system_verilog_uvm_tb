@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v32",
+  "version": "v33",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -29,7 +29,7 @@
       "title": "반복 자극과 작업 분리",
       "subtitle": "기존 PWM에 task·function·repeat·for·wait 적용",
       "slug": "ch03_reusable_stimulus",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch03/tb_pwm_reusable_stimulus.sv"
     },
     {
