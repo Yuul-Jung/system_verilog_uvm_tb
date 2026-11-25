@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v51",
+  "version": "v52",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -180,9 +180,9 @@
       "id": "ch20",
       "number": 20,
       "title": "Factory·Config·Objection",
-      "subtitle": "PWM UVM Factory Override·Config DB·Objection과 Scoreboard 검증",
+      "subtitle": "Factory 타입 교체·Config DB 설정 변경·Objection 종료 계약 및 정상 2/부정 3 시나리오",
       "slug": "ch20_factory_config_objection",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch20/tb_pwm_factory_config_objection.sv"
     },
     {
