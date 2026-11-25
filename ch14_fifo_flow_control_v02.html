@@ -1,0 +1,430 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="제14장 UART FIFO 및 흐름 제어 검증"><title>제14장 · FIFO 및 흐름 제어</title><link rel="stylesheet" href="assets/site.css"></head><body data-chapter="ch14"><a class="access-skip" href="#main-content">본문 바로가기</a><button type="button" class="mobile-menu" id="mobile-menu" aria-controls="course-nav" aria-expanded="false">☰ 장·목차</button><div class="shade" id="shade"></div><header class="hero"><div class="hero-inner"><p class="kicker">제4부 · 인터페이스·연산기 검증</p><h1>제14장 · FIFO 및 흐름 제어</h1><p>실제 UART RX/TX FIFO의 저장·배출·Backpressure·Reset을 검증합니다.</p><div class="chips"><span class="chip">PART 04 · CHAPTER 14</span><span class="chip">4개 경계 시나리오</span><span class="chip">기존 RTL 변경 없음</span></div></div></header><div class="wrap"><nav class="toc" id="course-nav" aria-label="부·장·절 탐색"></nav><main class="content" id="main-content">
+<section class="section" id="s00"><h2><span class="num">00</span>개요 · 실제 저장소와 직렬 통신</h2><p>제13장의 에코 제어기는 조합 전달 회로였습니다. 제14장은 실제 UART(유아트, 비동기 직렬 통신)의 RX/TX FIFO(피포, 선입선출 버퍼)와 직렬 송수신 회로를 검증합니다. 수락, 포화, 동시 읽기·쓰기, 초과 수신 및 리셋을 구분합니다.</p><p><strong>선행 설계 학습안내서:</strong> Basys3 소형 NPU 실습(<code>amd_soc_npu</code>) 제1장 UART 계산기, 03절 「서브젝트 1-1 · UART 에코」의 <code>uart_core.v</code>, <code>uart_rx.v</code>, <code>uart_tx.v</code>. 세 원본을 그대로 사용합니다.</p><div class="codeblock"><div class="codebar"><span>Ubuntu · 실습 폴더 준비</span></div><pre tabindex="0"><code>mkdir -p ch14_lab/reference_rtl ch14_lab/tb/ch14 ch14_lab/scripts
+cd ch14_lab</code></pre></div><table><thead><tr><th>파일</th><th>기능</th></tr></thead><tbody><tr><td>reference_rtl/uart_core.v</td><td>두 FIFO 및 PHY 연결</td></tr><tr><td>reference_rtl/uart_rx.v</td><td>8N1 수신 및 1바이트 보류</td></tr><tr><td>reference_rtl/uart_tx.v</td><td>8N1 송신</td></tr><tr><td>tb/ch14/tb_uart_fifo_flow.sv</td><td>독립 검증 환경</td></tr><tr><td>scripts/run_ch14.sh</td><td>Icarus 대체 실행</td></tr></tbody></table><p>01절·05절·06절의 전체 코드를 각 파일에 저장합니다.</p></section>
+<section class="section" id="s01"><h2><span class="num">01</span>원본 RTL 전체 · 세 모듈</h2><figure style="overflow-x:auto;margin:16px 0"><div style="min-width:700px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 350" role="img" aria-labelledby="ch14title"><title id="ch14title">UART Core의 두 FIFO와 직렬 송수신</title><rect width="960" height="350" fill="white"/><defs><marker id="ch14arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs><g fill="#172439" font-family="Noto Sans CJK KR,sans-serif" text-anchor="middle"><text x="480" y="28" font-size="20" font-weight="bold">uart_core · RX/TX 데이터 경로</text><rect x="170" y="46" width="620" height="258" rx="4" fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"/><g fill="white" stroke="#1F3A5F" stroke-width="1.8"><rect x="190" y="76" width="180" height="76"/><rect x="570" y="76" width="200" height="76"/><rect x="190" y="204" width="180" height="76"/><rect x="570" y="204" width="200" height="76"/></g><g font-size="15" font-weight="bold"><text x="280" y="100">uart_rx · rx</text><text x="670" y="100">rx_fifo[0:15]</text><text x="280" y="228">tx_fifo[0:15]</text><text x="670" y="228">uart_tx · tx</text></g><g font-size="12"><text x="280" y="125">1바이트 보류 레지스터</text><text x="670" y="125">rx_count · rx_wptr/rptr</text><text x="280" y="253">tx_count · tx_wptr/rptr</text><text x="670" y="253">10비트 frame_q</text><text x="84" y="102">uart_rxd_i</text><text x="876" y="102">rx_out_data / valid</text><text x="876" y="141">rx_out_ready</text><text x="84" y="230">tx_in_data / valid</text><text x="84" y="269">tx_in_ready</text><text x="876" y="230">uart_txd_o</text><text x="470" y="94">phy_rx_data / valid</text><text x="470" y="145">phy_rx_ready</text><text x="470" y="222">phy_tx_data / valid</text><text x="470" y="273">phy_tx_ready</text></g><g stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch14arr)"><path d="M25 114H190"/><path d="M370 110H570"/><path d="M570 133H370"/><path d="M770 114H935"/><path d="M935 148H770"/><path d="M25 242H190"/><path d="M190 276H25"/><path d="M370 238H570"/><path d="M570 261H370"/><path d="M770 242H935"/></g><text x="480" y="329" font-size="13">clk · resetn 공통 / FIFO마다 16바이트, PHY 저장 공간은 별도</text></g></svg>
+</div><figcaption>실제 모듈 및 데이터/준비 신호의 흐름. 오류 출력은 RX 모듈에서 직접 전달됩니다.</figcaption></figure><div class="codeblock"><div class="codebar"><span>reference_rtl/uart_core.v · Verilog</span></div><pre tabindex="0"><code>// (변경) 8N1 PHY 내부에 깊이 16 RX/TX FIFO를 넣어 byte stream ready/valid를 보존.
+// 1바이트 UART 수신 레지스터와 FIFO는 별개. Controller는 stop-and-wait 정책을 유지.
+module uart_core #(
+    parameter integer CLK_HZ=100000000,BAUD=115200
+)(
+    input wire clk,resetn,uart_rxd_i,
+    output wire uart_txd_o,
+    output wire [7:0] rx_out_data,
+    output wire rx_out_valid,
+    input wire rx_out_ready,
+    input wire [7:0] tx_in_data,
+    input wire tx_in_valid,
+    output wire tx_in_ready,
+    output wire rx_framing_error_o,rx_overrun_o
+);
+    wire [7:0] phy_rx_data;
+    wire phy_rx_valid,phy_rx_ready;
+    wire [7:0] phy_tx_data;
+    wire phy_tx_valid,phy_tx_ready;
+    uart_rx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) rx(
+        .clk(clk),.resetn(resetn),.rx_i(uart_rxd_i),
+        .out_data_o(phy_rx_data),.out_valid_o(phy_rx_valid),
+        .out_ready_i(phy_rx_ready),.framing_error_o(rx_framing_error_o),
+        .overrun_o(rx_overrun_o));
+    uart_tx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) tx(
+        .clk(clk),.resetn(resetn),.in_data_i(phy_tx_data),
+        .in_valid_i(phy_tx_valid),.in_ready_o(phy_tx_ready),.tx_o(uart_txd_o));
+
+    reg [7:0] rx_fifo[0:15];
+    reg [3:0] rx_wptr,rx_rptr;
+    reg [4:0] rx_count;
+    wire rx_pop=rx_out_valid &amp;&amp; rx_out_ready;
+    wire rx_push=phy_rx_valid &amp;&amp; phy_rx_ready;
+    assign rx_out_valid=(rx_count!=0);
+    assign rx_out_data=rx_fifo[rx_rptr];
+    assign phy_rx_ready=resetn &amp;&amp; ((rx_count&lt;16) || rx_pop);
+
+    reg [7:0] tx_fifo[0:15];
+    reg [3:0] tx_wptr,tx_rptr;
+    reg [4:0] tx_count;
+    wire tx_pop=phy_tx_ready &amp;&amp; phy_tx_valid;
+    wire tx_push=tx_in_valid &amp;&amp; tx_in_ready;
+    assign tx_in_ready=resetn &amp;&amp; ((tx_count&lt;16) || tx_pop);
+    assign phy_tx_valid=(tx_count!=0);
+    assign phy_tx_data=tx_fifo[tx_rptr];
+
+    always @(posedge clk)begin
+        if(!resetn)begin
+            rx_wptr&lt;=0;rx_rptr&lt;=0;rx_count&lt;=0;
+            tx_wptr&lt;=0;tx_rptr&lt;=0;tx_count&lt;=0;
+        end else begin
+            if(rx_push)begin
+                rx_fifo[rx_wptr]&lt;=phy_rx_data;
+                rx_wptr&lt;=rx_wptr+1'b1;
+            end
+            if(rx_pop)rx_rptr&lt;=rx_rptr+1'b1;
+            case({rx_push,rx_pop})
+                2'b10:rx_count&lt;=rx_count+1'b1;
+                2'b01:rx_count&lt;=rx_count-1'b1;
+                default:begin end
+            endcase
+            if(tx_push)begin
+                tx_fifo[tx_wptr]&lt;=tx_in_data;
+                tx_wptr&lt;=tx_wptr+1'b1;
+            end
+            if(tx_pop)tx_rptr&lt;=tx_rptr+1'b1;
+            case({tx_push,tx_pop})
+                2'b10:tx_count&lt;=tx_count+1'b1;
+                2'b01:tx_count&lt;=tx_count-1'b1;
+                default:begin end
+            endcase
+        end
+    end
+endmodule
+</code></pre></div><div class="codeblock"><div class="codebar"><span>reference_rtl/uart_rx.v · Verilog</span></div><pre tabindex="0"><code>// (추가) 8N1 수신. RX 2FF, start midpoint/bit center, hold/overrun.
+module uart_rx #(
+    parameter integer CLK_HZ=100000000, BAUD=115200
+)(
+    input wire clk,resetn,rx_i,
+    output reg [7:0] out_data_o,
+    output reg out_valid_o,
+    input wire out_ready_i,
+    output reg framing_error_o,overrun_o
+);
+    localparam integer CPB=(CLK_HZ+BAUD/2)/BAUD;
+    localparam integer HALF=CPB/2;
+    localparam [1:0] IDLE=0,START=1,DATA=2,STOP=3;
+    reg [1:0] state;
+    reg rx_meta,rx_sync;
+    reg [31:0] count_q;
+    reg [2:0] bit_q;
+    reg [7:0] shift_q;
+    always @(posedge clk)begin
+        if(!resetn)begin
+            state&lt;=IDLE;rx_meta&lt;=1;rx_sync&lt;=1;count_q&lt;=0;bit_q&lt;=0;shift_q&lt;=0;
+            out_data_o&lt;=0;out_valid_o&lt;=0;framing_error_o&lt;=0;overrun_o&lt;=0;
+        end else begin
+            rx_meta&lt;=rx_i;rx_sync&lt;=rx_meta;
+            if(out_valid_o &amp;&amp; out_ready_i)out_valid_o&lt;=0;
+            case(state)
+                IDLE:if(!rx_sync)begin count_q&lt;=HALF-1;state&lt;=START;end
+                START:if(count_q==0)begin
+                    if(!rx_sync)begin count_q&lt;=CPB-1;bit_q&lt;=0;state&lt;=DATA;end
+                    else state&lt;=IDLE;
+                end else count_q&lt;=count_q-1'b1;
+                DATA:if(count_q==0)begin
+                    shift_q[bit_q]&lt;=rx_sync;count_q&lt;=CPB-1;
+                    if(bit_q==7)state&lt;=STOP;
+                    else bit_q&lt;=bit_q+1'b1;
+                end else count_q&lt;=count_q-1'b1;
+                STOP:if(count_q==0)begin
+                    state&lt;=IDLE;
+                    if(!rx_sync)framing_error_o&lt;=1;
+                    else if(!out_valid_o || out_ready_i)begin
+                        out_data_o&lt;=shift_q;out_valid_o&lt;=1;
+                    end else overrun_o&lt;=1;
+                end else count_q&lt;=count_q-1'b1;
+                default:state&lt;=IDLE;
+            endcase
+        end
+    end
+    // synthesis translate_off
+    initial if(CPB&lt;4)$fatal(1,&quot;Unsupported UART clock/baud ratio&quot;);
+    // synthesis translate_on
+endmodule
+</code></pre></div><div class="codeblock"><div class="codebar"><span>reference_rtl/uart_tx.v · Verilog</span></div><pre tabindex="0"><code>// (추가) 8N1 송신. valid/ready handshake, 10bit start/data/stop.
+module uart_tx #(
+    parameter integer CLK_HZ=100000000, BAUD=115200
+)(
+    input wire clk,resetn,
+    input wire [7:0] in_data_i,
+    input wire in_valid_i,
+    output wire in_ready_o,
+    output reg tx_o
+);
+    localparam integer CPB=(CLK_HZ+BAUD/2)/BAUD;
+    reg sending;
+    reg [31:0] tick_q;
+    reg [3:0] bit_q;
+    reg [9:0] frame_q;
+    assign in_ready_o=resetn &amp;&amp; !sending;
+    always @(posedge clk)begin
+        if(!resetn)begin
+            sending&lt;=0;tick_q&lt;=0;bit_q&lt;=0;frame_q&lt;=10'h3ff;tx_o&lt;=1;
+        end else if(!sending)begin
+            tx_o&lt;=1;
+            if(in_valid_i)begin
+                sending&lt;=1;tick_q&lt;=CPB-1;bit_q&lt;=0;
+                frame_q&lt;={1'b1,in_data_i,1'b0};tx_o&lt;=0;
+            end
+        end else if(tick_q!=0)tick_q&lt;=tick_q-1'b1;
+        else begin
+            tick_q&lt;=CPB-1;frame_q&lt;={1'b1,frame_q[9:1]};
+            if(bit_q==9)begin sending&lt;=0;tx_o&lt;=1;end
+            else begin bit_q&lt;=bit_q+1'b1;tx_o&lt;=frame_q[1];end
+        end
+    end
+    // synthesis translate_off
+    initial if(CPB&lt;4)$fatal(1,&quot;Unsupported UART clock/baud ratio&quot;);
+    // synthesis translate_on
+endmodule
+</code></pre></div><p>FIFO의 4비트 포인터는 0~15를 순환하고 5비트 count는 0~16을 나타냅니다. RX FIFO와 수신기의 out_data_o 보류 레지스터, TX FIFO와 송신기의 frame_q는 서로 다른 저장 공간입니다. 메모리 배열을 리셋할 때 모두 0으로 지우지 않고 count와 포인터를 초기화합니다. 따라서 valid=0일 때 rx_out_data 값은 검사하지 않습니다.</p></section>
+<section class="section" id="s02"><h2><span class="num">02</span>FIFO 계약 · 포화와 동시 입출력</h2><table><thead><tr><th>실제 식</th><th>의미</th></tr></thead><tbody><tr><td>rx_out_valid = (rx_count != 0)</td><td>RX 읽을 데이터 존재</td></tr><tr><td>rx_pop = rx_out_valid &amp;&amp; rx_out_ready</td><td>RX 소비</td></tr><tr><td>phy_rx_ready = resetn &amp;&amp; ((rx_count &lt; 16) || rx_pop)</td><td>RX full이어도 pop과 함께 push 허용</td></tr><tr><td>tx_in_ready = resetn &amp;&amp; ((tx_count &lt; 16) || tx_pop)</td><td>TX 공간 또는 동시 pop</td></tr><tr><td>tx_pop = phy_tx_ready &amp;&amp; phy_tx_valid</td><td>TX PHY로 전달</td></tr></tbody></table><table><thead><tr><th>push</th><th>pop</th><th>count 변화</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>유지</td></tr><tr><td>1</td><td>0</td><td>+1</td></tr><tr><td>0</td><td>1</td><td>-1</td></tr><tr><td>1</td><td>1</td><td>유지</td></tr></tbody></table><p>가득 찬 FIFO에 push와 pop이 동시에 발생하면 이전 맨 앞 데이터를 전달하면서 같은 주소에 새 데이터를 기록할 수 있습니다. 비차단 대입에 의해 기존 읽기값으로 거래가 성립합니다. 단순히 18개를 보내는 것으로 포화 시험을 완료했다고 판정하지 않고 실제 stall과 full 동시 교체를 확인합니다.</p></section>
+<section class="section" id="s03"><h2><span class="num">03</span>직렬 비트 시간과 독립 관찰</h2><p>TB 클록은 10ns(100MHz), 파라미터 CLK_HZ=100000000, BAUD=10000000입니다. CPB(클록/비트)는 10, 한 비트는 100ns, 8N1 프레임은 10비트로 1000ns입니다. 실제 보드 기본 115200bps와 다릅니다. 송신기는 프레임 종료 후 다음 상승 에지에서 새 프레임을 시작할 수 있어 연속 시작 간격은 101클록입니다.</p><table><thead><tr><th>구간</th><th>기대값</th><th>TX 시작 하강 에지 이후 관찰</th></tr></thead><tbody><tr><td>Start</td><td>0</td><td>45ns</td></tr><tr><td>D0~D7</td><td>LSB부터 8비트</td><td>145~845ns, 100ns 간격</td></tr><tr><td>Stop</td><td>1</td><td>945ns</td></tr></tbody></table><p>원본 uart_rx를 정답 모니터로 재사용하면 송수신기의 공통 해석 오류를 놓칠 수 있습니다. TB는 txd 하강 에지에서 시작하여 각 비트 중앙 부근에서 직접 샘플링합니다. 18개 프레임 뒤 200클록 동안 TX가 HIGH인지 확인합니다. 정상 8N1 경로의 표본 검사이며 모든 순간 글리치·보레이트 오차를 측정하는 시험은 아닙니다.</p></section>
+<section class="section" id="s04"><h2><span class="num">04</span>검증 시나리오 · 실제 경계 발생 확인</h2><table><thead><tr><th>시험</th><th>입력</th><th>기대 결과</th></tr></thead><tbody><tr><td>T1 TX</td><td>0x40~0x51, 18개</td><td>18 수락/18 복조, stall 및 full 교체 발생</td></tr><tr><td>T2 RX</td><td>0x80~0x8F, 16개</td><td>full·대기 유지·16개 순서·empty</td></tr><tr><td>T3 RX 초과</td><td>0xA0~0xB1, 18개</td><td>FIFO 16+PHY 1 보존, 마지막 0xB1 유실, overrun=1</td></tr><tr><td>T4 리셋</td><td>RX C3 보류, TX 00/11/22</td><td>RX 1개 및 TX FIFO 2개와 송신 중 프레임 폐기</td></tr></tbody></table><p>T3에서 첫 pop은 PHY에 보류된 17번째 바이트를 FIFO로 밀어 넣으므로 count 16이 유지됩니다. 이후 16개가 더 배출되면 empty가 됩니다. overrun은 리셋까지 유지되는 상태입니다. T4는 RX valid가 1이고 TX가 실제로 송신 중이며 FIFO에 2개가 남았음을 확인한 뒤 리셋합니다. TX 핀은 다음 상승 에지에서 idle HIGH가 됩니다. 리셋 이후 200클록 동안 잔류 데이터가 나타나지 않는지 확인합니다.</p><p>순서와 수락 판정은 공개 포트, full 경계 발생은 내부 count/push/pop으로 확인합니다. 내부 접근은 검증용 계층 참조이며 합성 설계 변경이 아닙니다. RX의 framing error 발생 자체는 별도 시험 범위입니다.</p></section>
+<section class="section" id="s05"><h2><span class="num">05</span>테스트벤치 전체 코드</h2><div class="codeblock"><div class="codebar"><span>tb/ch14/tb_uart_fifo_flow.sv · SystemVerilog</span></div><pre tabindex="0"><code>`timescale 1ns/1ps
+// 제14장: 실제 uart_core의 RX/TX 깊이 16 FIFO를 공개 포트로 검증.
+// 내부 카운터는 교육용 관찰에만 사용하며, 정답 판정은 포트 계약 중심.
+module tb_uart_fifo_flow;
+    localparam integer CLK_HZ=100000000, BAUD=10000000, CPB=10;
+    reg clk=0, resetn=0, rxd=1;
+    wire txd;
+    wire [7:0] rx_out_data;
+    wire rx_out_valid, tx_in_ready, fe, ov;
+    reg rx_out_ready=0, tx_in_valid=0;
+    reg [7:0] tx_in_data=0;
+    integer accepted=0, received=0, rx_checked=0;
+    integer phase=0, tx_stalls=0, tx_full_swap=0, rx_full_swap=0;
+    reg rx_held=0;
+    reg [7:0] held_data;
+    always #5 clk=~clk;
+
+    uart_core #(.CLK_HZ(CLK_HZ), .BAUD(BAUD)) dut (
+        .clk(clk), .resetn(resetn), .uart_rxd_i(rxd), .uart_txd_o(txd),
+        .rx_out_data(rx_out_data), .rx_out_valid(rx_out_valid),
+        .rx_out_ready(rx_out_ready), .tx_in_data(tx_in_data),
+        .tx_in_valid(tx_in_valid), .tx_in_ready(tx_in_ready),
+        .rx_framing_error_o(fe), .rx_overrun_o(ov)
+    );
+    // (변경) 실제 상승 에지의 거래를 독립 집계한다.
+    // 내부 count는 경계 발생 및 용량 검사의 보조 증거로 사용한다.
+    always @(posedge clk) begin
+        if (!resetn) rx_held=0;
+        else begin
+            if ((^dut.rx_count) === 1'bx || (^dut.tx_count) === 1'bx ||
+                dut.rx_count&gt;16 || dut.tx_count&gt;16)
+                $fatal(1,&quot;FAIL FIFO_COUNT&quot;);
+            if (phase==1 &amp;&amp; tx_in_valid) begin
+                if (tx_in_ready === 1'b0) tx_stalls++;
+                if (tx_in_ready === 1'b1) begin
+                    if (accepted&gt;=18 || tx_in_data !== (8'h40+8'(accepted)))
+                        $fatal(1,&quot;FAIL TX_ACCEPT_ORDER&quot;);
+                    accepted++;
+                    if (dut.tx_count==16 &amp;&amp; dut.tx_pop) tx_full_swap++;
+                end
+            end
+            if (rx_held &amp;&amp; (rx_out_valid !== 1'b1 || rx_out_data !== held_data))
+                $fatal(1,&quot;FAIL RX_HOLD&quot;);
+            rx_held=(rx_out_valid === 1'b1 &amp;&amp; rx_out_ready === 1'b0);
+            if (rx_held) held_data=rx_out_data;
+            if ((phase==2 || phase==3) &amp;&amp;
+                rx_out_valid === 1'b1 &amp;&amp; rx_out_ready === 1'b1) begin
+                if (rx_checked&gt;=((phase==2)?16:17) ||
+                    rx_out_data !== ((phase==2?8'h80:8'ha0)+8'(rx_checked)))
+                    $fatal(1,&quot;FAIL RX_ORDER phase=%0d idx=%0d&quot;,phase,rx_checked);
+                rx_checked++;
+                if (phase==3 &amp;&amp; dut.rx_count==16 &amp;&amp; dut.rx_push)
+                    rx_full_swap++;
+            end
+        end
+    end
+
+    // 입력 바이트를 handshake 때만 수락한다.
+    task automatic push_tx(input [7:0] data);
+        integer guard;
+        begin
+            @(negedge clk);
+            tx_in_data=data; tx_in_valid=1;
+            guard=0;
+            while (tx_in_ready !== 1'b1) begin
+                @(negedge clk);
+                guard=guard+1;
+                if (guard&gt;2000) $fatal(1,&quot;FAIL TX_READY_TIMEOUT&quot;);
+            end
+            @(posedge clk);
+            if (tx_in_ready !== 1'b1) $fatal(1,&quot;FAIL TX_HANDSHAKE&quot;);
+            @(negedge clk);
+            tx_in_valid=0;
+        end
+    endtask
+
+    // 8N1: start(0), D0~D7, stop(1). LSB부터 전송한다.
+    task automatic send_rx(input [7:0] data);
+        integer i;
+        begin
+            @(negedge clk);
+            rxd=0;
+            repeat(CPB) @(negedge clk);
+            for(i=0;i&lt;8;i=i+1) begin
+                rxd=data[i];
+                repeat(CPB) @(negedge clk);
+            end
+            rxd=1;
+            repeat(CPB) @(negedge clk);
+        end
+    endtask
+
+    // (변경) DUT의 uart_rx를 재사용하지 않는 독립 8N1 복조기.
+    // TX 시작 에지 이후 각 비트 중앙 부근에서 직접 관찰한다.
+    reg [7:0] decoded;
+    integer frame_index, bit_index;
+    initial begin
+        wait(phase==1);
+        for(frame_index=0;frame_index&lt;18;frame_index++) begin
+            @(negedge txd);
+            repeat(CPB/2) @(negedge clk);
+            if(txd !== 1'b0) $fatal(1,&quot;FAIL TX_START&quot;);
+            for(bit_index=0;bit_index&lt;8;bit_index++) begin
+                repeat(CPB) @(negedge clk);
+                decoded[bit_index]=txd;
+            end
+            repeat(CPB) @(negedge clk);
+            if(txd !== 1'b1) $fatal(1,&quot;FAIL TX_STOP&quot;);
+            if(received&gt;=accepted || decoded !== (8'h40+8'(frame_index)))
+                $fatal(1,&quot;FAIL TX_ORDER idx=%0d got=%h&quot;,frame_index,decoded);
+            received++;
+        end
+    end
+
+    task automatic drain_rx(input integer total);
+        integer k;
+        begin
+            for(k=0;k&lt;total;k++) begin
+                @(negedge clk);
+                if(rx_out_valid !== 1'b1) $fatal(1,&quot;FAIL RX_EMPTY_EARLY&quot;);
+                rx_out_ready=1;
+                @(negedge clk); rx_out_ready=0;
+            end
+            if(rx_out_valid !== 1'b0 || rx_checked!=total)
+                $fatal(1,&quot;FAIL RX_DRAIN&quot;);
+        end
+    endtask
+
+    initial begin
+        #1000000;
+        $fatal(1,&quot;FAIL GLOBAL_TIMEOUT&quot;);
+    end
+
+`ifdef VCD
+    initial begin
+        $dumpfile(&quot;ch14_uart_fifo.vcd&quot;);
+        $dumpvars(0,tb_uart_fifo_flow);
+    end
+`endif
+    integer i,guard;
+    initial begin
+        repeat(5) @(negedge clk);
+        if(tx_in_ready !== 1'b0 || rx_out_valid !== 1'b0 ||
+           txd !== 1'b1 || fe !== 1'b0 || ov !== 1'b0)
+            $fatal(1,&quot;FAIL RESET_PORTS&quot;);
+        resetn=1;
+        @(negedge clk);
+        if(tx_in_ready !== 1'b1) $fatal(1,&quot;FAIL EMPTY_TX_READY&quot;);
+
+        // (변경) T1: 16 FIFO + 1 PHY를 초과하는 18개 입력.
+        phase=1;
+        for(i=0;i&lt;18;i++) push_tx(8'h40+8'(i));
+        guard=0;
+        while(received&lt;18) begin
+            @(negedge clk); guard++;
+            if(guard&gt;CPB*10*22) $fatal(1,&quot;FAIL TX_DRAIN_TIMEOUT&quot;);
+        end
+        repeat(CPB*20) begin
+            @(negedge clk);
+            if(txd !== 1'b1) $fatal(1,&quot;FAIL EXTRA_TX&quot;);
+        end
+        if(accepted!=18 || received!=18 || tx_stalls==0 ||
+           tx_full_swap==0 || dut.tx_count !== 5'd0)
+            $fatal(1,&quot;FAIL TX_TOTAL_OR_BOUNDARY&quot;);
+        $display(&quot;T1_TX_FIFO_PASS accepted=18 received=18&quot;);
+
+        // T2: ready=0으로 RX 16개 저장, 대기 유지 및 순서 검사.
+        phase=2;
+        for(i=0;i&lt;16;i++) send_rx(8'h80+8'(i));
+        repeat(5) @(negedge clk);
+        if(dut.rx_count !== 5'd16 || rx_out_valid !== 1'b1 ||
+           rx_out_data !== 8'h80 || fe !== 1'b0 || ov !== 1'b0)
+            $fatal(1,&quot;FAIL RX_FULL&quot;);
+        drain_rx(16);
+        $display(&quot;T2_RX_BACKPRESSURE_PASS checked=16&quot;);
+
+        // (추가) T3: FIFO 16 + PHY 보류 1, 18번째 overrun.
+        phase=3; rx_checked=0;
+        for(i=0;i&lt;18;i++) send_rx(8'ha0+8'(i));
+        repeat(5) @(negedge clk);
+        if(dut.rx_count !== 5'd16 || dut.phy_rx_valid !== 1'b1 ||
+           rx_out_data !== 8'ha0 || fe !== 1'b0 || ov !== 1'b1)
+            $fatal(1,&quot;FAIL RX_OVERRUN&quot;);
+        drain_rx(17);
+        if(rx_full_swap==0 || ov !== 1'b1 || fe !== 1'b0)
+            $fatal(1,&quot;FAIL RX_SWAP_OR_STICKY&quot;);
+        $display(&quot;T3_RX_OVERRUN_PASS kept=17 dropped=1&quot;);
+
+        // (변경) T4: FIFO가 실제로 비어 있지 않을 때 리셋.
+        phase=4;
+        send_rx(8'hc3);
+        repeat(5) @(negedge clk);
+        push_tx(8'h00); push_tx(8'h11); push_tx(8'h22);
+        if(rx_out_valid !== 1'b1 || rx_out_data !== 8'hc3 ||
+           dut.tx_count !== 5'd2 || txd !== 1'b0)
+            $fatal(1,&quot;FAIL RESET_PRECONDITION&quot;);
+        resetn=0;
+        repeat(3) @(negedge clk);
+        if(rx_out_valid !== 1'b0 || tx_in_ready !== 1'b0 ||
+           txd !== 1'b1 || fe !== 1'b0 || ov !== 1'b0)
+            $fatal(1,&quot;FAIL RESET_FLUSH&quot;);
+        resetn=1;
+        @(negedge clk);
+        if(tx_in_ready !== 1'b1 || rx_out_valid !== 1'b0)
+            $fatal(1,&quot;FAIL RESET_RELEASE&quot;);
+        repeat(CPB*20) begin
+            @(negedge clk);
+            if(txd !== 1'b1 || rx_out_valid !== 1'b0 ||
+               tx_in_ready !== 1'b1)
+                $fatal(1,&quot;FAIL RESET_STALE_DATA&quot;);
+        end
+        $display(&quot;T4_RESET_PASS&quot;);
+        if(accepted!=18 || received!=18 || rx_checked!=17)
+            $fatal(1,&quot;FAIL FINAL_COUNTS&quot;);
+        $display(&quot;PASS CH14 tx=18 rx=16+17 overrun=1 reset=1&quot;);
+        $finish;
+    end
+endmodule
+</code></pre></div><table><thead><tr><th>코드</th><th>역할</th></tr></thead><tbody><tr><td>push_tx()</td><td>ready 확인, 상승 에지 수락, 하강 에지 구동</td></tr><tr><td>send_rx()</td><td>직렬 8N1 입력 생성</td></tr><tr><td>always @(posedge clk)</td><td>독립 수락 집계·순서 및 RX 대기 유지</td></tr><tr><td>tx_full_swap / rx_full_swap</td><td>full 상태에서 동시 교체 발생 확인</td></tr><tr><td>decoded[bit_index]</td><td>직렬 핀의 실제 데이터 직접 복조</td></tr><tr><td>drain_rx()</td><td>RX ready 펄스로 순서대로 소비</td></tr><tr><td>RESET_PRECONDITION</td><td>실제 잔류 데이터가 있는지 확인</td></tr><tr><td>GLOBAL_TIMEOUT</td><td>검증 전체의 무한 대기 방지</td></tr></tbody></table><p>이 장의 PASS는 네 시나리오에 한정됩니다. RX 초과 수신은 원본의 의도된 동작이며 모든 보레이트·프레임 오류·리셋 위상을 검증한 것은 아닙니다.</p></section>
+<section class="section" id="s06"><h2><span class="num">06</span>Ubuntu 실행 · Vivado XSIM 우선</h2><div class="codeblock"><div class="codebar"><span>Ubuntu · XSIM</span></div><pre tabindex="0"><code># Vivado 설치 경로의 settings64.sh를 source한 뒤 실행
+command -v xvlog xelab xsim
+mkdir -p .build/ch14/xsim
+cd .build/ch14/xsim
+xvlog ../../../reference_rtl/uart_rx.v ../../../reference_rtl/uart_tx.v
+xvlog ../../../reference_rtl/uart_core.v
+xvlog -sv ../../../tb/ch14/tb_uart_fifo_flow.sv
+xelab -debug typical tb_uart_fifo_flow -s ch14_sim
+xsim ch14_sim -runall
+# 파형 관찰
+xsim ch14_sim -gui</code></pre></div><p>xvlog는 소스 분석, xelab은 테스트벤치 연결, xsim은 실행과 파형 관찰을 담당합니다. 파형에는 clk/resetn, txd/rxd, tx_in_valid/ready, rx_out_valid/ready, dut.rx_count, dut.tx_count, dut.phy_rx_valid 및 ov를 추가합니다.</p><h3>Icarus 대체 실행</h3><div class="codeblock"><div class="codebar"><span>scripts/run_ch14.sh · Bash</span></div><pre tabindex="0"><code>#!/usr/bin/env bash
+# 제14장: 원본 uart_core + uart_rx + uart_tx와 TB 컴파일 및 실행.
+set -euo pipefail
+ROOT=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)/..&quot; &amp;&amp; pwd)&quot;
+RTL=&quot;${RTL_DIR:-$ROOT/reference_rtl}&quot;
+if ! command -v iverilog &gt;/dev/null 2&gt;&amp;1 || ! command -v vvp &gt;/dev/null 2&gt;&amp;1; then
+  echo &quot;NOT_RUN: iverilog 또는 vvp 없음&quot; &gt;&amp;2
+  exit 2
+fi
+for file in uart_core.v uart_rx.v uart_tx.v; do
+  if [[ ! -f &quot;$RTL/$file&quot; ]]; then
+    echo &quot;NOT_RUN: 원본 RTL 없음: $RTL/$file&quot; &gt;&amp;2
+    exit 2
+  fi
+done
+RTL=&quot;$(realpath &quot;$RTL&quot;)&quot;
+mkdir -p &quot;$ROOT/.build/ch14&quot;
+cd &quot;$ROOT/.build/ch14&quot;
+iverilog -g2012 -DVCD -s tb_uart_fifo_flow -o sim \
+  &quot;$RTL/uart_core.v&quot; &quot;$RTL/uart_rx.v&quot; &quot;$RTL/uart_tx.v&quot; \
+  &quot;$ROOT/tb/ch14/tb_uart_fifo_flow.sv&quot;
+vvp sim | tee simulation.log
+grep -Fxq 'PASS CH14 tx=18 rx=16+17 overrun=1 reset=1' simulation.log
+</code></pre></div><div class="codeblock"><div class="codebar"><span>Ubuntu · 실습 루트에서 실행</span></div><pre tabindex="0"><code>sudo apt update
+sudo apt install iverilog
+bash scripts/run_ch14.sh</code></pre></div><p>apt update는 패키지 목록 갱신, apt install은 설치, bash는 실행입니다. VCD와 simulation.log는 .build/ch14에 생성됩니다.</p></section>
+<section class="section" id="s07"><h2><span class="num">07</span>예상 결과 및 실패 분석</h2><p>아래는 코드 계약에서 도출한 예상 완료 문자열이며 실제 시뮬레이션 로그가 아닙니다.</p><div class="codeblock"><div class="codebar"><span>예상 콘솔 출력</span></div><pre tabindex="0"><code>T1_TX_FIFO_PASS accepted=18 received=18
+T2_RX_BACKPRESSURE_PASS checked=16
+T3_RX_OVERRUN_PASS kept=17 dropped=1
+T4_RESET_PASS
+PASS CH14 tx=18 rx=16+17 overrun=1 reset=1</code></pre></div><table><thead><tr><th>실패</th><th>확인</th></tr></thead><tbody><tr><td>TX_TOTAL_OR_BOUNDARY</td><td>수락·복조 수, 포화와 동시 교체</td></tr><tr><td>TX_START / TX_STOP / TX_ORDER</td><td>직렬 비트 시간, LSB 순서, 프레임</td></tr><tr><td>RX_HOLD / RX_ORDER</td><td>backpressure 중 데이터 및 수락 순서</td></tr><tr><td>RX_OVERRUN / RX_SWAP_OR_STICKY</td><td>16+1 보존, 초과 바이트 유실, sticky 오류</td></tr><tr><td>RESET_PRECONDITION / RESET_STALE_DATA</td><td>비어 있지 않은 상태의 리셋과 잔류 출력</td></tr><tr><td>GLOBAL_TIMEOUT</td><td>전체 진행 및 종료</td></tr></tbody></table><p>다음 제15장은 AXI4-Lite 레지스터 인터페이스의 독립 채널 및 주소·데이터 계약 검증으로 확장합니다.</p></section>
+<div class="chapter-links" id="chapter-links"></div></main></div><footer class="footer">RTL TESTBENCH · SYSTEMVERILOG · UVM · CH14 v02</footer><script>window.COURSE={"title":"RTL Testbench · SystemVerilog · UVM 실무 검증","short_title":"SV UVM TB","home_label":"전체 학습 안내서","chapters":[{"id":"ch01","number":1,"title":"테스트벤치의 첫 실행","file":"ch01_testbench_basics_v04.html"},{"id":"ch02","number":2,"title":"Clock·Reset·이벤트","file":"ch02_clock_reset_events_v03.html"},{"id":"ch03","number":3,"title":"반복 자극과 작업 분리","file":"ch03_reusable_stimulus_v03.html"},{"id":"ch04","number":4,"title":"PASS/FAIL 자동 판정","file":"ch04_pass_fail_automation_v04.html"},{"id":"ch05","number":5,"title":"검증 자료형과 타입","file":"ch05_verification_types_v04.html"},{"id":"ch06","number":6,"title":"배열·큐·패키지","file":"ch06_arrays_queues_packages_v04.html"},{"id":"ch07","number":7,"title":"인터페이스·타이밍 분리","file":"ch07_interface_modport_clocking_v03.html"},{"id":"ch08","number":8,"title":"객체와 제약 기반 입력","file":"ch08_objects_constraints_v02.html"},{"id":"ch09","number":9,"title":"참조 모델·스코어보드","file":"ch09_reference_model_scoreboard_v03.html"},{"id":"ch10","number":10,"title":"경계조건·오류 주입","file":"ch10_corner_reset_timeout_v04.html"},{"id":"ch11","number":11,"title":"시간적 속성 검사","file":"ch11_temporal_assertions_v03.html"},{"id":"ch12","number":12,"title":"기능 커버리지","file":"ch12_functional_coverage_v02.html"},{"id":"ch13","number":13,"title":"UART 스트림 검증","file":"ch13_uart_stream_verification_v02.html"},{"id":"ch14","number":14,"title":"FIFO 및 흐름 제어","file":"ch14_fifo_flow_control_v02.html"},{"id":"ch15","number":15,"title":"AXI4-Lite 레지스터 검증","file":"ch15_axi4lite_register_verification_v01.html"},{"id":"ch16","number":16,"title":"MAC·NPU 정수 연산 검증","file":"ch16_mac_npu_integer_verification_v01.html"},{"id":"ch17","number":17,"title":"최소 UVM 환경","file":"ch17_minimal_uvm_environment_v01.html"},{"id":"ch18","number":18,"title":"Sequence에서 Driver까지","file":"ch18_sequence_driver_v01.html"},{"id":"ch19","number":19,"title":"Monitor·Agent·Scoreboard","file":"ch19_monitor_agent_scoreboard_v02.html"},{"id":"ch20","number":20,"title":"Factory·Config·Objection","file":"ch20_factory_config_objection_v01.html"},{"id":"ch21","number":21,"title":"UVM 레지스터 추상화","file":"ch21_uvm_register_abstraction_v01.html"},{"id":"ch22","number":22,"title":"다중 Agent·VIP","file":"ch22_multi_agent_vip_v02.html"},{"id":"ch23","number":23,"title":"NPU 통합 정답 비교","file":"ch23_npu_integrated_scoreboard_v01.html"},{"id":"ch24","number":24,"title":"회귀·CI·검증 보고","file":"ch24_regression_ci_reporting_v01.html"}]};</script><script src="assets/site.js"></script></body></html>
