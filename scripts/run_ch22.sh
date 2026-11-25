@@ -1,55 +1,34 @@
 #!/usr/bin/env bash
-# CH22: AXI4-Lite Agent + IRQ/Reset Agent + Virtual Sequence UVM 실행.
-# 상용 AXI VIP가 아니라 교육용 VIP-style AXI BFM과 독립 Monitor를 사용한다.
+# 제22장: Vivado XSIM 내장 UVM 라이브러리 사용.
 set -euo pipefail
-
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RTL="${RTL_DIR:-$ROOT/reference_rtl}"
-TB="$ROOT/tb/ch22/tb_axi_multiagent_irq.sv"
-OUT="$ROOT/.build/ch22"
-
-for p in "$RTL/axi4lite_slave_adapter.v" \
-         "$RTL/custom_register_bank.v" "$TB"; do
-  if [[ ! -f "$p" ]]; then
-    echo "NOT_RUN: source file not found: $p" >&2
+for f in axi4lite_slave_adapter.v custom_register_bank.v; do
+  if [[ ! -f "$RTL/$f" ]]; then echo "NOT_RUN: missing $RTL/$f" >&2; exit 2; fi
+done
+RTL="$(realpath "$RTL")"
+for tool in xvlog xelab xsim; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "NOT_RUN: $tool missing; source Vivado settings64.sh" >&2
     exit 2
   fi
 done
-if ! command -v verilator >/dev/null 2>&1; then
-  echo "NOT_RUN: Verilator is not installed" >&2
-  exit 2
-fi
-if [[ -z "${UVM_HOME:-}" || ! -f "$UVM_HOME/src/uvm_pkg.sv" ]]; then
-  echo "NOT_RUN: compatible UVM_HOME/src/uvm_pkg.sv is required" >&2
-  exit 2
-fi
-
-mkdir -p "$OUT"
-verilator --version | tee "$OUT/tool_version.txt"
-
-# --timing: UVM 이벤트와 지연; --trace: VCD 기록; --assert: 검사.
-# 실제 UVM 호환성은 설치된 Verilator/UVM 버전으로 확인해야 한다.
-verilator --binary --timing --assert --trace -Wno-fatal \
-  --top-module tb_axi_multiagent_irq --Mdir "$OUT/obj_dir" \
-  +incdir+"$UVM_HOME/src" \
-  "$UVM_HOME/src/uvm_pkg.sv" \
-  "$RTL/axi4lite_slave_adapter.v" \
-  "$RTL/custom_register_bank.v" "$TB" \
-  2>&1 | tee "$OUT/build.log"
-
-(cd "$OUT" && ./obj_dir/Vtb_axi_multiagent_irq \
-  +UVM_TESTNAME=axi22_test | tee simulation.log)
-
-# UVM 결과 문구와 실제 에러 수(0)를 독립적으로 확인한다.
-if ! grep -q 'PASS CH22 AXI_W=4 AXI_R=11 IRQ=2 RESET=2' "$OUT/simulation.log"; then
-  echo "FAIL: multi-agent scoreboard did not complete all checks" >&2
+mkdir -p "$ROOT/.build/ch22"
+OUT="$(mktemp -d "$ROOT/.build/ch22/run.XXXXXX")"
+cd "$OUT"
+xvlog "$RTL/axi4lite_slave_adapter.v" "$RTL/custom_register_bank.v" 2>&1 | tee rtl.log
+xvlog -sv -L uvm "$ROOT/tb/ch22/tb_axi_multiagent_irq.sv" 2>&1 | tee tb.log
+xelab -L uvm -debug typical tb_axi_multiagent_irq -s ch22_sim 2>&1 | tee elaborate.log
+xsim ch22_sim -runall -onerror quit 2>&1 | tee normal.log
+grep -Eq '\[RESULT\][[:space:]]+PASS CH22 AXI_W=6 AXI_R=13 IRQ=4 RESET=2 COLLISION=1 ZERO=1[[:space:]]*$' normal.log
+grep -Eq 'UVM_ERROR[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log
+grep -Eq 'UVM_FATAL[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log
+rc=0
+xsim ch22_sim -runall -onerror quit -testplusarg CORRUPT_IRQ > negative.log 2>&1 || rc=$?
+grep -Eq 'UVM_FATAL.*\[IRQ_MISMATCH\].*status=10 expected=11 collisions=1' negative.log
+if grep -Eq 'PASS CH22|CH22 GLOBAL_TIMEOUT' negative.log; then
+  echo "FAIL: unexpected negative result" >&2
   exit 1
 fi
-# UVM_ERROR : 0 / UVM_FATAL : 0은 정상 요약이다.
-if grep -Eq 'UVM_(ERROR|FATAL) @[[:space:]]*[0-9]+|UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]' "$OUT/simulation.log"; then
-  echo "FAIL: UVM_ERROR or UVM_FATAL detected" >&2
-  exit 1
-fi
-echo "PASS CH22 SUITE: 4 writes, 11 reads, 2 IRQ events, 2 resets"
-echo "Logs: $OUT/build.log and $OUT/simulation.log"
-echo "Waveform (if generated): $OUT/ch22_multiagent_axi_irq.vcd"
+echo "PASS CH22 HARNESS (negative exit=$rc)"
+echo "Logs: $OUT"
