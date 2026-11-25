@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 270" role="img" aria-labelledby="ch03-title ch03-desc">
+<title id="ch03-title">PWM 반복 자극 실행 순서</title><desc id="ch03-desc">리셋 후 다섯 듀티에 대해 request_pwm과 observe_one_period를 순서대로 호출한다.</desc>
+<defs><marker id="ch03-arrow" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<rect width="900" height="270" fill="white"/>
+<g font-family="Noto Sans CJK KR, sans-serif" text-anchor="middle" fill="#172439">
+<rect x="24" y="24" width="852" height="222" rx="6" fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"/>
+<text x="450" y="49" font-size="17" font-weight="bold">for: duty_step = 0, 2, 4, 6, 8</text>
+<g fill="white" stroke="#1F3A5F" stroke-width="2"><rect x="48" y="80" width="225" height="108" rx="4"/><rect x="337" y="80" width="225" height="108" rx="4"/><rect x="626" y="80" width="225" height="108" rx="4"/></g>
+<g font-size="16" font-weight="bold"><text x="160.5" y="105">request_pwm()</text><text x="449.5" y="105">wait · #1</text><text x="738.5" y="105">observe_one_period()</text></g>
+<g font-size="13"><text x="160.5" y="130">하강 에지에서 요청</text><text x="160.5" y="151">cfg_duty · cfg_apply</text><text x="160.5" y="173">한 클록 유지</text><text x="449.5" y="130">pending: 1 → 0</text><text x="449.5" y="151">active_duty 관찰</text><text x="449.5" y="173">duty_percent()</text><text x="738.5" y="130">하강 에지 8회</text><text x="738.5" y="151">pwm_out 관찰</text><text x="738.5" y="173">high_samples 집계</text></g>
+<g fill="none" stroke="#5A1E1E" stroke-width="2" marker-end="url(#ch03-arrow)"><path d="M273 134H337"/><path d="M562 134H626"/></g>
+<text x="450" y="220" font-size="14">위 실행 순서를 듀티마다 반복 · 완료 후 다음 듀티</text>
+</g></svg>
