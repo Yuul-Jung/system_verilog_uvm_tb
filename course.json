@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v40",
+  "version": "v41",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -92,7 +92,7 @@
       "title": "경계조건·오류 주입",
       "subtitle": "PWM 0%·100%·동작 중 리셋 및 두 가지 오류 주입 검출",
       "slug": "ch10_corner_reset_timeout",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch10/tb_pwm_corner_reset_timeout.sv"
     },
     {
