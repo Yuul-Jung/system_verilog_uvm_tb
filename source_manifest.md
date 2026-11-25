@@ -246,3 +246,7 @@
 ## 제14장 v02 · FIFO 및 흐름 제어
 - amd_soc_npu 제1장 03절 UART 3개 RTL 주석 제외 일치. 원본 유지. TX 독립 직렬 복조 및 포화 교체, RX 16+1·overrun, 비어 있지 않은 FIFO 리셋 보강.
 - ch14_fifo_flow_control_v02.html; [검증 기록](docs/CH14_VALIDATION_v02.md). 원본·독립 거래 계산·원격 정적 검사 PASS. RTL_SIM 및 브라우저 렌더 NOT_RUN.
+
+## 제15장 v02 · AXI4-Lite 레지스터 검증
+- amd_soc_p2 04.2장 03~04절, 10.3장 2~3절 및 03.2장 개념 연계(CONCEPT_ONLY). 동일 원본 경로 미확인. 기존 범용 RTL 2개 불변.
+- 독립 채널 수락/payload·응답 유지, zero WSTRB·RO·미매핑·별칭, B/R 대기 중 리셋 보강. ch15_axi4lite_register_verification_v02.html; [검증 기록](docs/CH15_VALIDATION_v02.md). 독립 레지스터 계산·원격 정적 검사 완료, RTL_SIM/렌더 NOT_RUN.
