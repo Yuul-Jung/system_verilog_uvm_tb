@@ -27,5 +27,8 @@ iverilog -g2012 -DVCD -s tb_uart_arrays_queues \
 
 # pipefail로 시뮬레이터의 실패 종료 코드를 유지한다.
 (cd "$OUT_DIR" && vvp simulation.vvp | tee output.log)
+grep -q '^PASS checks=11 failures=0 queue=0echo "로그: $OUT_DIR/output.log"
+echo "파형: $OUT_DIR/ch06_uart_arrays_queues.vcd"
+ "$OUT_DIR/output.log"
 echo "로그: $OUT_DIR/output.log"
 echo "파형: $OUT_DIR/ch06_uart_arrays_queues.vcd"
