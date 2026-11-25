@@ -30,7 +30,8 @@ package ch21_pkg;
         `uvm_object_utils(axi21_adapter)
         function new(string name="axi21_adapter");
             super.new(name);
-            supports_byte_enable=1;
+            // (변경) 전체 레지스터 접근만 수행한다. 개별 필드 byte 접근은 미지원.
+            supports_byte_enable=0;
             provides_responses=0;
         endfunction
         virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
@@ -58,13 +59,23 @@ package ch21_pkg;
         `uvm_object_utils(axi21_reg)
         uvm_reg_field value;
         string access_mode="RW";
+        bit is_control=0;
+        uvm_reg_field mode, reserved;
         uvm_reg_data_t reset_value=0;
         function new(string name="axi21_reg");
             super.new(name,32,UVM_NO_COVERAGE);
         endfunction
         virtual function void build();
             value=uvm_reg_field::type_id::create("value");
-            value.configure(this,32,0,access_mode,0,reset_value,1,1,0);
+            // (변경) CONTROL의 실제 쓰기 가능 범위는 3비트뿐이다.
+            if (is_control) begin
+                value.configure(this,1,0,"RW",0,0,1,0,0); // enable
+                mode=uvm_reg_field::type_id::create("mode");
+                mode.configure(this,2,1,"RW",0,0,1,0,0);
+                reserved=uvm_reg_field::type_id::create("reserved");
+                reserved.configure(this,29,3,"RO",0,0,1,0,0);
+            end else
+                value.configure(this,32,0,access_mode,0,reset_value,1,0,0);
         endfunction
     endclass
 
@@ -77,6 +88,7 @@ package ch21_pkg;
         virtual function void build();
             default_map=create_map("map",0,4,UVM_LITTLE_ENDIAN,1);
             control=axi21_reg::type_id::create("control");
+            control.is_control=1;
             control.configure(this);
             control.build();
             default_map.add_reg(control,'h00,"RW");
@@ -110,10 +122,8 @@ package ch21_pkg;
     class axi21_driver extends uvm_driver #(axi21_item);
         `uvm_component_utils(axi21_driver)
         virtual axi21_if vif;
-        uvm_analysis_port #(axi21_item) completed_ap;
         function new(string name,uvm_component parent);
             super.new(name,parent);
-            completed_ap=new("completed_ap",this);
         endfunction
         function void build_phase(uvm_phase phase);
             super.build_phase(phase);
@@ -142,6 +152,8 @@ package ch21_pkg;
                     t.resp=vif.bresp;
                     vif.bready=1;
                     @(posedge vif.clk);
+                    if (vif.bvalid !== 1'b1 || vif.bresp !== t.resp)
+                        `uvm_fatal("B_HANDSHAKE","Response changed before acceptance")
                     @(negedge vif.clk);
                     vif.bready=0;
                     return;
@@ -166,6 +178,9 @@ package ch21_pkg;
                     t.data=vif.rdata;t.resp=vif.rresp;
                     vif.rready=1;
                     @(posedge vif.clk);
+                    if (vif.rvalid !== 1'b1 || vif.rresp !== t.resp ||
+                        vif.rdata !== t.data)
+                        `uvm_fatal("R_HANDSHAKE","Response changed before acceptance")
                     @(negedge vif.clk);
                     vif.rready=0;
                     return;
@@ -179,9 +194,77 @@ package ch21_pkg;
                 seq_item_port.get_next_item(req);
                 if(req.is_write) write_one(req);
                 else read_one(req);
-                // Completion stream feeds predictor; it is NOT an independent bus monitor.
-                completed_ap.write(req);
                 seq_item_port.item_done();
+            end
+        endtask
+    endclass
+
+    // (추가) 실제 공개 버스 상승 에지에서만 완료 거래를 재구성한다.
+    // Driver의 요청 객체를 Predictor로 전달하지 않는다.
+    class axi21_monitor extends uvm_monitor;
+        `uvm_component_utils(axi21_monitor)
+        virtual axi21_if vif;
+        uvm_analysis_port #(axi21_item) ap;
+        bit have_aw=0, have_w=0, have_ar=0;
+        logic [31:0] wa, wd, ra;
+        logic [3:0] ws;
+        int unsigned writes=0, reads=0;
+        axi21_item last_write, last_read;
+        function new(string name,uvm_component parent);
+            super.new(name,parent);
+            ap=new("ap",this);
+        endfunction
+        function void build_phase(uvm_phase phase);
+            super.build_phase(phase);
+            if(!uvm_config_db#(virtual axi21_if)::get(this,"","vif",vif))
+                `uvm_fatal("NO_VIF","Monitor interface missing")
+        endfunction
+        task run_phase(uvm_phase phase);
+            axi21_item t;
+            forever begin
+                @(posedge vif.clk);
+                if(vif.resetn === 1'b0) begin
+                    have_aw=0; have_w=0; have_ar=0;
+                end else begin
+                    if ((^{vif.resetn,vif.awvalid,vif.awready,
+                           vif.wvalid,vif.wready,vif.bvalid,vif.bready,
+                           vif.arvalid,vif.arready,vif.rvalid,vif.rready}) === 1'bx)
+                        `uvm_fatal("BUS_X","Unknown handshake signal")
+                    if(vif.awvalid && vif.awready) begin
+                        if(have_aw || (^vif.awaddr) === 1'bx)
+                            `uvm_fatal("MON_AW","Duplicate or unknown AW")
+                        wa=vif.awaddr; have_aw=1;
+                    end
+                    if(vif.wvalid && vif.wready) begin
+                        if(have_w || (^{vif.wdata,vif.wstrb}) === 1'bx)
+                            `uvm_fatal("MON_W","Duplicate or unknown W")
+                        wd=vif.wdata; ws=vif.wstrb; have_w=1;
+                    end
+                    if(vif.bvalid && vif.bready) begin
+                        if(!have_aw || !have_w || vif.bresp !== 2'b00)
+                            `uvm_fatal("MON_B","Unexpected write response")
+                        t=axi21_item::type_id::create("observed_write");
+                        t.is_write=1; t.addr=wa; t.data=wd; t.strb=ws;
+                        t.resp=vif.bresp;
+                        have_aw=0; have_w=0;
+                        writes++; last_write=t; ap.write(t);
+                    end
+                    if(vif.arvalid && vif.arready) begin
+                        if(have_ar || (^vif.araddr) === 1'bx)
+                            `uvm_fatal("MON_AR","Duplicate or unknown AR")
+                        ra=vif.araddr; have_ar=1;
+                    end
+                    if(vif.rvalid && vif.rready) begin
+                        if(!have_ar || vif.rresp !== 2'b00 ||
+                           (^vif.rdata) === 1'bx)
+                            `uvm_fatal("MON_R","Unexpected read response")
+                        t=axi21_item::type_id::create("observed_read");
+                        t.is_write=0; t.addr=ra; t.data=vif.rdata;
+                        t.strb=4'hf; t.resp=vif.rresp;
+                        have_ar=0;
+                        reads++; last_read=t; ap.write(t);
+                    end
+                end
             end
         endtask
     endclass
@@ -189,6 +272,7 @@ package ch21_pkg;
     class axi21_env extends uvm_env;
         `uvm_component_utils(axi21_env)
         axi21_driver drv;
+        axi21_monitor mon;
         axi21_sequencer sqr;
         axi21_adapter adapter;
         axi21_block model;
@@ -199,6 +283,7 @@ package ch21_pkg;
         function void build_phase(uvm_phase phase);
             super.build_phase(phase);
             drv=axi21_driver::type_id::create("drv",this);
+            mon=axi21_monitor::type_id::create("mon",this);
             sqr=axi21_sequencer::type_id::create("sqr",this);
             predictor=uvm_reg_predictor#(axi21_item)::type_id::create("predictor",this);
             adapter=axi21_adapter::type_id::create("adapter");
@@ -212,7 +297,9 @@ package ch21_pkg;
             model.default_map.set_auto_predict(0);
             predictor.map=model.default_map;
             predictor.adapter=adapter;
-            drv.completed_ap.connect(predictor.bus_in);
+            // (변경) 부정 시험에서는 명시적 예측 경로만 끊는다.
+            if (!$test$plusargs("NO_PREDICT"))
+                mon.ap.connect(predictor.bus_in);
         endfunction
     endclass
 
@@ -220,6 +307,8 @@ package ch21_pkg;
         `uvm_component_utils(axi21_test)
         axi21_env env;
         virtual axi21_if vif;
+        int unsigned read_checks=0, write_checks=0;
+        bit done=0;
         function new(string name,uvm_component parent);
             super.new(name,parent);
         endfunction
@@ -229,37 +318,73 @@ package ch21_pkg;
             if(!uvm_config_db#(virtual axi21_if)::get(this,"","vif",vif))
                 `uvm_fatal("NO_VIF","Test interface missing")
         endfunction
-        task run_phase(uvm_phase phase);
+        // (추가) RAL 반환과 실제 버스 거래를 함께 확인한다.
+        task automatic write_expect(uvm_reg rg, bit [31:0] addr,
+                                    bit [31:0] data, bit [31:0] expected);
+            uvm_status_e status;
+            rg.write(status,data,UVM_FRONTDOOR,env.model.default_map);
+            write_checks++;
+            if(status!=UVM_IS_OK || env.mon.writes!=write_checks ||
+               env.mon.last_write==null ||
+               env.mon.last_write.addr!==addr ||
+               env.mon.last_write.data!==data ||
+               env.mon.last_write.strb!==4'hf)
+                `uvm_fatal("WRITE","Write status or observed transaction mismatch")
+            // 읽기 전에 확인해야 read prediction이 쓰기 예측 누락을 가리지 않는다.
+            if(rg.get_mirrored_value() !== uvm_reg_data_t'(expected))
+                `uvm_fatal("PREDICT_WRITE",$sformatf(
+                    "addr=%h expected=%h",addr,expected))
+        endtask
+
+        task automatic read_expect(uvm_reg rg, bit [31:0] addr,
+                                   bit [31:0] expected);
             uvm_status_e status;
             uvm_reg_data_t value;
+            rg.read(status,value,UVM_FRONTDOOR,env.model.default_map);
+            read_checks++;
+            if(status!=UVM_IS_OK || value!==uvm_reg_data_t'(expected) ||
+               env.mon.reads!=read_checks || env.mon.last_read==null ||
+               env.mon.last_read.addr!==addr ||
+               env.mon.last_read.data!==expected ||
+               rg.get_mirrored_value()!==uvm_reg_data_t'(expected))
+                `uvm_fatal("READ",$sformatf("Read mismatch addr=%h",addr))
+        endtask
+
+        task run_phase(uvm_phase phase);
             phase.raise_objection(this);
             repeat(4) @(negedge vif.clk);
             vif.resetn=1;
             @(negedge vif.clk);
-            env.model.reset();
+            env.model.reset(); // 모델만 초기화한다. DUT reset은 위에서 수행.
 
-            // Frontdoor: RAL -> adapter -> AXI driver -> DUT.
-            env.model.data_in.write(status,32'h11223344);
-            if(status!=UVM_IS_OK) `uvm_fatal("WRITE","DATA_IN write failed")
-            env.model.data_in.read(status,value);
-            if(status!=UVM_IS_OK || value!==32'h11223344)
-                `uvm_fatal("DATA_IN","Readback mismatch")
-            if(env.model.data_in.get_mirrored_value()!==32'h11223344)
-                `uvm_fatal("PREDICT","Mirror did not update")
-
-            env.model.control.write(status,32'h00000005);
-            env.model.control.read(status,value);
-            if(status!=UVM_IS_OK || value!==32'h00000005)
-                `uvm_fatal("CONTROL","Readback mismatch")
-            env.model.version_reg.read(status,value);
-            if(status!=UVM_IS_OK || value!==32'h00010000)
-                `uvm_fatal("VERSION","VERSION mismatch")
-            env.model.id_reg.read(status,value);
-            if(status!=UVM_IS_OK || value!==32'h524D4150)
-                `uvm_fatal("ID","ID mismatch")
-            `uvm_info("CH21","PASS CH21 RAL frontdoor reads=4 writes=2",UVM_LOW)
+            read_expect(env.model.control,32'h00,32'h0);
+            read_expect(env.model.data_in,32'h10,32'h0);
+            write_expect(env.model.data_in,32'h10,32'h11223344,32'h11223344);
+            read_expect(env.model.data_in,32'h10,32'h11223344);
+            // (추가) 예약 비트는 1을 써도 읽기값과 mirror가 0이어야 한다.
+            write_expect(env.model.control,32'h00,32'hFFFFFFFF,32'h7);
+            read_expect(env.model.control,32'h00,32'h7);
+            write_expect(env.model.control,32'h00,32'h5,32'h5);
+            read_expect(env.model.control,32'h00,32'h5);
+            read_expect(env.model.version_reg,32'h18,32'h00010000);
+            read_expect(env.model.id_reg,32'h1C,32'h524D4150);
+            done=1;
             phase.drop_objection(this);
         endtask
+        function void check_phase(uvm_phase phase);
+            super.check_phase(phase);
+            if(!done || read_checks!=7 || write_checks!=3 ||
+               env.mon.reads!=7 || env.mon.writes!=3 ||
+               env.mon.have_aw || env.mon.have_w || env.mon.have_ar)
+                `uvm_fatal("COUNTS","Incomplete RAL verification")
+        endfunction
+        function void report_phase(uvm_phase phase);
+            super.report_phase(phase);
+            if (uvm_report_server::get_server().get_severity_count(UVM_ERROR)!=0 ||
+                uvm_report_server::get_server().get_severity_count(UVM_FATAL)!=0)
+                `uvm_fatal("REPORT","UVM error or fatal reported")
+            `uvm_info("RESULT","PASS CH21 RAL reads=7 writes=3",UVM_NONE)
+        endfunction
     endclass
 endpackage
 
@@ -302,7 +427,10 @@ module tb_axi_uvm_ral;
         .irq_status_o(irq_status_o)
     );
     initial begin
-        uvm_config_db#(virtual axi21_if)::set(null,"uvm_test_top.*","vif",bus);
+        // (변경) test 자체도 정확한 경로로 설정한다.
+        uvm_config_db#(virtual axi21_if)::set(null,"uvm_test_top","vif",bus);
+        uvm_config_db#(virtual axi21_if)::set(null,"uvm_test_top.env.drv","vif",bus);
+        uvm_config_db#(virtual axi21_if)::set(null,"uvm_test_top.env.mon","vif",bus);
         run_test("axi21_test");
     end
     initial begin
