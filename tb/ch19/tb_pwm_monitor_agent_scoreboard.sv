@@ -18,8 +18,6 @@ package ch19_uvm_pkg;
     import uvm_pkg::*;
     `include "uvm_macros.svh"
 
-    typedef enum {PWM19_REQUEST, PWM19_APPLIED} pwm19_event_kind_e;
-
     // (추가) Sequence가 Driver로 보내는 설정 거래.
     class pwm19_item extends uvm_sequence_item;
         bit [31:0] duty;
@@ -31,7 +29,10 @@ package ch19_uvm_pkg;
 
     // (추가) Monitor가 관찰한 공개 신호를 담는 별도 거래.
     class pwm19_sample extends uvm_sequence_item;
-        pwm19_event_kind_e kind;
+        // (변경) 매 에지의 입력과 출력 모두 보존. X/Z도 유지한다.
+        logic resetn, cfg_apply;
+        logic [31:0] cfg_duty, cfg_period;
+        logic cfg_enable, cfg_polarity;
         logic [31:0] duty, period;
         logic enable, polarity, pending, pwm;
         time sampled_at;
@@ -119,7 +120,6 @@ package ch19_uvm_pkg;
         `uvm_component_utils(pwm19_monitor)
         virtual pwm19_if vif;
         uvm_analysis_port #(pwm19_sample) ap;
-        bit previous_pending = 1'b0;
 
         function new(string name, uvm_component parent);
             super.new(name, parent);
@@ -135,37 +135,25 @@ package ch19_uvm_pkg;
             forever begin
                 @(posedge vif.clk);
                 #1; // DUT의 비차단 대입 완료 이후 공개 출력 관찰
-                if (!vif.resetn) begin
-                    previous_pending = 1'b0;
-                end else begin
-                    if (vif.cfg_apply === 1'b1) begin
-                        sample = pwm19_sample::type_id::create("request_sample");
-                        sample.kind = PWM19_REQUEST;
-                        sample.duty = vif.cfg_duty;
-                        sample.period = vif.cfg_period;
-                        sample.enable = vif.cfg_enable;
-                        sample.polarity = vif.cfg_polarity;
-                        sample.pending = vif.pending;
-                        sample.pwm = vif.pwm_out;
-                        sample.sampled_at = $time;
-                        ap.write(sample);
-                    end
-                    // 이번 실습의 요청은 순차적으로만 전달한다.
-                    // pending이 1→0이 되는 경계를 실제 적용 완료로 관찰.
-                    if (previous_pending && vif.pending === 1'b0) begin
-                        sample = pwm19_sample::type_id::create("applied_sample");
-                        sample.kind = PWM19_APPLIED;
-                        sample.duty = vif.active_duty;
-                        sample.period = vif.active_period;
-                        sample.enable = vif.active_enable;
-                        sample.polarity = vif.active_polarity;
-                        sample.pending = vif.pending;
-                        sample.pwm = vif.pwm_out;
-                        sample.sampled_at = $time;
-                        ap.write(sample);
-                    end
-                    previous_pending = (vif.pending === 1'b1);
-                end
+                // (변경) 이벤트를 추론하지 않고 매 에지마다 새 객체를 전송한다.
+                sample = pwm19_sample::type_id::create("cycle_sample");
+                sample.resetn = vif.resetn;
+                sample.cfg_apply = vif.cfg_apply;
+                sample.cfg_duty = vif.cfg_duty;
+                sample.cfg_period = vif.cfg_period;
+                sample.cfg_enable = vif.cfg_enable;
+                sample.cfg_polarity = vif.cfg_polarity;
+                sample.duty = vif.active_duty;
+                sample.period = vif.active_period;
+                sample.enable = vif.active_enable;
+                sample.polarity = vif.active_polarity;
+                sample.pending = vif.pending;
+                sample.pwm = vif.pwm_out;
+                sample.sampled_at = $time;
+                // (추가) 정상 DUT가 아닌 관찰 객체만 변경하는 부정 시험.
+                if ($test$plusargs("CORRUPT_SAMPLE") && sample.sampled_at == 126)
+                    sample.pwm = ~sample.pwm;
+                ap.write(sample);
             end
         endtask
     endclass
@@ -179,46 +167,75 @@ package ch19_uvm_pkg;
         int unsigned applied = 0;
         bit [31:0] planned_duty[3] = '{32'd2, 32'd6, 32'd0};
         time request_time[3];
+        int unsigned reset_samples = 0, cycles = 0, samples = 0;
+        int unsigned phase_idx = 0;
+        bit expected_pending = 0, expected_enable = 0;
+        bit [31:0] expected_duty = 0;
+        bit expected_pwm;
 
         function new(string name, uvm_component parent);
             super.new(name, parent);
             analysis_export = new("analysis_export", this);
         endfunction
 
+        // (변경) 예상 위상은 DUT의 pending/counter가 아니라 리셋 후
+        // 관찰 클록 수의 나머지로 계산한다. 이 실습은 period=8 고정.
         function void write(pwm19_sample sample);
-            if (sample.kind == PWM19_REQUEST) begin
-                if (requests >= 3)
-                    `uvm_fatal("SB_EXTRA", "Unexpected extra PWM request")
-                if (sample.period !== 32'd8 ||
-                    sample.duty !== planned_duty[requests] ||
-                    sample.enable !== 1'b1 ||
-                    sample.polarity !== 1'b0 ||
-                    sample.pending !== 1'b1)
+            if (sample.resetn === 1'b0) begin
+                if (cycles != 0)
+                    `uvm_fatal("SB_RESET", "Unexpected reset during transactions")
+                reset_samples++;
+                if (sample.period !== 32'd8 || sample.duty !== 32'd0 ||
+                    sample.enable !== 1'b0 || sample.polarity !== 1'b0 ||
+                    sample.pending !== 1'b0 || sample.pwm !== 1'b0)
+                    `uvm_fatal("SB_RESET", "Reset output mismatch")
+                return;
+            end
+            if (sample.resetn !== 1'b1 || reset_samples != 3)
+                `uvm_fatal("SB_RESET", "Reset sequence mismatch")
+            cycles++;
+            phase_idx = cycles % 8;
+
+            // 주기 경계에서는 이전 요청만 적용된다.
+            if (phase_idx == 0 && expected_pending) begin
+                if (applied >= requests || applied >= 3)
+                    `uvm_fatal("SB_ORDER", "Apply without request")
+                expected_duty = planned_duty[applied];
+                expected_enable = 1;
+                expected_pending = 0;
+                if (sample.sampled_at - request_time[applied] > 80)
+                    `uvm_fatal("SB_LATENCY", "Apply exceeded one period")
+                applied++;
+                `uvm_info("SB", $sformatf("APPLIED %0d duty=%0d",
+                    applied, expected_duty), UVM_LOW)
+            end
+            // 요청의 예상 순서는 Driver의 거래 객체에 의존하지 않는다.
+            if (sample.cfg_apply === 1'b1) begin
+                if (requests >= 3 || expected_pending)
+                    `uvm_fatal("SB_EXTRA", "Unexpected or overlapping request")
+                if (sample.cfg_period !== 32'd8 ||
+                    sample.cfg_duty !== planned_duty[requests] ||
+                    sample.cfg_enable !== 1'b1 || sample.cfg_polarity !== 1'b0)
                     `uvm_fatal("SB_REQUEST", "Unexpected PWM request content")
                 request_time[requests] = sample.sampled_at;
                 requests++;
-                `uvm_info("SB", $sformatf(
-                    "REQUEST %0d duty=%0d", requests, sample.duty), UVM_LOW)
-            end else if (sample.kind == PWM19_APPLIED) begin
-                if (applied >= requests || applied >= 3)
-                    `uvm_fatal("SB_ORDER", "Applied event without request")
-                if (sample.period !== 32'd8 ||
-                    sample.duty !== planned_duty[applied] ||
-                    sample.enable !== 1'b1 ||
-                    sample.polarity !== 1'b0 ||
-                    sample.pending !== 1'b0 ||
-                    sample.pwm !== (planned_duty[applied] != 0))
-                    `uvm_fatal("SB_APPLY", "Applied PWM config/output mismatch")
-                // RESET_PERIOD=8이고 요청을 순차 제출하므로 80ns 이내.
-                if (sample.sampled_at < request_time[applied] ||
-                    sample.sampled_at - request_time[applied] > 80)
-                    `uvm_fatal("SB_LATENCY", "PWM apply exceeded one period")
-                applied++;
-                `uvm_info("SB", $sformatf(
-                    "APPLIED %0d duty=%0d", applied, sample.duty), UVM_LOW)
-            end else begin
-                `uvm_fatal("SB_KIND", "Unknown monitor sample kind")
-            end
+                expected_pending = 1;
+                `uvm_info("SB", $sformatf("REQUEST %0d duty=%0d",
+                    requests, sample.cfg_duty), UVM_LOW)
+            end else if (sample.cfg_apply !== 1'b0)
+                `uvm_fatal("SB_REQUEST", "Unknown cfg_apply")
+
+            // 실제 공개 출력과 독립 기대값을 매 에지에서 대조한다.
+            if (sample.period !== 32'd8 || sample.duty !== expected_duty ||
+                sample.enable !== expected_enable || sample.polarity !== 1'b0 ||
+                sample.pending !== expected_pending)
+                `uvm_fatal("SB_STATE", $sformatf("t=%0d phase=%0d",
+                    sample.sampled_at, phase_idx))
+            expected_pwm = expected_enable && (phase_idx < expected_duty);
+            if (sample.pwm !== expected_pwm)
+                `uvm_fatal("SB_PWM", $sformatf("t=%0d phase=%0d expected=%0b got=%0b",
+                    sample.sampled_at, phase_idx, expected_pwm, sample.pwm))
+            if (expected_enable) samples++;
         endfunction
     endclass
 
@@ -265,6 +282,7 @@ package ch19_uvm_pkg;
         `uvm_component_utils(pwm19_test)
         virtual pwm19_if vif;
         pwm19_env env;
+        bit seq_finished = 0;
         function new(string name, uvm_component parent);
             super.new(name, parent);
         endfunction
@@ -284,13 +302,27 @@ package ch19_uvm_pkg;
             vif.resetn = 1'b1;
             seq = pwm19_sequence::type_id::create("seq");
             seq.start(env.ag.sqr);
-            repeat (2) @(negedge vif.clk);
-            if (env.ag.drv.driven != 3 ||
-                env.sb.requests != 3 || env.sb.applied != 3)
-                `uvm_fatal("SB_COUNT", "Missing driver/monitor/scoreboard events")
-            `uvm_info("RESULT", "PASS CH19 requests=3 applied=3", UVM_NONE)
+            seq_finished = 1;
+            // (변경) 마지막 거래 적용 이후 전체 주기의 관찰까지 기다린다.
+            wait (env.sb.samples == 24);
+            @(negedge vif.clk);
             phase.drop_objection(this);
         endtask
+        function void check_phase(uvm_phase phase);
+            super.check_phase(phase);
+            if (!seq_finished || env.ag.drv.driven != 3 ||
+                env.sb.requests != 3 || env.sb.applied != 3 ||
+                env.sb.samples != 24 || env.sb.cycles != 31 ||
+                env.sb.reset_samples != 3 || env.sb.expected_pending)
+                `uvm_fatal("SB_COUNT", "Missing or extra observations")
+        endfunction
+        function void report_phase(uvm_phase phase);
+            super.report_phase(phase);
+            if (uvm_report_server::get_server().get_severity_count(UVM_ERROR) != 0 ||
+                uvm_report_server::get_server().get_severity_count(UVM_FATAL) != 0)
+                `uvm_fatal("REPORT", "UVM error or fatal reported")
+            `uvm_info("RESULT", "PASS CH19 requests=3 applied=3 samples=24", UVM_NONE)
+        endfunction
     endclass
 endpackage
 
@@ -313,9 +345,9 @@ module tb_pwm_monitor_agent_scoreboard;
     );
 
     initial begin
-        $dumpfile("ch19_pwm_monitor_scoreboard.vcd");
-        $dumpvars(0, tb_pwm_monitor_agent_scoreboard);
-        uvm_config_db#(virtual pwm19_if)::set(null, "*", "vif", bus);
+        uvm_config_db#(virtual pwm19_if)::set(null, "uvm_test_top", "vif", bus);
+        uvm_config_db#(virtual pwm19_if)::set(null, "uvm_test_top.env.ag.drv", "vif", bus);
+        uvm_config_db#(virtual pwm19_if)::set(null, "uvm_test_top.env.ag.mon", "vif", bus);
         run_test("pwm19_test");
     end
     initial begin
