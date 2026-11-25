@@ -33,6 +33,23 @@
 | 6 | 23 | [NPU 통합 정답 비교](ch23_npu_integrated_scoreboard_v03.html) | [tb/ch23/tb_npu_integrated.sv](tb/ch23/tb_npu_integrated.sv) |
 | 6 | 24 | [회귀·CI·검증 보고](ch24_regression_ci_reporting_v03.html) | [tb/ch24/tb_uart_regression.sv](tb/ch24/tb_uart_regression.sv) |
 
+## Ubuntu 실습 시작
+
+```bash
+# 독립 저장소를 복제하고 작업 폴더로 진입한다.
+git clone https://github.com/Yuul-Jung/system_verilog_uvm_tb.git
+cd system_verilog_uvm_tb
+# Icarus Verilog를 사용하는 장의 실행 도구를 설치한다.
+sudo apt update
+sudo apt install -y iverilog
+# 제1장 예제 실행
+bash scripts/run_ch01.sh
+# 제24장 독립 회귀 예제 실행
+bash scripts/run_ch24.sh
+```
+
+Vivado XSIM/UVM 등이 필요한 장은 해당 학습안내서의 환경 준비와 실행 명령을 따른다. 이전 상세 변경 이력은 Git 기록으로 보존한다.
+
 ## 제작·검증 원칙
 
 - [중앙 rule_md](https://github.com/Yuul-Jung/rule_md) · [과정 규칙](AGENTS.md)
