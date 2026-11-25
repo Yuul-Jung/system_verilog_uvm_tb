@@ -113,6 +113,9 @@ module tb_uart_types;
         end
 
         $display("TYPE logic=%h bit=%h", four_state_copy, compact_copy);
+        // (추가) 입력 사례 또는 자료형 비교 누락 방지.
+        if (checks != 6)
+            $fatal(1, "FAIL COUNT checks=%0d expected=6", checks);
         if (failures == 0) begin
             $display("PASS checks=%0d failures=0", checks);
             $finish;
