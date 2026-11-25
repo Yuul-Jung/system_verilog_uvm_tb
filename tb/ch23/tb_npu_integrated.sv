@@ -60,6 +60,7 @@ module tb_npu_integrated;
                              input signed [39:0] value);
         begin
             @(negedge clk);
+            if (load_ready_o !== 1'b1) $fatal(1,"FAIL LOAD_BIAS_READY");
             neuron_i=neuron; bias_i=value; b_wr_en=1;
             @(negedge clk);
             b_wr_en=0; model_bias[neuron]=value;
@@ -70,13 +71,13 @@ module tb_npu_integrated;
     // 동점이면 낮은 뉴런 번호를 선택한다(원본의 > 비교 계약).
     task automatic calculate(input integer len);
         integer n,k;
-        reg signed [40:0] acc;
+        longint signed acc;
         begin
             for(n=0;n<4;n=n+1) begin
                 acc=$signed(model_bias[n]);
                 for(k=0;k<len;k=k+1)
                     acc=acc+$signed(model_x[k])*$signed(model_w[n][k]);
-                expected[n]=acc;
+                expected[n]=acc[40:0];
             end
             expected_class=0;
             best=expected[0];
@@ -90,7 +91,7 @@ module tb_npu_integrated;
 
     // 시작 에지를 0으로 세고 done_o가 올라오는 에지까지 측정.
     // 원본 FSM: READ/ISSUE 각각 len회, DRAIN1/2 이후 done.
-    // done 관측 지연: 2*len+3 클록(시작 에지 제외).
+    // done 관측 지연: 2*len+2 클록(시작 에지 제외).
     task automatic execute(input integer len);
         integer n;
         begin
@@ -100,7 +101,8 @@ module tb_npu_integrated;
             length_i=len; start_i=1;
             @(posedge clk);
             #1;
-            if(busy_o !== 1'b1) $fatal(1,"FAIL BUSY_START");
+            if(busy_o !== 1'b1 || done_o !== 1'b0 || error_o !== 1'b0)
+                $fatal(1,"FAIL BUSY_START");
             @(negedge clk);
             start_i=0;
             cycles=0;
@@ -108,10 +110,12 @@ module tb_npu_integrated;
                 @(posedge clk);
                 #1;
                 cycles=cycles+1;
+                if(done_o !== 1'b1 && (busy_o !== 1'b1 || load_ready_o !== 1'b0 || error_o !== 1'b0))
+                    $fatal(1,"FAIL BUSY_CONTRACT");
                 if(cycles>2*len+10) $fatal(1,"FAIL DONE_TIMEOUT");
             end
-            if(cycles != 2*len+3)
-                $fatal(1,"FAIL LATENCY got=%0d expected=%0d",cycles,2*len+3);
+            if(cycles != 2*len+2)
+                $fatal(1,"FAIL LATENCY got=%0d expected=%0d",cycles,2*len+2);
             if(busy_o !== 1'b0 || error_o !== 1'b0 ||
                class_o !== expected_class)
                 $fatal(1,"FAIL STATUS_CLASS got=%0d expected=%0d",
@@ -125,6 +129,26 @@ module tb_npu_integrated;
             @(posedge clk);
             #1;
             if(done_o !== 1'b0) $fatal(1,"FAIL DONE_NOT_PULSE");
+        end
+    endtask
+
+    // (추가) 거부된 시작은 결과를 보존하고 error_o만 1클록 발생시킨다.
+    task automatic reject_start(input integer len);
+        reg [163:0] old_scores;
+        reg [1:0] old_class;
+        begin
+            @(negedge clk);
+            old_scores=scores_o; old_class=class_o;
+            length_i=len; start_i=1;
+            @(posedge clk); #1;
+            if(error_o !== 1'b1 || busy_o !== 1'b0 || done_o !== 1'b0 ||
+               scores_o !== old_scores || class_o !== old_class)
+                $fatal(1,"FAIL REJECT len=%0d",len);
+            @(negedge clk); start_i=0;
+            @(posedge clk); #1;
+            if(error_o !== 1'b0 || load_ready_o !== 1'b1)
+                $fatal(1,"FAIL REJECT_RECOVERY len=%0d",len);
+            $display("REJECT len=%0d",len);
         end
     endtask
 
@@ -157,15 +181,43 @@ module tb_npu_integrated;
         if(class_o !== 2'd3) $fatal(1,"FAIL BIAS_CLASS");
         // 길이 1: 남은 유효 가중치에 대한 결과만 비교.
         execute(1);
-        // 길이 3: 세 번째 입력이 없어 오류, busy/done 미발생.
-        @(negedge clk);
-        length_i=3; start_i=1;
+        // (추가) 길이 0, 미적재 주소, 최대 범위 초과를 각각 거부.
+        reject_start(0);
+        reject_start(3);
+        reject_start(65);
+
+        // (추가) 네 점수가 모두 0인 실제 동점: 가장 낮은 번호 0.
+        for(i=0;i<4;i=i+1) load_bias(i,40'sd0);
+        load_x(0,16'sd0);
+        execute(1);
+        if(class_o !== 2'd0) $fatal(1,"FAIL TIE");
+
+        // (추가) 최대 길이 64, signed 16비트 양 끝, signed 40비트 bias.
+        // -32768 × -32768 × 64의 누산은 32비트 범위를 초과한다.
+        for(j=0;j<64;j=j+1) begin
+            load_x(j,16'sh8000);
+            load_w(0,j,16'sh8000);
+            load_w(1,j,16'sh7fff);
+            load_w(2,j,16'sd0);
+            load_w(3,j,16'sh8000);
+        end
+        load_bias(0,40'sh7fffffffff);
+        load_bias(1,40'sh8000000000);
+        execute(64);
+        if(class_o !== 2'd0 ||
+           $signed(scores_o[0+:41]) !== 41'sd618475290623 ||
+           $signed(scores_o[41+:41]) !== -41'sd618473193472)
+            $fatal(1,"FAIL EXTREME_SCORE");
+
+        // (추가) reset은 유효 비트를 지운다. 기존 RAM 값은 사용 불가.
+        @(negedge clk); resetn=0;
         @(posedge clk); #1;
-        if(error_o !== 1'b1 || busy_o !== 1'b0 || done_o !== 1'b0)
-            $fatal(1,"FAIL INVALID_LENGTH");
-        @(negedge clk);
-        start_i=0;
-        $display("PASS CH23 cases=%0d invalid_length=1",tests);
+        if(busy_o !== 1'b0 || done_o !== 1'b0 || error_o !== 1'b0 ||
+           scores_o !== 164'd0 || class_o !== 2'd0)
+            $fatal(1,"FAIL RESET");
+        @(negedge clk); resetn=1;
+        reject_start(1);
+        $display("PASS CH23 cases=%0d rejected=4",tests);
         $finish;
     end
 endmodule
