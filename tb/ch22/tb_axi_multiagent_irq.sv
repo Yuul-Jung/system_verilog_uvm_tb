@@ -18,6 +18,11 @@ interface irq22_if(input logic clk);
     logic resetn=0;
     logic done_event=0, error_event=0;
     wire [1:0] irq_status;
+    // (추가) 공개 레지스터 뱅크 입력: 실제 commit 경계 관찰 및 충돌 자극.
+    wire wr_en;
+    wire [7:0] wr_offset;
+    wire [31:0] wr_data;
+    wire [3:0] wr_strb;
 endinterface
 
 package ch22_pkg;
@@ -28,7 +33,7 @@ package ch22_pkg;
     `uvm_analysis_imp_decl(_bus)
     `uvm_analysis_imp_decl(_irq)
 
-    typedef enum {EV_RELEASE, EV_ASSERT_RESET, EV_DONE, EV_ERROR} evt22_kind_e;
+    typedef enum {EV_RELEASE, EV_ASSERT_RESET, EV_DONE, EV_ERROR, EV_BOTH_ON_CLEAR} evt22_kind_e;
 
     class axi22_item extends uvm_sequence_item;
         `uvm_object_utils(axi22_item)
@@ -36,6 +41,7 @@ package ch22_pkg;
         bit [31:0] addr, data;
         bit [3:0] strb=4'hf;
         bit [1:0] resp=0;
+        time ar_stamp;
         function new(string name="axi22_item");
             super.new(name);
         endfunction
@@ -51,7 +57,10 @@ package ch22_pkg;
 
     class irq22_sample extends uvm_sequence_item;
         `uvm_object_utils(irq22_sample)
-        evt22_kind_e kind;
+        logic resetn, done_event, error_event, wr_en;
+        logic [7:0] offset;
+        logic [31:0] data;
+        logic [3:0] strb;
         logic [1:0] status;
         time stamp;
         function new(string name="irq22_sample");
@@ -107,9 +116,11 @@ package ch22_pkg;
                 if (vif.bvalid) begin
                     t.resp=vif.bresp;
                     // 두 클록 동안 BREADY=0 → 응답 유지 후 수락.
-                    repeat (2) @(negedge vif.clk);
-                    if (vif.bvalid !== 1'b1)
-                        `uvm_fatal("B_HOLD","BVALID dropped during stall")
+                    repeat (2) begin
+                        @(negedge vif.clk);
+                        if (vif.bvalid !== 1'b1 || vif.bresp !== t.resp)
+                            `uvm_fatal("B_HOLD","Write response changed during stall")
+                    end
                     vif.bready=1'b1;
                     @(posedge vif.clk);
                     @(negedge vif.clk);
@@ -135,9 +146,12 @@ package ch22_pkg;
                 if (vif.rvalid) begin
                     t.data=vif.rdata; t.resp=vif.rresp;
                     // 두 클록 동안 RREADY=0 → 데이터 유지 검사.
-                    repeat (2) @(negedge vif.clk);
-                    if (vif.rvalid !== 1'b1 || vif.rdata !== t.data)
-                        `uvm_fatal("R_HOLD","Read response changed during stall")
+                    repeat (2) begin
+                        @(negedge vif.clk);
+                        if (vif.rvalid !== 1'b1 || vif.rdata !== t.data ||
+                            vif.rresp !== t.resp)
+                            `uvm_fatal("R_HOLD","Read response changed during stall")
+                    end
                     vif.rready=1'b1;
                     @(posedge vif.clk);
                     @(negedge vif.clk);
@@ -167,6 +181,10 @@ package ch22_pkg;
         bit aw_seen=0, w_seen=0, ar_seen=0;
         bit [31:0] saved_aw, saved_wd, saved_ar;
         bit [3:0] saved_strb;
+        time saved_ar_stamp;
+        bit b_held=0, r_held=0;
+        logic [1:0] held_bresp, held_rresp;
+        logic [31:0] held_rdata;
         function new(string name,uvm_component parent);
             super.new(name,parent);
             ap=new("ap",this);
@@ -182,18 +200,39 @@ package ch22_pkg;
                 @(posedge vif.clk); // DUT가 Handshake를 읽는 에지에서 관찰
                 if (!vif.resetn) begin
                     aw_seen=0; w_seen=0; ar_seen=0;
+                    b_held=0; r_held=0;
                 end else begin
+                    if ((^{vif.resetn,vif.awvalid,vif.awready,vif.wvalid,vif.wready,
+                           vif.bvalid,vif.bready,vif.arvalid,vif.arready,
+                           vif.rvalid,vif.rready}) === 1'bx)
+                        `uvm_fatal("BUS_X","Unknown handshake")
+                    // (추가) 모든 상승 에지에서 응답 대기 및 수락 에지까지 유지 검사.
+                    if (b_held && (vif.bvalid !== 1'b1 || vif.bresp !== held_bresp))
+                        `uvm_fatal("B_HOLD","B changed while pending")
+                    if (r_held && (vif.rvalid !== 1'b1 || vif.rresp !== held_rresp ||
+                                   vif.rdata !== held_rdata))
+                        `uvm_fatal("R_HOLD","R changed while pending")
+                    b_held=vif.bvalid && !vif.bready;
+                    r_held=vif.rvalid && !vif.rready;
+                    if (b_held) held_bresp=vif.bresp;
+                    if (r_held) begin held_rresp=vif.rresp; held_rdata=vif.rdata; end
                     if (vif.awvalid && vif.awready) begin
+                        if (aw_seen || (^vif.awaddr) === 1'bx)
+                            `uvm_fatal("MON_AW","Duplicate or unknown AW")
                         saved_aw=vif.awaddr; aw_seen=1;
                     end
                     if (vif.wvalid && vif.wready) begin
+                        if (w_seen || (^{vif.wdata,vif.wstrb}) === 1'bx)
+                            `uvm_fatal("MON_W","Duplicate or unknown W")
                         saved_wd=vif.wdata; saved_strb=vif.wstrb; w_seen=1;
                     end
                     if (vif.arvalid && vif.arready) begin
-                        saved_ar=vif.araddr; ar_seen=1;
+                        if (ar_seen || (^vif.araddr) === 1'bx)
+                            `uvm_fatal("MON_AR","Duplicate or unknown AR")
+                        saved_ar=vif.araddr; saved_ar_stamp=$time; ar_seen=1;
                     end
                     if (vif.bvalid && vif.bready) begin
-                        if (!aw_seen || !w_seen)
+                        if (!aw_seen || !w_seen || vif.bresp !== 2'b00)
                             `uvm_fatal("AXI_MON_B","B before AW/W Handshake")
                         s=axi22_item::type_id::create("observed_write");
                         s.is_write=1; s.addr=saved_aw; s.data=saved_wd;
@@ -202,10 +241,11 @@ package ch22_pkg;
                         aw_seen=0; w_seen=0;
                     end
                     if (vif.rvalid && vif.rready) begin
-                        if (!ar_seen)
+                        if (!ar_seen || vif.rresp !== 2'b00 || (^vif.rdata) === 1'bx)
                             `uvm_fatal("AXI_MON_R","R before AR Handshake")
                         s=axi22_item::type_id::create("observed_read");
                         s.is_write=0; s.addr=saved_ar; s.data=vif.rdata;
+                        s.ar_stamp=saved_ar_stamp;
                         s.resp=vif.rresp;
                         ap.write(s);
                         ar_seen=0;
@@ -254,6 +294,19 @@ package ch22_pkg;
                         @(negedge vif.clk);
                         vif.error_event=1'b0;
                     end
+                    // (추가) 실제 bank 쓰기 경계에 두 이벤트를 정렬한다.
+                    EV_BOTH_ON_CLEAR: begin
+                        int guard=0;
+                        do begin
+                            @(negedge vif.clk);
+                            guard++;
+                            if (guard>100) `uvm_fatal("COLLISION_TIMEOUT","No W1C commit")
+                        end while (!(vif.wr_en === 1'b1 && vif.wr_offset === 8'h0c &&
+                                     vif.wr_strb[0] === 1'b1 && vif.wr_data[1:0] === 2'b11));
+                        vif.done_event=1'b1; vif.error_event=1'b1;
+                        @(negedge vif.clk);
+                        vif.done_event=1'b0; vif.error_event=1'b0;
+                    end
                 endcase
                 events_driven++;
                 seq_item_port.item_done();
@@ -266,7 +319,6 @@ package ch22_pkg;
         `uvm_component_utils(irq22_monitor)
         virtual irq22_if vif;
         uvm_analysis_port #(irq22_sample) ap;
-        bit previous_resetn=1'b1;
         function new(string name,uvm_component parent);
             super.new(name,parent);
             ap=new("ap",this);
@@ -280,23 +332,18 @@ package ch22_pkg;
             irq22_sample s;
             forever begin
                 @(posedge vif.clk);
-                #1; // 레지스터 뱅크 NBA 갱신이 완료된 시점
-                if (!vif.resetn && previous_resetn) begin
-                    s=irq22_sample::type_id::create("reset_event");
-                    s.kind=EV_ASSERT_RESET; s.status=vif.irq_status;
-                    s.stamp=$time; ap.write(s);
-                end
-                previous_resetn=(vif.resetn===1'b1);
-                if (vif.resetn && vif.done_event) begin
-                    s=irq22_sample::type_id::create("done_event");
-                    s.kind=EV_DONE; s.status=vif.irq_status;
-                    s.stamp=$time; ap.write(s);
-                end
-                if (vif.resetn && vif.error_event) begin
-                    s=irq22_sample::type_id::create("error_event");
-                    s.kind=EV_ERROR; s.status=vif.irq_status;
-                    s.stamp=$time; ap.write(s);
-                end
+                // (변경) 입력은 상승 에지, 출력은 NBA 이후에 같은 객체로 관찰.
+                s=irq22_sample::type_id::create("cycle");
+                s.stamp=$time; s.resetn=vif.resetn;
+                s.done_event=vif.done_event; s.error_event=vif.error_event;
+                s.wr_en=vif.wr_en; s.offset=vif.wr_offset;
+                s.data=vif.wr_data; s.strb=vif.wr_strb;
+                #1;
+                s.status=vif.irq_status;
+                if ($test$plusargs("CORRUPT_IRQ") && s.resetn &&
+                    s.done_event && s.error_event && s.wr_en)
+                    s.status=s.status ^ 2'b01;
+                ap.write(s);
             end
         endtask
     endclass
@@ -309,6 +356,10 @@ package ch22_pkg;
         bit [31:0] expected_control=0, expected_data=0;
         bit [1:0] expected_irq=0;
         int unsigned writes=0, reads=0, events=0, resets=0;
+        int unsigned collisions=0, zero_strobes=0, commits=0;
+        bit previous_resetn=1;
+        bit [1:0] irq_before[time];
+        axi22_item committed[$];
         function new(string name,uvm_component parent);
             super.new(name,parent);
             bus_in=new("bus_in",this);
@@ -317,24 +368,34 @@ package ch22_pkg;
 
         function void write_bus(axi22_item s);
             bit [31:0] exp_data;
+            axi22_item c;
             if (s.resp !== 2'b00)
                 `uvm_fatal("AXI_RESP","Non-OKAY AXI response")
             if (s.is_write) begin
+                if (committed.size()==0)
+                    `uvm_fatal("COMMIT","B without register-bank commit")
+                c=committed.pop_front();
+                if (s.addr[7:0] !== c.addr[7:0] || s.data !== c.data ||
+                    s.strb !== c.strb)
+                    `uvm_fatal("COMMIT","AXI transaction differs from bank input")
                 case (s.addr)
                     'h00: if (s.strb[0])
                         expected_control={29'd0,s.data[2:0]};
                     'h10: for (int i=0;i<4;i++)
                         if (s.strb[i])
                             expected_data[i*8 +: 8]=s.data[i*8 +: 8];
-                    'h0c: if (s.strb[0])
-                        expected_irq=expected_irq & ~s.data[1:0];
+                    'h0c: ; // IRQ는 B 응답이 아니라 실제 commit 에지에서 갱신한다.
                     default: `uvm_fatal("AXI_WR_ADDR","Unexpected write address")
                 endcase
                 writes++;
             end else begin
                 case (s.addr)
                     'h00: exp_data=expected_control;
-                    'h0c: exp_data={30'd0,expected_irq};
+                    'h0c: begin
+                        if (!irq_before.exists(s.ar_stamp))
+                            `uvm_fatal("AR_TIME","No IRQ state at AR acceptance")
+                        exp_data={30'd0,irq_before[s.ar_stamp]};
+                    end
                     'h10: exp_data=expected_data;
                     'h18: exp_data=32'h00010000;
                     'h1c: exp_data=32'h524D4150;
@@ -349,19 +410,41 @@ package ch22_pkg;
         endfunction
 
         function void write_irq(irq22_sample s);
-            case (s.kind)
-                EV_ASSERT_RESET: begin
-                    expected_irq=2'b00;
-                    expected_control=0; expected_data=0; resets++;
+            axi22_item c;
+            bit [1:0] clear_mask, set_mask;
+            irq_before[s.stamp]=expected_irq;
+            if (s.resetn === 1'b0) begin
+                if (previous_resetn) resets++;
+                if (committed.size()!=0)
+                    `uvm_fatal("RESET_PENDING","Unexpected pending bank commit")
+                expected_irq=0; expected_control=0; expected_data=0;
+                previous_resetn=0;
+            end else begin
+                if ((^{s.resetn,s.done_event,s.error_event,s.wr_en}) === 1'bx)
+                    `uvm_fatal("IRQ_X","Unknown bank control")
+                previous_resetn=1;
+                clear_mask=0; set_mask={s.error_event,s.done_event};
+                if (s.wr_en) begin
+                    if ((^{s.offset,s.data,s.strb}) === 1'bx)
+                        `uvm_fatal("COMMIT_X","Unknown bank write")
+                    c=axi22_item::type_id::create("commit");
+                    c.addr={24'd0,s.offset}; c.data=s.data; c.strb=s.strb;
+                    committed.push_back(c); commits++;
+                    if (s.offset==8'h0c) begin
+                        if (s.strb[0]) clear_mask=s.data[1:0];
+                        else zero_strobes++;
+                    end
                 end
-                EV_DONE: begin expected_irq[0]=1'b1; events++; end
-                EV_ERROR: begin expected_irq[1]=1'b1; events++; end
-                default: `uvm_fatal("IRQ_KIND","Unexpected IRQ monitor event")
-            endcase
+                if (s.done_event) events++;
+                if (s.error_event) events++;
+                if (clear_mask==2'b11 && set_mask==2'b11) collisions++;
+                // (추가) 동일 비트의 set이 clear보다 우선.
+                expected_irq=(expected_irq & ~clear_mask) | set_mask;
+            end
             if (s.status !== expected_irq)
-                `uvm_fatal("IRQ_MISMATCH",
-                    $sformatf("IRQ status=%b expected=%b",
-                              s.status,expected_irq))
+                `uvm_fatal("IRQ_MISMATCH",$sformatf(
+                    "status=%b expected=%b collisions=%0d",
+                    s.status,expected_irq,collisions))
         endfunction
     endclass
 
@@ -502,6 +585,16 @@ package ch22_pkg;
             wr('h0c,32'h00000002);
             rd('h0c,32'h00000000);
 
+            // (추가) 두 Agent를 동시에 실행하여 같은 commit 에지에서 set/clear 충돌.
+            fork
+                wr('h0c,32'h00000003);
+                ev(EV_BOTH_ON_CLEAR);
+            join
+            rd('h0c,32'h00000003);
+            // WSTRB[0]=0: W1C가 무시되어 두 비트가 유지된다.
+            wr('h0c,32'h00000003,4'b0000);
+            rd('h0c,32'h00000003);
+
             // RO 레지스터와 리셋 후 상태 초기화 확인.
             rd('h18,32'h00010000);
             rd('h1c,32'h524D4150);
@@ -542,6 +635,7 @@ package ch22_pkg;
         `uvm_component_utils(axi22_test)
         axi22_env env;
         virtual irq22_if irq_vif;
+        bit done=0;
         function new(string name,uvm_component parent);
             super.new(name,parent);
         endfunction
@@ -557,19 +651,28 @@ package ch22_pkg;
             repeat (4) @(negedge irq_vif.clk);
             vseq=axi22_system_sequence::type_id::create("vseq");
             vseq.start(env.vsqr);
-            repeat (2) @(negedge irq_vif.clk);
-            if (env.sb.writes!=4 || env.sb.reads!=11 ||
-                env.sb.events!=2 || env.sb.resets!=2 ||
-                env.bus_agent.drv.driven!=15 ||
-                env.event_agent.drv.events_driven!=5)
-                `uvm_fatal("COUNT",
-                    $sformatf("W=%0d R=%0d IRQ=%0d RESET=%0d",
-                              env.sb.writes,env.sb.reads,
-                              env.sb.events,env.sb.resets))
-            `uvm_info("RESULT",
-                "PASS CH22 AXI_W=4 AXI_R=11 IRQ=2 RESET=2",UVM_NONE)
+            done=1;
             phase.drop_objection(this);
         endtask
+        function void check_phase(uvm_phase phase);
+            super.check_phase(phase);
+            if (!done || env.sb.writes!=6 || env.sb.reads!=13 ||
+                env.sb.events!=4 || env.sb.resets!=2 ||
+                env.sb.collisions!=1 || env.sb.zero_strobes!=1 ||
+                env.sb.commits!=6 || env.sb.committed.size()!=0 ||
+                env.bus_agent.drv.driven!=19 ||
+                env.event_agent.drv.events_driven!=6 ||
+                env.bus_agent.mon.aw_seen || env.bus_agent.mon.w_seen ||
+                env.bus_agent.mon.ar_seen)
+                `uvm_fatal("COUNT","Incomplete multi-agent verification")
+        endfunction
+        function void report_phase(uvm_phase phase);
+            super.report_phase(phase);
+            if (uvm_report_server::get_server().get_severity_count(UVM_ERROR)!=0 ||
+                uvm_report_server::get_server().get_severity_count(UVM_FATAL)!=0)
+                `uvm_fatal("REPORT","UVM error or fatal reported")
+            `uvm_info("RESULT","PASS CH22 AXI_W=6 AXI_R=13 IRQ=4 RESET=2 COLLISION=1 ZERO=1",UVM_NONE)
+        endfunction
     endclass
 endpackage
 
@@ -618,13 +721,18 @@ module tb_axi_multiagent_irq;
         .data_in_o(data_in_o),.irq_status_o(irq_bus.irq_status)
     );
 
+    // (추가) 관찰용 연결만 추가, 원본 DUT 포트와 동작은 유지.
+    assign irq_bus.wr_en=wr_en;
+    assign irq_bus.wr_offset=wr_offset;
+    assign irq_bus.wr_data=wr_data;
+    assign irq_bus.wr_strb=wr_strb;
+
     initial begin
-        $dumpfile("ch22_multiagent_axi_irq.vcd");
-        $dumpvars(0,tb_axi_multiagent_irq);
         uvm_config_db#(virtual axi22_if)::set(
-            null,"uvm_test_top*","vif",axi_bus);
+            null,"uvm_test_top.env.bus_agent.*","vif",axi_bus);
         uvm_config_db#(virtual irq22_if)::set(
-            null,"uvm_test_top*","vif",irq_bus);
+            null,"uvm_test_top.env.event_agent.*","vif",irq_bus);
+        uvm_config_db#(virtual irq22_if)::set(null,"uvm_test_top","vif",irq_bus);
         run_test("axi22_test");
     end
     initial begin
