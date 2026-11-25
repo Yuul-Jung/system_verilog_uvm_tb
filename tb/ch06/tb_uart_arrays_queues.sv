@@ -36,7 +36,8 @@ module tb_uart_arrays_queues;
     integer failures = 0;
     integer i;
 
-    // 전송은 valid와 ready가 모두 1일 때에만 수락된다.
+    // 이 TB는 입력 사례의 valid/ready가 모두 1이면 수락으로 모델링한다.
+    // DUT 자체에는 클록과 실제 수락 에지 또는 저장소가 없다.
     task automatic apply_sample(
         input case_kind_t next_kind,
         input uart_sample_t next_sample
@@ -70,21 +71,24 @@ module tb_uart_arrays_queues;
                         $error("DATA_MISMATCH got=%h expected=%h",
                             tx_data_o, expected_byte);
                     end else begin
-                        $display("ACCEPT t=%0t data=%h remain=%0d",
+                        $display("ACCEPT t=%0d ns data=%h remain=%0d",
                             $time, tx_data_o, expected_q.size());
                     end
                 end
             end else begin
-                $display("HOLD t=%0t kind=%0d valid=%b ready=%b",
+                $display("HOLD t=%0d ns kind=%0d valid=%b ready=%b",
                     $time, kind, sample.valid, sample.ready);
             end
         end
     endtask
 
+`ifdef VCD
+    // (변경) Icarus 실행에서 VCD 기록을 활성화한다.
     initial begin
         $dumpfile("ch06_uart_arrays_queues.vcd");
         $dumpvars(0, tb_uart_arrays_queues);
     end
+`endif
 
     initial begin
         rx_data_i  = 8'h00;
@@ -105,17 +109,18 @@ module tb_uart_arrays_queues;
             packed_bytes, unpacked_bytes[0], unpacked_bytes[3]);
         $display("QUEUE size=%0d", expected_q.size());
 
+        // (변경) 구조체 필드 순서 valid[9], ready[8], data[7:0]의 비트 연결.
         // 유효하지 않은 데이터: queue에서 꺼내지 않는다.
-        apply_sample(CASE_IDLE, '{1'b0, 1'b1, 8'h00});
+        apply_sample(CASE_IDLE, {1'b0, 1'b1, 8'h00});
 
         // A는 수락, B는 ready=0인 동안 수락하지 않는다.
-        apply_sample(CASE_SEND, '{1'b1, 1'b1, 8'h41});
-        apply_sample(CASE_STALL, '{1'b1, 1'b0, 8'h42});
-        apply_sample(CASE_RESUME, '{1'b1, 1'b1, 8'h42});
+        apply_sample(CASE_SEND, {1'b1, 1'b1, 8'h41});
+        apply_sample(CASE_STALL, {1'b1, 1'b0, 8'h42});
+        apply_sample(CASE_RESUME, {1'b1, 1'b1, 8'h42});
 
         // C, D를 이어서 전송하고 큐를 비운다.
-        apply_sample(CASE_SEND, '{1'b1, 1'b1, 8'h43});
-        apply_sample(CASE_SEND, '{1'b1, 1'b1, 8'h44});
+        apply_sample(CASE_SEND, {1'b1, 1'b1, 8'h43});
+        apply_sample(CASE_SEND, {1'b1, 1'b1, 8'h44});
 
         checks = checks + 1;
         if (expected_q.size() != 0) begin
