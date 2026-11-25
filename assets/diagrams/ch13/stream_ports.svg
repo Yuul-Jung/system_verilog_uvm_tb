@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 280" role="img" aria-labelledby="ch13title">
+<title id="ch13title">UART Echo 조합 포트 연결</title>
+<rect width="920" height="280" fill="white"/>
+<defs><marker id="ch13arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle">
+<text x="460" y="30" font-size="20" font-weight="bold">UART Echo · 조합형 바이트 스트림</text>
+<rect x="285" y="55" width="350" height="190" rx="4" fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"/>
+<text x="460" y="80" font-size="17" font-weight="bold">uart_echo_controller</text>
+<g font-size="14"><text x="155" y="111">rx_data_i[7:0]</text><text x="765" y="111">tx_data_o[7:0]</text><text x="155" y="161">rx_valid_i</text><text x="765" y="161">tx_valid_o</text><text x="155" y="211">rx_ready_o</text><text x="765" y="211">tx_ready_i</text></g>
+<g stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch13arr)"><path d="M24 125H890"/><path d="M24 175H890"/><path d="M890 225H24"/></g>
+<g font-size="12"><text x="460" y="115">8비트 데이터 전달</text><text x="460" y="165">유효 신호 전달</text><text x="460" y="215">준비 신호 역방향 전달</text></g>
+<text x="460" y="267" font-size="13">클록·리셋·FIFO 없음 · tb_clk은 검증 환경에만 존재</text>
+</g></svg>
