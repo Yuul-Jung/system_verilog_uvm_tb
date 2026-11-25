@@ -30,7 +30,7 @@ module tb_pwm_pass_fail;
             checks = checks + 1;
             if (actual !== expected) begin
                 errors = errors + 1;
-                $error("MISMATCH t=%0t actual=%b expected=%b",
+                $error("MISMATCH t=%0d ns actual=%b expected=%b",
                     $time, actual, expected);
             end
         end
@@ -53,7 +53,7 @@ module tb_pwm_pass_fail;
                 $error("ACTIVE_DUTY expected=%0d actual=%0d",
                     requested, active_duty);
             end
-            $display("APPLIED duty=%0d t=%0t", requested, $time);
+            $display("APPLIED duty=%0d t=%0d ns", requested, $time);
         end
     endtask
 
@@ -83,10 +83,13 @@ module tb_pwm_pass_fail;
         end
     endtask
 
+`ifdef VCD
+    // (변경) Icarus 실행에서만 VCD 기록을 사용한다.
     initial begin
         $dumpfile("ch04_pwm_pass_fail.vcd");
         $dumpvars(0, tb_pwm_pass_fail);
     end
+`endif
     initial begin
         #2000;
         $fatal(1, "TIMEOUT: pending 적용 완료 대기 초과");
