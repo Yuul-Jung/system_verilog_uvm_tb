@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 330" role="img" aria-labelledby="ch18title">
+<title id="ch18title">PWM Sequence와 Driver의 거래 전달 및 완료</title>
+<rect width="960" height="330" fill="white"/>
+<defs><marker id="ch18arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" text-anchor="middle">
+<text x="480" y="30" font-size="20" font-weight="bold">거래 객체 → 신호 구동 → 완료 통지</text>
+<g fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2">
+<rect x="24" y="65" width="200" height="112" rx="4"/><rect x="280" y="65" width="190" height="112" rx="4"/>
+<rect x="526" y="65" width="200" height="112" rx="4"/><rect x="782" y="65" width="148" height="112" rx="4"/>
+</g>
+<g font-size="15" font-weight="bold"><text x="124" y="91">pwm18_sequence</text><text x="375" y="91">pwm18_sequencer</text><text x="626" y="91">pwm18_driver</text><text x="856" y="91">pwm_core</text></g>
+<g font-size="12">
+<text x="124" y="115">start_item(req)</text><text x="124" y="136">duty 지정 · 2, 6, 0</text><text x="124" y="157">finish_item(req)</text>
+<text x="375" y="115">sqr.seq_item_export</text><text x="375" y="136">요청 중개</text><text x="375" y="157">완료 통지 전달</text>
+<text x="626" y="115">get_next_item(req)</text><text x="626" y="136">drive_one(req)</text><text x="626" y="157">item_done()</text>
+<text x="856" y="115">cfg_apply</text><text x="856" y="136">pending</text><text x="856" y="157">active_* · pwm_out</text>
+<text x="252" y="106">req</text><text x="498" y="106">req</text><text x="754" y="106">vif</text>
+</g>
+<g fill="none" stroke="#5A1E1E" stroke-width="2" marker-end="url(#ch18arr)">
+<path d="M224 115H280"/><path d="M470 115H526"/><path d="M726 115H782"/>
+<path d="M782 156H726"/><path d="M526 156H470"/><path d="M280 156H224"/>
+</g>
+<rect x="280" y="213" width="446" height="80" rx="4" fill="#F7F9FC" stroke="#1F3A5F" stroke-width="2"/>
+<text x="503" y="237" font-size="15" font-weight="bold">pwm18_test · 완료 판정</text>
+<text x="503" y="259" font-size="13">seq.start(env.sqr) 반환 → check_phase</text>
+<text x="503" y="278" font-size="12">checks=3 · samples=24 · applied_duties 2, 6, 0</text>
+<text x="480" y="312" font-size="13">env.connect_phase에서 drv.seq_item_port와 sqr.seq_item_export 연결</text>
+<path d="M124 177V253H280" stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch18arr)"/>
+<path d="M626 177V213" stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch18arr)"/>
+</g></svg>
