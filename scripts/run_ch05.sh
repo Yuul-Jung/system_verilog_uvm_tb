@@ -20,7 +20,7 @@ if [[ ! -f "$DUT_PATH" ]]; then
 fi
 
 mkdir -p "$OUT_DIR"
-iverilog -g2012 -s tb_uart_types -o "$OUT_DIR/simulation.vvp" \
+iverilog -g2012 -DVCD -s tb_uart_types -o "$OUT_DIR/simulation.vvp" \
   "$DUT_PATH" "$TB_PATH"
 (cd "$OUT_DIR" && vvp simulation.vvp | tee output.log)
 echo "로그: $OUT_DIR/output.log"
