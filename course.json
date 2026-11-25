@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v37",
+  "version": "v38",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -65,7 +65,7 @@
       "title": "인터페이스·타이밍 분리",
       "subtitle": "interface·modport·clocking block 기반 UART Byte Stream 검증",
       "slug": "ch07_interface_modport_clocking",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch07/tb_uart_interface.sv"
     },
     {
