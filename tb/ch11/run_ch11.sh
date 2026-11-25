@@ -22,9 +22,21 @@ cd "$OUT"
 xvlog "$RTL"
 xvlog -sv "$TB"
 xelab -debug typical tb_pwm_sva -s ch11_sim
-xsim ch11_sim -runall 2>&1 | tee ch11.log
+xsim ch11_sim -runall -onerror quit 2>&1 | tee ch11.log
 grep -q '^PASS CH11 SVA checks=4$' ch11.log
-if grep -q 'FAIL SVA\|FAIL APPLY\|FAIL RESET\|FAIL UNKNOWN\|FAIL GLOBAL' ch11.log; then
+if grep -q 'FAIL SVA\|FAIL APPLY\|FAIL RESET\|FAIL UNKNOWN\|FAIL GLOBAL\|DETECTED_SVA_PENDING' ch11.log; then
   echo "FAIL: 검증 오류 로그 발견" >&2
   exit 1
 fi
+
+# (추가) 어설션 엔진의 의도된 실패 경로를 별도 실행으로 확인한다.
+# XSIM 종료 코드의 버전 차이를 고려해 진단과 정상 완료 부재를 검사한다.
+rc=0
+xsim ch11_sim -runall -onerror quit -testplusarg INJECT_SVA_PENDING \
+  > ch11_negative.log 2>&1 || rc=$?
+grep -q 'DETECTED_SVA_PENDING t=55' ch11_negative.log
+if grep -q 'PASS CH11 SVA\|FAIL SVA\|FAIL APPLY\|FAIL RESET\|FAIL UNKNOWN\|FAIL GLOBAL' ch11_negative.log; then
+  echo "FAIL: 부정 시험에서 기대하지 않은 결과 발생" >&2
+  exit 1
+fi
+echo "PASS CH11 HARNESS: SVA 오류 검출 (xsim exit=$rc)"
