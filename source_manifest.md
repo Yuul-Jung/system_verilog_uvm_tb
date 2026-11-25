@@ -250,3 +250,7 @@
 ## 제15장 v02 · AXI4-Lite 레지스터 검증
 - amd_soc_p2 04.2장 03~04절, 10.3장 2~3절 및 03.2장 개념 연계(CONCEPT_ONLY). 동일 원본 경로 미확인. 기존 범용 RTL 2개 불변.
 - 독립 채널 수락/payload·응답 유지, zero WSTRB·RO·미매핑·별칭, B/R 대기 중 리셋 보강. ch15_axi4lite_register_verification_v02.html; [검증 기록](docs/CH15_VALIDATION_v02.md). 독립 레지스터 계산·원격 정적 검사 완료, RTL_SIM/렌더 NOT_RUN.
+
+## 제16장 v02 및 제4부 종합 검증
+- amd_soc_npu 제1장 04·06절 두 MAC 원본 Blob 동일, 원본 유지. 16/24비트 부호 확장·양방향 순환·clear/reset 보류 곱 폐기, 21클록 완료 확인.
+- ch16_mac_npu_integer_verification_v02.html; [제16장 검증 기록](docs/CH16_VALIDATION_v02.md), [제4부 종합 검증](docs/PART04_VALIDATION.md). 실제 Python 독립 계산, Bash 문법, SVG 단독 렌더 및 원격 정적 검사 완료. 제13~16장 탐색 동기화. 제15장 CONCEPT_ONLY 유지. 실제 RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
