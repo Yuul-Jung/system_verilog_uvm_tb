@@ -201,3 +201,7 @@
 - 제04장 pwm_core 원본 동일, TB VCD 분리 및 시간 표시 보완. ch04_pass_fail_automation_v03.html.
 - 제01장 v04 설계 참조 보완, 제02장 v03 독립 제2부 참조 수정, 제1부 탐색 데이터 최신화. RTL 원본 유지.
 - [제04장 검증 기록](docs/CH04_VALIDATION_v03.md), [제1부 종합 검증](docs/PART01_VALIDATION.md). 실제 RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
+
+## 제05장 v03 · 검증 자료형 및 구조체
+- amd_soc_npu 제1장 03절 UART 에코 원본 주석 차이만 확인, RTL 변경 없음. 10비트 packed 표현 및 조건부 VCD, XSIM 절차 추가.
+- ch05_verification_types_v03.html; [검증 기록](docs/CH05_VALIDATION_v03.md). 독립 비트 계산, SVG 단독 렌더링 및 원격 정적 검사 PASS. RTL_SIM/전체 HTML 렌더링 NOT_RUN.
