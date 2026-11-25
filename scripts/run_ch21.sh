@@ -1,28 +1,34 @@
 #!/usr/bin/env bash
-# CH21: UVM RAL frontdoor simulation; no changes to source RTL.
+# 제21장: Vivado XSIM 내장 UVM 라이브러리 사용.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RTL="${RTL_DIR:-$ROOT/reference_rtl}"
-OUT="$ROOT/.build/ch21"
 for f in axi4lite_slave_adapter.v custom_register_bank.v; do
   if [[ ! -f "$RTL/$f" ]]; then echo "NOT_RUN: missing $RTL/$f" >&2; exit 2; fi
 done
-if ! command -v verilator >/dev/null 2>&1; then
-  echo "NOT_RUN: Verilator unavailable" >&2; exit 2
+RTL="$(realpath "$RTL")"
+for tool in xvlog xelab xsim; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "NOT_RUN: $tool missing; source Vivado settings64.sh" >&2
+    exit 2
+  fi
+done
+mkdir -p "$ROOT/.build/ch21"
+OUT="$(mktemp -d "$ROOT/.build/ch21/run.XXXXXX")"
+cd "$OUT"
+xvlog "$RTL/axi4lite_slave_adapter.v" "$RTL/custom_register_bank.v" 2>&1 | tee rtl.log
+xvlog -sv -L uvm "$ROOT/tb/ch21/tb_axi_uvm_ral.sv" 2>&1 | tee tb.log
+xelab -L uvm -debug typical tb_axi_uvm_ral -s ch21_sim 2>&1 | tee elaborate.log
+xsim ch21_sim -runall -onerror quit 2>&1 | tee normal.log
+grep -Eq '\[RESULT\][[:space:]]+PASS CH21 RAL reads=7 writes=3[[:space:]]*$' normal.log
+grep -Eq 'UVM_ERROR[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log
+grep -Eq 'UVM_FATAL[[:space:]]*:[[:space:]]*0[[:space:]]*$' normal.log
+rc=0
+xsim ch21_sim -runall -onerror quit -testplusarg NO_PREDICT > negative.log 2>&1 || rc=$?
+grep -Eq 'UVM_FATAL.*\[PREDICT_WRITE\].*addr=00000010 expected=11223344' negative.log
+if grep -Eq 'PASS CH21|CH21 GLOBAL_TIMEOUT' negative.log; then
+  echo "FAIL: unexpected negative result" >&2
+  exit 1
 fi
-if [[ -z "${UVM_HOME:-}" || ! -f "$UVM_HOME/src/uvm_pkg.sv" ]]; then
-  echo "NOT_RUN: UVM_HOME/src/uvm_pkg.sv unavailable" >&2; exit 2
-fi
-mkdir -p "$OUT"
-verilator --version > "$OUT/verilator_version.txt"
-verilator --binary --timing --assert -Wno-fatal \
-  --top-module tb_axi_uvm_ral --Mdir "$OUT/obj_dir" \
-  +incdir+"$UVM_HOME/src" "$UVM_HOME/src/uvm_pkg.sv" \
-  "$RTL/axi4lite_slave_adapter.v" "$RTL/custom_register_bank.v" \
-  "$ROOT/tb/ch21/tb_axi_uvm_ral.sv" 2>&1 | tee "$OUT/build.log"
-(cd "$OUT" && ./obj_dir/Vtb_axi_uvm_ral +UVM_TESTNAME=axi21_test | tee simulation.log)
-grep -q 'PASS CH21 RAL frontdoor reads=4 writes=2' "$OUT/simulation.log"
-if grep -Eq 'UVM_(ERROR|FATAL)' "$OUT/simulation.log"; then
-  echo "FAIL: UVM ERROR/FATAL in log" >&2; exit 1
-fi
-echo "PASS CH21 SUITE"
+echo "PASS CH21 HARNESS (negative exit=$rc)"
+echo "Logs: $OUT"
