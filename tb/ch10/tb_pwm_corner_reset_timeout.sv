@@ -159,6 +159,12 @@ module tb_pwm_corner_reset_timeout;
         #1;
         if (pwm_out !== 1'b0)
             $fatal(1, "FAIL async output gate");
+        // (추가) 다음 상승 에지 이전에는 활성 레지스터가 보존되어야 한다.
+        // 비동기 레지스터 리셋으로 잘못 구현한 경우를 검출한다.
+        if (active_period !== 32'd8 || active_duty !== 32'd8 ||
+            active_enable !== 1'b1 || active_polarity !== 1'b0 ||
+            pending !== 1'b0)
+            $fatal(1, "FAIL PRE_EDGE_STATE");
         @(posedge clk); #1;
         if (active_period !== 32'd8 || active_duty !== 32'd0 ||
             active_enable !== 1'b0 || active_polarity !== 1'b0 ||
