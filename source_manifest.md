@@ -205,3 +205,7 @@
 ## 제05장 v03 · 검증 자료형 및 구조체
 - amd_soc_npu 제1장 03절 UART 에코 원본 주석 차이만 확인, RTL 변경 없음. 10비트 packed 표현 및 조건부 VCD, XSIM 절차 추가.
 - ch05_verification_types_v03.html; [검증 기록](docs/CH05_VALIDATION_v03.md). 독립 비트 계산, SVG 단독 렌더링 및 원격 정적 검사 PASS. RTL_SIM/전체 HTML 렌더링 NOT_RUN.
+
+## 제06장 v03 · 배열·큐·패키지
+- amd_soc_npu 제1장 03절 UART 에코 원본 및 패키지 유지. 구조체 비트 연결 대체 표현, 조건부 VCD·시간 단위·XSIM 절차 보완. 제05장과 필드 순서 차이 명시.
+- ch06_arrays_queues_packages_v03.html; [검증 기록](docs/CH06_VALIDATION_v03.md). 독립 큐 추적·SVG 단독 렌더링·원격 정적 검사 PASS. 실제 RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
