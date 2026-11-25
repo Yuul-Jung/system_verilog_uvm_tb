@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 // 제24장: 실제 uart_echo_controller 6포트의 시드 기반 반복 회귀 검증.
-// 이 DUT는 조합 전달기이므로 클록은 TB 샘플링 기준일 뿐이다.
+// 이 DUT는 클록이 없는 조합 전달기이다. #1은 출력 안정화 대기이다.
 module tb_uart_regression;
     reg [7:0] rx_data_i = 0;
     reg rx_valid_i = 0;
@@ -37,14 +37,25 @@ module tb_uart_regression;
     task automatic check_transaction(
         input [7:0] data, input valid, input ready
     );
+        reg [7:0] observed_data;
         begin
             rx_data_i = data;
             rx_valid_i = valid;
             tx_ready_i = ready;
             #1;
-            if (tx_data_o !== data || tx_valid_o !== valid ||
-                rx_ready_o !== ready)
-                $fatal(1, "FAIL PORT_CONTRACT case=%0d", checks);
+            // (변경) 9번째 표본의 관찰값만 반전한다. 원본 DUT는 그대로 둔다.
+            observed_data = tx_data_o;
+            if (fault && checks == 8)
+                observed_data = tx_data_o ^ 8'h01;
+            // 정상/부정 시험이 같은 비교기를 통과한다.
+            if (observed_data !== data || tx_valid_o !== valid ||
+                rx_ready_o !== ready) begin
+                if (fault && checks == 8 && tx_data_o === data &&
+                    tx_valid_o === valid && rx_ready_o === ready &&
+                    observed_data === (data ^ 8'h01))
+                    $fatal(1, "DETECTED_INJECTED_FAULT case=9");
+                $fatal(1, "FAIL PORT_CONTRACT case=%0d", checks + 1);
+            end
 
             if (!valid && !ready) cov_idle = cov_idle + 1;
             if ( valid && !ready) cov_stall = cov_stall + 1;
@@ -53,10 +64,6 @@ module tb_uart_regression;
             if (valid && ready) accepted = accepted + 1;
             checks = checks + 1;
 
-            // 오류 주입은 DUT가 아닌 검증기 쪽에만 적용한다.
-            // 정상 회귀와 달리 음성 시험은 이 오류를 검출해야 성공한다.
-            if (fault && checks == 9)
-                $fatal(1, "DETECTED_INJECTED_FAULT case=%0d", checks);
         end
     endtask
 
@@ -91,7 +98,9 @@ module tb_uart_regression;
         end
 
         if (checks != 32 || cov_idle == 0 || cov_stall == 0 ||
-            cov_accept == 0 || cov_ready_idle == 0)
+            cov_accept == 0 || cov_ready_idle == 0 ||
+            cov_idle + cov_stall + cov_accept + cov_ready_idle != checks ||
+            accepted != cov_accept)
             $fatal(1, "FAIL COVERAGE checks=%0d", checks);
         $display("COVERAGE seed=%0d idle=%0d stall=%0d accept=%0d ready_idle=%0d",
                  seed, cov_idle, cov_stall, cov_accept, cov_ready_idle);
