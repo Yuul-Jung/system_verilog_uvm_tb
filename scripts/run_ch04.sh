@@ -13,7 +13,7 @@ for tool in iverilog vvp; do
 done
 [[ -f "$DUT_PATH" ]] || { echo "ERROR: DUT 파일 없음: $DUT_PATH"; exit 2; }
 mkdir -p "$OUT_DIR"
-iverilog -g2012 -s tb_pwm_pass_fail -o "$OUT_DIR/simulation.vvp" \
+iverilog -g2012 -DVCD -s tb_pwm_pass_fail -o "$OUT_DIR/simulation.vvp" \
   "$DUT_PATH" "$TB_PATH"
 (cd "$OUT_DIR" && vvp simulation.vvp | tee output.log)
 echo "로그: $OUT_DIR/output.log"
