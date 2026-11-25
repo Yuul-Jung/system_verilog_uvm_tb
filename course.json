@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v38",
+  "version": "v39",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -74,7 +74,7 @@
       "title": "객체와 제약 기반 입력",
       "subtitle": "class·new·extends·rand·constraint 기반 UART 거래 객체",
       "slug": "ch08_objects_constraints",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch08/tb_uart_objects.sv"
     },
     {
