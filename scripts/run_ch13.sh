@@ -9,8 +9,9 @@ if [[ ! -f "$DUT" ]]; then echo "NOT_RUN: DUT 없음: $DUT" >&2; exit 2; fi
 if ! command -v iverilog >/dev/null 2>&1 || ! command -v vvp >/dev/null 2>&1; then
   echo "NOT_RUN: iverilog/vvp 미설치" >&2; exit 2
 fi
+DUT="$(realpath "$DUT")"
 mkdir -p "$ROOT/.build/ch13"
 cd "$ROOT/.build/ch13"
-iverilog -g2012 -s tb_uart_stream -o sim "$DUT" "$TB"
+iverilog -g2012 -DVCD -s tb_uart_stream -o sim "$DUT" "$TB"
 vvp sim | tee simulation.log
-grep -q '^PASS CH13 accepted=3 checks=12$' simulation.log
+grep -q '^PASS CH13 accepted=3 checks=14$' simulation.log
