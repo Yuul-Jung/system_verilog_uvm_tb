@@ -233,3 +233,7 @@
 ## 제12장 v02 및 제3부 종합 검증
 - amd_soc_p2 04.2장 PWM 원본 유지. 표본 위상·활성 상태 비교와 12개 visited 비트맵 보강, 실제 활성 설정의 covergroup 샘플, XSIM/xcrg 실행 경로.
 - ch12_functional_coverage_v02.html; [제12장 검증 기록](docs/CH12_VALIDATION_v02.md), [제3부 종합 검증](docs/PART03_VALIDATION.md). 제09~12장 원본·TB·의존 파일·목차 대조 완료. 실제 RTL_SIM/SVA/커버리지 및 전체 페이지 렌더링 NOT_RUN.
+
+## 제13장 v02 · UART 스트림 검증
+- amd_soc_npu 제1장 03절 UART 에코 원본 주석 차이만 확인. 독립 상승 에지 모니터, 대기 보존·수락 순서·X/Z 준비 신호 검사 추가. XSIM 우선 실행.
+- ch13_uart_stream_verification_v02.html; [검증 기록](docs/CH13_VALIDATION_v02.md). 독립 샘플 계산·SVG 단독 렌더·원격 정적 검사 PASS. 실제 RTL_SIM 및 전체 페이지 렌더링 NOT_RUN.
