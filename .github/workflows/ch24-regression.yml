@@ -8,9 +8,12 @@ on:
       - 'scripts/run_ch24.sh'
       - 'reference_rtl/uart_echo_controller.v'
       - '.github/workflows/ch24-regression.yml'
+permissions:
+  contents: read
 jobs:
   regression:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Install Icarus Verilog
@@ -23,4 +26,5 @@ jobs:
         with:
           name: ch24-regression-report
           path: .build/ch24/
+          include-hidden-files: true
           if-no-files-found: warn
