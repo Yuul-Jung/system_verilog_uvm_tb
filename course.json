@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v41",
+  "version": "v42",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -101,7 +101,7 @@
       "title": "시간적 속성 검사",
       "subtitle": "SVA 속성으로 PWM 시간 계약 검증",
       "slug": "ch11_temporal_assertions",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch11/tb_pwm_sva.sv"
     },
     {
