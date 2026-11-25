@@ -19,4 +19,4 @@ iverilog -g2012 -s tb_npu_integrated -o sim \
   "$RTL/npu_engine4.v" "$RTL/npu_dsp_mac_lane.v" \
   "$RTL/dsp_multiplier.v" "$ROOT/tb/ch23/tb_npu_integrated.sv"
 vvp sim | tee simulation.log
-grep -q '^PASS CH23 cases=6 invalid_length=1$' simulation.log
+grep -q '^PASS CH23 cases=8 rejected=4$' simulation.log
