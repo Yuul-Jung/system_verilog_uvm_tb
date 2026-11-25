@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 330" role="img" aria-labelledby="ch11title ch11desc">
+<title id="ch11title">요청과 pending의 샘플링 관계</title><desc id="ch11desc">40ns에 요청하고 45ns 상승 에지에서 샘플링한다. pending은 45ns 비차단 갱신 이후 1이 되고 55ns에서 다음 샘플로 검사한다.</desc>
+<defs><marker id="ch11arr" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="10" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#5A1E1E"/></marker></defs>
+<rect width="940" height="330" fill="white"/>
+<g font-family="Noto Sans CJK KR,sans-serif" fill="#172439" font-size="15">
+<text x="470" y="30" text-anchor="middle" font-size="20" font-weight="bold">cfg_apply |=> pending · 예상 시간 관계</text>
+<g stroke="#aab6c4" stroke-width="1" stroke-dasharray="4 4"><path d="M250 60V255 M400 60V255 M550 60V255 M700 60V255 M850 60V255"/></g>
+<g text-anchor="middle" font-size="13"><text x="250" y="276">40</text><text x="400" y="276">45</text><text x="550" y="276">50</text><text x="700" y="276">55</text><text x="850" y="276">60 ns</text></g>
+<text x="24" y="99">clk</text><text x="24" y="149">cfg_apply</text><text x="24" y="199">pending</text>
+<g stroke="#1F3A5F" stroke-width="2.5" fill="none"><path d="M200 78H250V110H400V78H550V110H700V78H850V110H910"/><path d="M200 160H250V128H550V160H910"/><path d="M200 210H400V178H910"/></g>
+<g fill="#5A1E1E" text-anchor="middle" font-size="13"><text x="400" y="52">요청 샘플</text><text x="700" y="52">다음 샘플 검사</text><text x="550" y="239">|=&gt; 다음 상승 에지</text></g>
+<path d="M400 224H700" stroke="#5A1E1E" stroke-width="2" fill="none" marker-end="url(#ch11arr)"/>
+<g fill="#5A1E1E" font-size="12"><text x="410" y="205">NBA 갱신 후 1</text></g>
+<text x="470" y="307" text-anchor="middle" font-size="13">45ns 직전 pending은 0 · 55ns 직전 pending은 1 (에지 내부 시간차는 확대하지 않음)</text>
+</g></svg>
