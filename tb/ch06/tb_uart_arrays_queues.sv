@@ -128,6 +128,9 @@ module tb_uart_arrays_queues;
             $error("QUEUE_NOT_EMPTY remain=%0d", expected_q.size());
         end
 
+        // (추가) 큐가 비어 있어도 IDLE·STALL 검사가 누락될 수 있다.
+        if (checks != 11)
+            $fatal(1, "FAIL COUNT checks=%0d expected=11", checks);
         if (failures == 0) begin
             $display("PASS checks=%0d failures=0 queue=0", checks);
             $finish;
