@@ -26,9 +26,10 @@ mkdir -p "$OUT_DIR"
 verilator --version | tee "$OUT_DIR/tool_version.txt"
 
 # --timing: 이벤트·시간 제어를 활성화한다.
-# --trace: VCD 파형 출력 기능을 활성화한다.
+# --trace 및 -DVCD: 파형 기록을 활성화한다.
+# -Wno-TIMESCALEMOD: 시간 지연 없는 원본 DUT의 timescale 누락 경고만 제외한다.
 # 컴파일 오류가 나면 clocking 지원이 되는 Verilator 버전인지 확인한다.
-verilator --binary --timing --trace --top-module tb_uart_interface \
+verilator --binary --timing --trace -DVCD -Wno-TIMESCALEMOD --top-module tb_uart_interface \
   --Mdir "$OUT_DIR/obj_dir" \
   "$IF_PATH" "$DUT_PATH" "$TB_PATH" \
   2>&1 | tee "$OUT_DIR/build.log"
