@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v52",
+  "version": "v53",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -189,9 +189,9 @@
       "id": "ch21",
       "number": 21,
       "title": "UVM 레지스터 추상화",
-      "subtitle": "RAL·Adapter·Predictor 기반 AXI4-Lite 레지스터 Frontdoor 검증",
+      "subtitle": "RAL·독립 Monitor/Predictor·CONTROL 필드 모델 및 Frontdoor 10거래 검증",
       "slug": "ch21_uvm_register_abstraction",
-      "version": "v01",
+      "version": "v02",
       "source": "tb/ch21/tb_axi_uvm_ral.sv"
     },
     {
