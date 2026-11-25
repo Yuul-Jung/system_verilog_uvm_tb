@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v33",
+  "version": "v34",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -38,7 +38,7 @@
       "title": "PASS/FAIL 자동 판정",
       "subtitle": "기존 PWM 코어의 기대값·실제 출력 자동 비교",
       "slug": "ch04_pass_fail_automation",
-      "version": "v02",
+      "version": "v03",
       "source": "tb/ch04/tb_pwm_pass_fail.sv"
     },
     {
