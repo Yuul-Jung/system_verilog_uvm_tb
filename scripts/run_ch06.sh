@@ -22,7 +22,7 @@ fi
 
 mkdir -p "$OUT_DIR"
 # SystemVerilog 패키지를 먼저 지정해야 import가 해석된다.
-iverilog -g2012 -s tb_uart_arrays_queues \
+iverilog -g2012 -DVCD -s tb_uart_arrays_queues \
   -o "$OUT_DIR/simulation.vvp" "$PKG_PATH" "$DUT_PATH" "$TB_PATH"
 
 # pipefail로 시뮬레이터의 실패 종료 코드를 유지한다.
