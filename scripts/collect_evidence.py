@@ -17,6 +17,52 @@ ROOT = Path(__file__).resolve().parent.parent
 KEY_LINE = re.compile(r"PASS|OBSERVATION ONLY|OBSERVED |DETECTED|UVM_FATAL.*\[|"
                       r"UVM_(ERROR|FATAL)\s*:|^POS |^EVENT |^t=|COVERAGE|REJECT")
 
+# (추가) 승인 기준은 manifest의 자기 선언이 아니라 실제 장별 실행 계약이다.
+NORMAL_RESULTS = {
+    1: {"output.log": "=== CH01 END: OBSERVATION ONLY ==="},
+    2: {"output.log": "=== CH02 END: OBSERVATION ONLY ==="},
+    3: {"output.log": "=== CH03 END: OBSERVATION ONLY ==="},
+    4: {"output.log": "PASS checks=11 errors=0"},
+    5: {"output.log": "PASS checks=6 failures=0"},
+    6: {"output.log": "PASS checks=11 failures=0 queue=0"},
+    7: {"output.log": "CH07 PASS: 4 cases checked"},
+    8: {"output.log": "CH08 PASS: 4 cases checked"},
+    9: {"output.log": "PASS CH09 score_cycles=72 scenarios=6"},
+    10: {"normal.log": "PASS CH10 requests=3 checks=48"},
+    11: {"ch11.log": "PASS CH11 SVA checks=4"},
+    12: {"output.log": "PASS CH12 cases=12 coverage=100.00%"},
+    13: {"simulation.log": "PASS CH13 accepted=3 checks=14"},
+    14: {"simulation.log": "PASS CH14 tx=18 rx=16+17 overrun=1 reset=1"},
+    15: {"simulation.log": "PASS CH15 commits=7 checks=18"},
+    16: {"simulation.log": "PASS CH16 cycles=21 basic_valid=12 pipe_valid=10"},
+    17: {"normal.log": "PASS CH17 checks=8"},
+    18: {"normal.log": "PASS CH18 checks=3 samples=24"},
+    19: {"normal.log": "PASS CH19 requests=3 applied=3 samples=24"},
+    20: {"normal.log": "PASS CH20 factory=traced plan=2,6,0 applied=3 samples=24",
+         "alt.log": "PASS CH20 factory=traced plan=1,8,3 applied=3 samples=24"},
+    21: {"normal.log": "PASS CH21 RAL reads=7 writes=3"},
+    22: {"normal.log": "PASS CH22 AXI_W=6 AXI_R=13 IRQ=4 RESET=2 COLLISION=1 ZERO=1"},
+    23: {"simulation.log": "PASS CH23 cases=8 rejected=4"},
+    24: {"seed_1.log": "PASS CH24 seed=1 checks=32 accepted=9",
+         "seed_7.log": "PASS CH24 seed=7 checks=32 accepted=11",
+         "seed_42.log": "PASS CH24 seed=42 checks=32 accepted=9"},
+}
+NEGATIVE_RESULTS = {
+    (10, "fault"): ("fault_injection.log", r"FATAL: .*DETECTED_INJECTED_FAULT dut=1 measured=0"),
+    (10, "timeout"): ("apply_timeout.log", r"FATAL: .*DETECTED_APPLY_TIMEOUT duty=8 deadline=10clks"),
+    (11, "sva"): ("ch11_negative.log", r"Fatal: DETECTED_SVA_PENDING t=55"),
+    (17, "NO_VIF"): ("negative.log", r"UVM_FATAL\b.*\[NOVIF\] pwm_if was not provided"),
+    (18, "INVALID_DUTY"): ("negative.log", r"UVM_FATAL\b.*\[INVALID_DUTY\] duty=9 completed=1"),
+    (19, "CORRUPT_SAMPLE"): ("negative.log", r"UVM_FATAL\b.*\[SB_PWM\] t=126 phase=2 expected=0 got=1"),
+    (20, "NO_OVERRIDE"): ("NO_OVERRIDE.log", r"UVM_FATAL\b.*\[FACTORY\] Driver type override was ignored"),
+    (20, "NO_CFG"): ("NO_CFG.log", r"UVM_FATAL\b.*\[NO_CFG\] Driver config not found"),
+    (20, "EARLY_DROP"): ("EARLY_DROP.log", r"UVM_FATAL\b.*\[COUNTS\] Incomplete verification samples=17"),
+    (21, "NO_PREDICT"): ("negative.log", r"UVM_FATAL\b.*\[PREDICT_WRITE\] addr=00000010 expected=11223344"),
+    (22, "CORRUPT_IRQ"): ("negative.log", r"UVM_FATAL\b.*\[IRQ_MISMATCH\] status=10 expected=11 collisions=1"),
+    (24, "fault"): ("negative.log", r"FATAL: .*DETECTED_INJECTED_FAULT case=9"),
+}
+NORMAL_FAILURE = r"^(?:FATAL:|Fatal:|FAIL\b|ERROR:|Error:|UVM_(?:ERROR|FATAL)\b(?!\s*:))"
+
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -51,7 +97,7 @@ def build_dir(number):
     return parent / "xsim" if number == 11 else parent
 
 
-def log_files(number, folder):
+def log_names(number):
     if number < 7 or number == 9:
         names = ["output.log"]
     elif number in (7, 8):
@@ -72,7 +118,47 @@ def log_files(number, folder):
         names = ["compile.log", "seed_1.log", "seed_7.log", "seed_42.log", "negative.log", "report.json"]
     else:
         names = ["simulation.log"]
-    return [folder / name for name in names if (folder / name).is_file()]
+    return names
+
+
+def log_files(number, folder):
+    return [folder / name for name in log_names(number) if (folder / name).is_file()]
+
+
+def required_sources():
+    chapters = json.loads((ROOT / "course.json").read_text())["chapters"]
+    sources = {ROOT / c["source"] for c in chapters}
+    if len(chapters) != 24 or len(sources) != 24:
+        raise ValueError("course.json must identify 24 primary TB files")
+    # 파일이 삭제되어도 필수 집합에서 사라지지 않도록 경로를 먼저 정의한다.
+    rtl = ("axi4lite_slave_adapter.v custom_register_bank.v dsp_multiplier.v mac_core.v "
+           "mac_pipeline_core.v npu_dsp_mac_lane.v npu_engine4.v pwm_core.v uart_core.v "
+           "uart_echo_controller.v uart_rx.v uart_tx.v").split()
+    sources.update(ROOT / "reference_rtl" / name for name in rtl)
+    sources.update(ROOT / (f"tb/ch{n:02d}/run_ch{n:02d}.sh" if n in (11, 12)
+                           else f"scripts/run_ch{n:02d}.sh") for n in range(1, 25))
+    sources.update(ROOT / name for name in (
+        "scripts/setup_env.sh", "scripts/run_chapter.sh", "scripts/run_ch24.py",
+        "scripts/ch16_reference.py", "tb/ch06/uart_expect_pkg.sv",
+        "tb/ch07/uart_stream_if.sv", "tb/ch09/pwm_reference_model.sv"))
+    return sorted(sources)
+
+
+def negative_diagnostic(number, name, text):
+    pattern = NEGATIVE_RESULTS[number, name][1]
+    diagnostics = re.findall(r"^(?:FATAL:|Fatal:|UVM_FATAL\b(?!\s*:))[^\n]*", text, re.M)
+    if 17 <= number <= 22:
+        for severity, expected in (("ERROR", "0"), ("FATAL", "1")):
+            if re.findall(rf"^UVM_{severity}\s*:\s*(\d+)\s*$", text, re.M) != [expected]:
+                return False
+    return (len(diagnostics) == 1 and re.fullmatch(pattern + r"\s*", diagnostics[0]) is not None
+            and not re.search(rf"\bPASS CH{number:02d}\b|\bCH{number:02d} PASS:", text)
+            and not re.search(r"^(?:FAIL\b|ERROR:|Error:|UVM_ERROR\b(?!\s*:))", text, re.M))
+
+
+def negative_exit(number, code):
+    # XSIM의 Fatal은 버전에 따라 0 또는 1, Icarus의 주입 시험은 반드시 1이다.
+    return type(code) is int and code in ((1,) if number in (10, 24) else (0, 1))
 
 
 def snapshot_logs(number, bundle, prefix):
@@ -85,30 +171,120 @@ def snapshot_logs(number, bundle, prefix):
 
 
 def verify(bundle):
-    manifest = json.loads((bundle / "manifest.json").read_text())
     failures = []
-    for chapter in manifest["chapters"]:
-        for record in chapter["logs"] + chapter["legacy_logs"]:
-            path = bundle / record["public_path"]
-            if not path.is_file() or sha(path.read_bytes()) != record["public_sha256"]:
-                failures.append(record["public_path"])
-    for case in manifest.get("case_probes", []):
-        record = case["log"]
-        path = bundle / record["public_path"]
-        if sha(path.read_bytes()) != record["public_sha256"]:
-            failures.append(record["public_path"])
-    for name, digest in manifest["sources_sha256"].items():
-        if sha((ROOT / name).read_bytes()) != digest:
-            failures.append(name)
-    audit = bundle / "audit_sources.json"
-    if audit.is_file():
-        for name, digest in json.loads(audit.read_text())["files_sha256"].items():
-            if sha((ROOT / name).read_bytes()) != digest:
-                failures.append(name)
+
+    def relative_file(base, name):
+        path = base / name
+        if Path(name).is_absolute() or not path.resolve().is_relative_to(base.resolve()):
+            raise ValueError("file path escapes evidence/source root")
+        return path
+
+    def checked_log(record):
+        name = record["public_path"]
+        path = relative_file(bundle, name)
+        if not path.is_file():
+            failures.append(f"missing log: {name}")
+            return ""
+        data = path.read_bytes()
+        if sha(data) != record["public_sha256"]:
+            failures.append(f"log SHA256: {name}")
+        return data.decode("utf-8", errors="replace")
+
+    try:
+        manifest = json.loads((bundle / "manifest.json").read_text())
+        chapters = manifest["chapters"]
+        ids = [c["chapter"] for c in chapters]
+        if (len(ids) != 24 or any(type(n) is not int for n in ids)
+                or set(ids) != set(range(1, 25))):
+            failures.append("chapters must contain 01..24 exactly once")
+        current_logs = {}
+        for chapter in chapters:
+            number = chapter["chapter"]
+            if type(number) is not int or number not in NORMAL_RESULTS:
+                failures.append("invalid chapter ID")
+                continue
+            status = "EXECUTED_OBSERVATION" if number <= 3 else "PASS"
+            if (chapter.get("status") != status or type(chapter.get("exit_code")) is not int
+                    or chapter["exit_code"] != 0):
+                failures.append(f"CH{number:02d}: invalid status/exit_code")
+            logs = {r["public_path"]: checked_log(r) for r in chapter["logs"]}
+            if len(logs) != len(chapter["logs"]):
+                failures.append(f"CH{number:02d}: duplicate log path")
+            current_logs.update(logs)
+            prefix = f"runs/ch{number:02d}/"
+            for name in log_names(number) + ["runner.txt"]:
+                if prefix + name not in logs:
+                    failures.append(f"missing required log: {prefix + name}")
+                elif name not in ("compile.log", "build.log") and not logs[prefix + name].strip():
+                    failures.append(f"empty required log: {prefix + name}")
+            for name, marker in NORMAL_RESULTS[number].items():
+                text = logs.get(prefix + name, "")
+                start = r"^UVM_INFO\b[^\n]*\[RESULT\]\s+" if 17 <= number <= 22 else "^"
+                if (not re.search(start + re.escape(marker) + r"\s*$", text, re.M)
+                        or re.search(NORMAL_FAILURE, text, re.M)):
+                    failures.append(f"CH{number:02d}: normal completion/diagnostic: {name}")
+                if 17 <= number <= 22:
+                    for severity in ("ERROR", "FATAL"):
+                        counts = re.findall(rf"^UVM_{severity}\s*:\s*(\d+)\s*$", text, re.M)
+                        if counts != ["0"]:
+                            failures.append(f"CH{number:02d}: UVM_{severity} not zero: {name}")
+            for record in chapter.get("legacy_logs", []):
+                checked_log(record)
+
+        cases = manifest.get("case_probes", [])
+        keys = [(c["chapter"], c["name"]) for c in cases]
+        if (len(keys) != 12 or any(type(n) is not int for n, _ in keys)
+                or set(keys) != set(NEGATIVE_RESULTS)):
+            failures.append("case_probes must contain all 12 dedicated cases exactly once")
+        probe_paths = []
+        for case in cases:
+            number, name = case["chapter"], case["name"]
+            if type(number) is not int or (number, name) not in NEGATIVE_RESULTS:
+                failures.append("unknown negative case")
+                continue
+            text = checked_log(case["log"])
+            path = case["log"]["public_path"]
+            probe_paths.append(path)
+            if path != f"probes/ch{number:02d}_{name}.txt":
+                failures.append(f"negative log path: CH{number:02d}/{name}")
+            if (case.get("status") != "PASS_NEG" or not negative_exit(number, case.get("exit_code"))
+                    or not negative_diagnostic(number, name, text)):
+                failures.append(f"negative status/exit/diagnostic: CH{number:02d}/{name}")
+        if len(probe_paths) != len(set(probe_paths)):
+            failures.append("duplicate negative log path")
+        for (number, name), (log_name, _) in NEGATIVE_RESULTS.items():
+            if not negative_diagnostic(number, name, current_logs.get(f"runs/ch{number:02d}/{log_name}", "")):
+                failures.append(f"suite negative diagnostic: CH{number:02d}/{name}")
+
+        report = json.loads(current_logs.get("runs/ch24/report.json", "{}"))
+        expected = {"seed_1": 0, "seed_7": 0, "seed_42": 0, "negative_injection": 1}
+        report_cases = report.get("cases", [])
+        if (report.get("status") != "PASS" or report.get("seeds") != [1, 7, 42]
+                or len(report_cases) != 4 or {c["name"] for c in report_cases} != set(expected)
+                or any(c.get("status") != "PASS" or type(c.get("exit_code")) is not int
+                       or c["exit_code"] != expected[c["name"]] for c in report_cases)):
+            failures.append("CH24: incomplete/failed report.json")
+
+        sources = manifest["sources_sha256"]
+        required = {p.relative_to(ROOT).as_posix() for p in required_sources()}
+        if not required or not required.issubset(sources):
+            failures.append("missing required sources_sha256 entries")
+        for name, digest in sources.items():
+            path = relative_file(ROOT, name)
+            if not path.is_file() or sha(path.read_bytes()) != digest:
+                failures.append(f"source SHA256: {name}")
+        audit = bundle / "audit_sources.json"
+        if audit.is_file():
+            for name, digest in json.loads(audit.read_text())["files_sha256"].items():
+                path = relative_file(ROOT, name)
+                if not path.is_file() or sha(path.read_bytes()) != digest:
+                    failures.append(f"audit source SHA256: {name}")
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        failures.append(f"malformed/incomplete evidence: {sanitize(str(exc))}")
     if failures:
-        print("FAIL evidence hashes: " + ", ".join(failures))
+        print("FAIL evidence: " + ", ".join(failures))
         return 1
-    print(f"PASS evidence hashes: {len(manifest['chapters'])} chapters, sources and published logs")
+    print("PASS evidence: 24 chapters, 12 negative cases, required sources/logs and SHA256")
     return 0
 
 
@@ -134,9 +310,7 @@ def probe_cases(bundle):
         path = private / f"ch{n:02d}_{name}.txt"
         path.write_bytes(result.stdout)
         text = result.stdout.decode(errors="replace")
-        passed = marker in text and not re.search(rf"PASS CH{n:02d}\b", text)
-        if n in (10, 24):
-            passed = passed and result.returncode == 1
+        passed = negative_exit(n, result.returncode) and negative_diagnostic(n, name, text)
         cases.append(dict(chapter=n, name=name, command=command,
                           cwd=folder.relative_to(ROOT).as_posix(), exit_code=result.returncode,
                           expected_marker=marker, status="PASS_NEG" if passed else "FAIL",
@@ -160,13 +334,7 @@ def main():
         return probe_cases(bundle)
     bundle.mkdir(parents=True, exist_ok=False)
     raw_dir = Path(tempfile.mkdtemp(prefix="evidence_v59_", dir=ROOT / ".build"))
-    sources = {p for directory in ("reference_rtl", "tb")
-                      for p in (ROOT / directory).rglob("*")
-                      if p.is_file() and p.suffix in (".v", ".sv", ".svh", ".sh")}
-    sources.update((ROOT / "scripts").glob("run_ch[0-9][0-9].sh"))
-    sources.update(ROOT / "scripts" / name for name in (
-        "setup_env.sh", "run_chapter.sh", "run_ch24.py", "ch16_reference.py"))
-    sources = sorted(sources)
+    sources = required_sources()
     manifest = dict(schema=1, base_commit=subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         created_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -211,6 +379,8 @@ def main():
                              cwd=ROOT, capture_output=True, text=True, check=False)
     manifest["tools"]["version_output"] = sanitize(versions.stdout)
     (bundle / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+    if probe_cases(bundle):
+        return 1
     return verify(bundle)
 
 
