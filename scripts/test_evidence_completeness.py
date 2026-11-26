@@ -284,6 +284,18 @@ class EvidenceCompletenessTests(unittest.TestCase):
         data["chapters"].reverse()
         self.verify(data, 1, "SHA256SUMS: manifest.json", refresh=False)
 
+    def test_post_run_log_tampering(self):
+        # (추가) 실행 후 변경 기록의 재실행 로그가 바뀌면 거절한다.
+        record = json.loads(collect_evidence.POST_RUN_CHANGES.read_text())
+        logs = [l for c in record["changes"] for l in (c.get("rerun") or {}).get("logs", {}).values()]
+        if not logs:
+            self.skipTest("no post-run logs")
+        target = collect_evidence.POST_RUN_CHANGES.parent / logs[0]["public_path"]
+        original = target.read_bytes()
+        self.addCleanup(target.write_bytes, original)
+        target.write_bytes(original + b"TAMPERED\n")
+        self.verify(self.original, 1, f"post-run log SHA256: {logs[0]['public_path']}")
+
     def test_malformed_evidence_fails_cleanly(self):
         self.verify({}, 1, "malformed/incomplete evidence")
         data = copy.deepcopy(self.original)

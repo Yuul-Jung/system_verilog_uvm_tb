@@ -209,6 +209,13 @@ class ReviewTests(unittest.TestCase):
                              "file path escapes evidence/source root")
             self.assertEqual(sanitize("/srv/root/x root@pc"), "/srv/[USER]/x [USER]@pc")
 
+    def test_evidence_redaction_personal_account_everywhere(self):
+        # (추가) 개인 계정명은 XCRG 표 칸처럼 문맥이 없어도 지운다.
+        from unittest.mock import patch
+        with patch("getpass.getuser", return_value="jungbw"):
+            self.assertEqual(sanitize("<td>jungbw</td> created by jungbw"),
+                             "<td>[USER]</td> created by [USER]")
+
     def test_evidence_hash_rejects_tampered_log(self):
         source = ROOT / 'docs/evidence/v59'
         if not (source / 'manifest.json').is_file():

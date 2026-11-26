@@ -66,6 +66,9 @@ NORMAL_FAILURE = (r"^\s*(?:FATAL:|Fatal:|FAIL\b|ERROR:|Error:|UVM_(?:ERROR|FATAL
                   r"|^(?:\[[^\]\n]*\]\s*)?%(?:Error|Fatal)\b")
 # (추가) 실행 후 바뀐 소스는 이 기록에 실행 당시/현재 해시와 재검증 범위를 남긴다.
 POST_RUN_CHANGES = ROOT / "docs/evidence/POST_RUN_CHANGES_v59.json"
+# 범용 시스템 계정명은 일반 단어와 겹치므로 식별 문맥에서만 지운다.
+GENERIC_ACCOUNTS = {"root", "user", "admin", "ubuntu", "runner", "vscode", "codespace",
+                    "developer", "student", "guest", "test", "tester"}
 
 
 def sha(data):
@@ -79,12 +82,15 @@ def sanitize(text):
     text = re.sub(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}", "<EMAIL>", text)
     text = re.sub(r"\b(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)\b", "<TOKEN>", text)
     # XCRG HTML과 shell trace에도 계정명·호스트명이 들어갈 수 있다.
-    # (변경) 계정명은 경로·이메일·환경변수처럼 계정을 식별하는 문맥에서만 지운다.
-    # 단어 단위 전역 치환은 계정명이 root·user처럼 흔한 단어일 때 본문을 훼손한다.
+    # (변경) 개인 계정명은 단어 단위로 모두 지운다(XCRG 표의 사용자 칸 포함).
+    # root·user 같은 범용 계정명은 본문 단어와 겹치므로 식별 문맥에서만 지운다.
     host = re.escape(socket.gethostname())
     if host:
         text = re.sub(rf"(?<![\w.-]){host}(?![\w-])", "[HOST]", text)
-    user = re.escape(getpass.getuser())
+    name = getpass.getuser()
+    user = re.escape(name)
+    if name and name.lower() not in GENERIC_ACCOUNTS:
+        return re.sub(rf"\b{user}\b", "[USER]", text)
     text = re.sub(rf"(?<=[/\\]){user}(?=[/\\\s\"':]|$)", "[USER]", text, flags=re.M)
     text = re.sub(rf"(?<![\w.-]){user}(?=@)", "[USER]", text)
     text = re.sub(rf"\b(USER|LOGNAME|USERNAME|HOME)=([^\s]*){user}\b", r"\1=\2[USER]", text)
@@ -312,6 +318,12 @@ def verify(bundle):
             for name, digest in json.loads(audit.read_text())["files_sha256"].items():
                 if not source_matches(name, digest):
                     failures.append(f"audit source SHA256: {name}")
+        # (추가) 실행 후 변경 기록이 가리키는 재실행 로그도 해시를 대조한다.
+        for change in changed.values():
+            for record in (change.get("rerun") or {}).get("logs", {}).values():
+                path = relative_file(POST_RUN_CHANGES.parent, record["public_path"])
+                if not path.is_file() or sha(path.read_bytes()) != record["sha256"]:
+                    failures.append(f"post-run log SHA256: {record['public_path']}")
         # (추가) 공개 체크섬 목록도 직접 대조한다.
         sums = bundle / "SHA256SUMS"
         if sums.is_file():

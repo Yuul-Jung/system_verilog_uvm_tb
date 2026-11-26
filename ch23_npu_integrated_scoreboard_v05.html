@@ -489,8 +489,7 @@ CHECK len=64 cycles=130 class=0
 REJECT len=65
 REJECT len=1
 PASS CH23 cases=8 rejected=4
-/home/claude/system_verilog_uvm_tb/tb/ch23/tb_npu_integrated.sv:255: $finish called at 9026000 (1ps)
-</code></pre></div><p>출력은 정상 동작 시 기대되는 예시이며 실제 시뮬레이션 실행 결과가 아닙니다. <code>iverilog</code> 또는 <code>vvp</code>가 없으면 스크립트는 <code>NOT_RUN</code>으로 종료합니다.</p>
+</code></pre></div><p>위 출력은 개정 TB를 Icarus Verilog 12.0으로 실행한 출력에서 VCD 안내 행과 시뮬레이터 종료 행을 뺀 것입니다. <code>iverilog</code> 또는 <code>vvp</code>가 없으면 스크립트는 <code>NOT_RUN</code>으로 종료합니다.</p>
 <div class="execution-evidence" data-evidence="v59"><h3>2026-11-26 실제 실행 결과</h3><p>Icarus Verilog 12.0 · 종료 코드 0 · <strong>PASS</strong>. v05의 TB(편향 4종, 연산 중 쓰기, 전체 적재 후 길이 65 거부)를 같은 도구로 다시 실행한 결과입니다. 정상 실행과 정의된 오류 검출 조건을 장별 실행기로 확인했습니다.</p><div class="codeblock"><div class="codebar"><span>저장소 루트 · Bash · 실행 재현 명령</span></div><pre tabindex="0"><code>bash scripts/run_chapter.sh 23</code></pre></div><div class="codeblock"><div class="codebar"><span>실제 로그 발췌 · 예상 출력과 구별</span></div><pre tabindex="0"><code>BUSY_WRITE rejected error_pulse=1 result_kept=1
 REJECT len=0
 REJECT len=3

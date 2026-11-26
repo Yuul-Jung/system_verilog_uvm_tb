@@ -189,7 +189,7 @@
     {
       "path": "scripts/collect_evidence.py",
       "run_sha256": "a9b19e5e80f98fb0f6e4cbb6f0dcd74adc73f5a045600b89b0ce35481b9e538f",
-      "current_sha256": "f3ceef18ed4526ed78bac5e9b1d04e8f1ce935571a4e5fcd9a2a7875b8520655",
+      "current_sha256": "1f8fc7a9c7ccf043a03e0e65ea683480e6a7cd2dcf18aed157151d600c5d57d9",
       "chapters": [],
       "reason": "D-05·D-06: 오류 형식 확장, 완료 행 1회, SHA256SUMS 대조, 실행 후 변경 기록 대조, 계정명 문맥 치환."
     },
@@ -257,14 +257,14 @@
     {
       "path": "scripts/test_evidence_completeness.py",
       "run_sha256": "980ba1494cf02a9dc3f31f0bccc87dec07eba04c74e1dbba4858f731a9f2d483",
-      "current_sha256": "f7e4488dc39ad0db1751a20b933dcedbc4a99d0ab5f8314881fa391de2a913d8",
+      "current_sha256": "e0a2ba05aabe6c243057f522d2538c0a372683dfaf73c459e51d7a7edda1e8b2",
       "chapters": [],
       "reason": "D-05: 변형본이 SHA256SUMS도 다시 계산하도록 픽스처 갱신, 체크섬 불일치 시험 추가."
     },
     {
       "path": "scripts/test_review_fixes.py",
       "run_sha256": "7e6b95d221d121e083b25f48a81876061f13c5f290fa720b16b1c63ce19e174d",
-      "current_sha256": "bab1898d262bc136a0bfe2a2def05d81d6d2d744f1e2adfc59795a7791872788",
+      "current_sha256": "d98864a34512ecfb29cfb29e5384d914d7a25817d0788f0fc05ffc2617739725",
       "chapters": [],
       "reason": "D-06: 계정명 치환 시험을 문맥 기준으로 갱신하고 root 단어 보존 시험 추가."
     },
