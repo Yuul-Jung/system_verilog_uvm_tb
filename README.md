@@ -2,7 +2,7 @@
 
 - **교육과정:** 6부 24장. 기존 RTL을 보존하고 독립 테스트벤치로 검증합니다.
 - **진입점:** [전체 학습안내서](index.html) · [전체 편성](CURRICULUM.md) · [설계 대응표](docs/DESIGN_VERIFICATION_MAP.md)
-- **검증 상태:** 24장 실제 실행 완료(관찰 3장·자동 PASS 21장), 부정 시험 12건 검출. [v59 공개 증거](docs/evidence/v59/README.md)와 [종합 보고서](docs/COURSE_VALIDATION_v03.md)에서 확인합니다.
+- **검증 상태:** 24장 실제 실행 완료(관찰 3장·자동 PASS 21장), 부정 시험 12건 검출. [v59 공개 증거](docs/evidence/v59/README.md)와 [종합 보고서](docs/COURSE_VALIDATION_v03.md)에서 확인합니다. v60에서 제11·14·23장 TB와 실행 스크립트를 고친 내역과 재실행 범위는 [실행 후 변경 기록](docs/evidence/POST_RUN_CHANGES_v59.md)에 있습니다(제11장 개정 TB의 XSIM 재실행은 NOT_RUN).
 
 ## 최신 장별 자료
 
@@ -18,10 +18,10 @@
 | 2 | 08 | [객체와 제약 기반 입력](ch08_objects_constraints_v04.html) | [tb/ch08/tb_uart_objects.sv](tb/ch08/tb_uart_objects.sv) |
 | 3 | 09 | [참조 모델·스코어보드](ch09_reference_model_scoreboard_v04.html) | [tb/ch09/tb_pwm_scoreboard.sv](tb/ch09/tb_pwm_scoreboard.sv) |
 | 3 | 10 | [경계조건·오류 주입](ch10_corner_reset_timeout_v05.html) | [tb/ch10/tb_pwm_corner_reset_timeout.sv](tb/ch10/tb_pwm_corner_reset_timeout.sv) |
-| 3 | 11 | [시간적 속성 검사](ch11_temporal_assertions_v04.html) | [tb/ch11/tb_pwm_sva.sv](tb/ch11/tb_pwm_sva.sv) |
+| 3 | 11 | [시간적 속성 검사](ch11_temporal_assertions_v05.html) | [tb/ch11/tb_pwm_sva.sv](tb/ch11/tb_pwm_sva.sv) |
 | 3 | 12 | [기능 커버리지](ch12_functional_coverage_v03.html) | [tb/ch12/tb_pwm_coverage.sv](tb/ch12/tb_pwm_coverage.sv) |
 | 4 | 13 | [UART 스트림 검증](ch13_uart_stream_verification_v03.html) | [tb/ch13/tb_uart_stream.sv](tb/ch13/tb_uart_stream.sv) |
-| 4 | 14 | [FIFO 및 흐름 제어](ch14_fifo_flow_control_v03.html) | [tb/ch14/tb_uart_fifo_flow.sv](tb/ch14/tb_uart_fifo_flow.sv) |
+| 4 | 14 | [FIFO 및 흐름 제어](ch14_fifo_flow_control_v04.html) | [tb/ch14/tb_uart_fifo_flow.sv](tb/ch14/tb_uart_fifo_flow.sv) |
 | 4 | 15 | [AXI4-Lite 레지스터 검증](ch15_axi4lite_register_verification_v03.html) | [tb/ch15/tb_axi4lite_registers.sv](tb/ch15/tb_axi4lite_registers.sv) |
 | 4 | 16 | [MAC·NPU 정수 연산 검증](ch16_mac_npu_integer_verification_v03.html) | [tb/ch16/tb_mac_integer.sv](tb/ch16/tb_mac_integer.sv) |
 | 5 | 17 | [최소 UVM 환경](ch17_minimal_uvm_environment_v04.html) | [tb/ch17/tb_pwm_uvm.sv](tb/ch17/tb_pwm_uvm.sv) |
@@ -30,7 +30,7 @@
 | 5 | 20 | [Factory·Config·Objection](ch20_factory_config_objection_v04.html) | [tb/ch20/tb_pwm_factory_config_objection.sv](tb/ch20/tb_pwm_factory_config_objection.sv) |
 | 6 | 21 | [UVM 레지스터 추상화](ch21_uvm_register_abstraction_v04.html) | [tb/ch21/tb_axi_uvm_ral.sv](tb/ch21/tb_axi_uvm_ral.sv) |
 | 6 | 22 | [다중 Agent·VIP](ch22_multi_agent_vip_v05.html) | [tb/ch22/tb_axi_multiagent_irq.sv](tb/ch22/tb_axi_multiagent_irq.sv) |
-| 6 | 23 | [NPU 통합 정답 비교](ch23_npu_integrated_scoreboard_v04.html) | [tb/ch23/tb_npu_integrated.sv](tb/ch23/tb_npu_integrated.sv) |
+| 6 | 23 | [NPU 통합 정답 비교](ch23_npu_integrated_scoreboard_v05.html) | [tb/ch23/tb_npu_integrated.sv](tb/ch23/tb_npu_integrated.sv) |
 | 6 | 24 | [회귀·CI·검증 보고](ch24_regression_ci_reporting_v04.html) | [tb/ch24/tb_uart_regression.sv](tb/ch24/tb_uart_regression.sv) |
 
 ## Ubuntu 실습 시작

@@ -13,6 +13,9 @@ module tb_pwm_sva;
   // (추가) 속성의 선행 조건 발생 횟수. SVA 엔진의 통과 횟수와 구별한다.
   integer reset_hits = 0, disabled_hits = 0, apply_hits = 0;
   integer zero_hits = 0, full_hits = 0;
+  // (추가) enable=0이면서 duty>0인 표본. enable 차단이 빠지면 출력이
+  // HIGH가 되는 구간이므로 ap_disabled_low가 결함을 구별할 수 있다.
+  integer disabled_duty_hits = 0;
 
   pwm_core #(.RESET_PERIOD(32'd8)) dut (
     .clk(clk), .resetn(resetn), .cfg_apply(cfg_apply),
@@ -73,6 +76,8 @@ module tb_pwm_sva;
              active_enable, active_polarity}) === 1'bx)
         $fatal(1, "FAIL UNKNOWN_OUTPUT");
       if (!active_enable) disabled_hits++;
+      if (!active_enable && !active_polarity && active_duty != 32'd0)
+        disabled_duty_hits++;
       if (cfg_apply) apply_hits++;
       if (active_enable && !active_polarity &&
           active_duty == 32'd0) zero_hits++;
@@ -122,12 +127,24 @@ module tb_pwm_sva;
     repeat (2) @(negedge clk);
     resetn = 1;
     apply_duty(32'd2);
+    // (추가) enable=0, duty=4를 적용한다. 정상 DUT의 출력은 LOW를 유지한다.
+    @(negedge clk);
+    cfg_enable = 0;
+    cfg_duty = 32'd4;
+    cfg_apply = 1;
+    @(negedge clk);
+    cfg_apply = 0;
+    repeat (12) @(negedge clk);
+    if (active_enable !== 1'b0 || active_duty !== 32'd4 || pending !== 1'b0)
+      $fatal(1, "FAIL DISABLE_APPLY");
     // (추가) 선행 조건 미발생으로 인한 공허한 통과를 방지한다.
-    if (checks != 4 || apply_hits != 4 || reset_hits == 0 ||
-        disabled_hits == 0 || zero_hits == 0 || full_hits == 0)
+    if (checks != 4 || apply_hits != 5 || reset_hits == 0 ||
+        disabled_hits == 0 || disabled_duty_hits == 0 ||
+        zero_hits == 0 || full_hits == 0)
       $fatal(1, "FAIL SVA ACTIVATION");
-    $display("ACTIVATION reset=%0d disabled=%0d apply=%0d zero=%0d full=%0d",
-             reset_hits, disabled_hits, apply_hits, zero_hits, full_hits);
+    $display("ACTIVATION reset=%0d disabled=%0d disabled_duty=%0d apply=%0d zero=%0d full=%0d",
+             reset_hits, disabled_hits, disabled_duty_hits, apply_hits,
+             zero_hits, full_hits);
     $display("PASS CH11 SVA checks=%0d", checks);
     $finish;
   end

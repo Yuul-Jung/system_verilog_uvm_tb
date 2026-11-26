@@ -90,6 +90,25 @@ module tb_uart_fifo_flow;
         end
     endtask
 
+    // (추가) stop 비트를 0으로 보내는 손상 프레임. stop 표본 시점까지만 0을
+    // 유지한 뒤 idle(1)로 돌아가므로 새 start로 오인되지 않는다.
+    task automatic send_rx_bad_stop(input [7:0] data);
+        integer i;
+        begin
+            @(negedge clk);
+            rxd=0;
+            repeat(CPB) @(negedge clk);
+            for(i=0;i<8;i=i+1) begin
+                rxd=data[i];
+                repeat(CPB) @(negedge clk);
+            end
+            rxd=0;
+            repeat(CPB-2) @(negedge clk);
+            rxd=1;
+            repeat(CPB*3) @(negedge clk);
+        end
+    endtask
+
     // (변경) DUT의 uart_rx를 재사용하지 않는 독립 8N1 복조기.
     // TX 시작 에지 이후 각 비트 중앙 부근에서 직접 관찰한다.
     reg [7:0] decoded;
@@ -210,6 +229,16 @@ module tb_uart_fifo_flow;
                 $fatal(1,"FAIL RESET_STALE_DATA");
         end
         $display("T4_RESET_PASS");
+
+        // (추가) T5: stop 비트 오류는 framing_error로 보고되고 FIFO에 저장되지 않는다.
+        phase=5;
+        if(fe !== 1'b0) $fatal(1,"FAIL FRAMING_PRECONDITION");
+        send_rx_bad_stop(8'h5a);
+        repeat(CPB*2) @(negedge clk);
+        if(fe !== 1'b1 || ov !== 1'b0 || rx_out_valid !== 1'b0 ||
+           dut.rx_count !== 5'd0)
+            $fatal(1,"FAIL RX_FRAMING fe=%b ov=%b valid=%b",fe,ov,rx_out_valid);
+        $display("T5_RX_FRAMING_PASS fe=1 stored=0");
         if(accepted!=18 || received!=18 || rx_checked!=17)
             $fatal(1,"FAIL FINAL_COUNTS");
         $display("PASS CH14 tx=18 rx=16+17 overrun=1 reset=1");

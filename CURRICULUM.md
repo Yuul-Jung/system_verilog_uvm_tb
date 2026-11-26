@@ -38,8 +38,8 @@
 
 | 장 | 주제 | 핵심 문법·기술 | 기존 DUT 실습 |
 |---|---|---|---|
-| 13 | UART 스트림 검증 | BFM·프레임·전송 오류 | UART Echo 6포트 조합 전달기 |
-| 14 | FIFO 및 흐름 제어 | full/empty·ready/valid·backpressure | UART FIFO |
+| 13 | UART 스트림 검증 | BFM·바이트 거래 순서·대기·X/Z | UART Echo 6포트 조합 전달기 |
+| 14 | FIFO 및 흐름 제어 | full/empty·ready/valid·backpressure·프레이밍 오류 | UART FIFO |
 | 15 | AXI4-Lite 레지스터 검증 | AW/W/B/AR/R·WSTRB | 기존 사용자 AXI IP |
 | 16 | MAC·NPU 정수 연산 검증 | INT8·signed·pipeline·Python 모델 | mac_core·mac_pipeline_core |
 

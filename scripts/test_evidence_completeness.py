@@ -30,9 +30,25 @@ class EvidenceCompletenessTests(unittest.TestCase):
         audit["files_sha256"] = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
                                 for name in audit["files_sha256"]}
         audit_path.write_text(json.dumps(audit))
+        self.refresh_sums()
 
-    def verify(self, manifest, expected, message):
+    def refresh_sums(self):
+        # (추가) 변형본은 manifest와 함께 공개 체크섬도 다시 계산한 공격자를 가정한다.
+        sums = self.bundle / "SHA256SUMS"
+        lines = []
+        for line in sums.read_text().splitlines():
+            _, _, name = line.partition("  ")
+            if not (self.bundle / name).is_file():
+                lines.append(line)
+                continue
+            digest = hashlib.sha256((self.bundle / name).read_bytes()).hexdigest()
+            lines.append(f"{digest}  {name}")
+        sums.write_text("\n".join(lines) + "\n")
+
+    def verify(self, manifest, expected, message, refresh=True):
         (self.bundle / "manifest.json").write_text(json.dumps(manifest))
+        if refresh:
+            self.refresh_sums()
         result = subprocess.run([sys.executable, str(ROOT / "scripts/collect_evidence.py"),
                                  "--verify", "--output", str(self.bundle)],
                                 capture_output=True, text=True)
@@ -260,6 +276,13 @@ class EvidenceCompletenessTests(unittest.TestCase):
                           if r["public_path"].endswith("report.json"))
             self.rewrite_log(target, json.dumps(report))
             self.verify(data, 1, "CH24: incomplete/failed report.json")
+
+    def test_sha256sums_mismatch(self):
+        # (추가) 공개 체크섬 목록과 다른 바이트는 manifest가 맞아도 거절한다.
+        self.verify(self.original, 0, "PASS evidence:")
+        data = copy.deepcopy(self.original)
+        data["chapters"].reverse()
+        self.verify(data, 1, "SHA256SUMS: manifest.json", refresh=False)
 
     def test_malformed_evidence_fails_cleanly(self):
         self.verify({}, 1, "malformed/incomplete evidence")

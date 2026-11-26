@@ -1,0 +1,115 @@
++ set -eo pipefail
++ [[ 1 -ne 1 ]]
++ [[ ! 14 =~ ^(0[1-9]|1[0-9]|2[0-4])$ ]]
++++ dirname scripts/run_chapter.sh
+++ cd scripts/..
+++ pwd
++ COURSE_ROOT=<REPO>
++ chapter=14
++ case "$chapter" in
++ runner=scripts/run_ch14.sh
++ cd <REPO>
++ source scripts/setup_env.sh
+++++ dirname scripts/setup_env.sh
++++ cd scripts/..
++++ pwd
+++ UVM_TB_ROOT=<REPO>
+++ VIVADO_SETTINGS=/tools/Xilinx/Vivado/2024.2/settings64.sh
+++ [[ -f /tools/Xilinx/Vivado/2024.2/settings64.sh ]]
+++ printf 'WARN: Vivado settings not found: %s\n' /tools/Xilinx/Vivado/2024.2/settings64.sh
+WARN: Vivado settings not found: /tools/Xilinx/Vivado/2024.2/settings64.sh
+++ [[ -d <REPO>/.tools/[USER]/usr/bin ]]
+++ [[ -x <REPO>/.tools/verilator-5.054/bin/verilator ]]
+++ export UVM_TB_ROOT PATH
+++ printf 'UVM_TB_ROOT=%s\n' <REPO>
+UVM_TB_ROOT=<REPO>
+++ printf 'VIVADO_SETTINGS=%s\n' /tools/Xilinx/Vivado/2024.2/settings64.sh
+VIVADO_SETTINGS=/tools/Xilinx/Vivado/2024.2/settings64.sh
+++ uvm_tb_check_tools
+++ local tool
+++ local missing=0
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v xvlog
+++ printf '%-10s NOT_FOUND\n' xvlog
+xvlog      NOT_FOUND
+++ missing=1
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v xelab
+++ printf '%-10s NOT_FOUND\n' xelab
+xelab      NOT_FOUND
+++ missing=1
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v xsim
+++ printf '%-10s NOT_FOUND\n' xsim
+xsim       NOT_FOUND
+++ missing=1
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v xcrg
+++ printf '%-10s NOT_FOUND\n' xcrg
+xcrg       NOT_FOUND
+++ missing=1
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v iverilog
++++ command -v iverilog
+++ printf '%-10s %s\n' iverilog /usr/bin/iverilog
+iverilog   /usr/bin/iverilog
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v verilator
+++ printf '%-10s NOT_FOUND\n' verilator
+verilator  NOT_FOUND
+++ missing=1
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v z3
+++ printf '%-10s NOT_FOUND\n' z3
+z3         NOT_FOUND
+++ missing=1
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v python3
++++ command -v python3
+++ printf '%-10s %s\n' python3 /usr/local/bin/python3
+python3    /usr/local/bin/python3
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v make
++++ command -v make
+++ printf '%-10s %s\n' make /usr/bin/make
+make       /usr/bin/make
+++ for tool in xvlog xelab xsim xcrg iverilog verilator z3 python3 make g++
+++ command -v g++
++++ command -v g++
+++ printf '%-10s %s\n' g++ /usr/bin/g++
+g++        /usr/bin/g++
+++ return 1
++ echo 'WARN: 일부 도구가 없습니다. 이 장에 필요한 도구는 장별 실행기가 확인합니다.'
+WARN: 일부 도구가 없습니다. 이 장에 필요한 도구는 장별 실행기가 확인합니다.
++ case "$-" in
++ exec bash -x scripts/run_ch14.sh
++ set -euo pipefail
++++ dirname scripts/run_ch14.sh
+++ cd scripts/..
+++ pwd
++ ROOT=<REPO>
++ RTL=<REPO>/reference_rtl
++ command -v iverilog
++ command -v vvp
++ for file in uart_core.v uart_rx.v uart_tx.v
++ [[ ! -f <REPO>/reference_rtl/uart_core.v ]]
++ for file in uart_core.v uart_rx.v uart_tx.v
++ [[ ! -f <REPO>/reference_rtl/uart_rx.v ]]
++ for file in uart_core.v uart_rx.v uart_tx.v
++ [[ ! -f <REPO>/reference_rtl/uart_tx.v ]]
+++ realpath <REPO>/reference_rtl
++ RTL=<REPO>/reference_rtl
++ mkdir -p <REPO>/.build/ch14
++ cd <REPO>/.build/ch14
++ iverilog -g2012 -DVCD -s tb_uart_fifo_flow -o sim <REPO>/reference_rtl/uart_core.v <REPO>/reference_rtl/uart_rx.v <REPO>/reference_rtl/uart_tx.v <REPO>/tb/ch14/tb_uart_fifo_flow.sv
++ vvp sim
++ tee simulation.log
+VCD info: dumpfile ch14_uart_fifo.vcd opened for output.
+T1_TX_FIFO_PASS accepted=18 received=18
+T2_RX_BACKPRESSURE_PASS checked=16
+T3_RX_OVERRUN_PASS kept=17 dropped=1
+T4_RESET_PASS
+T5_RX_FRAMING_PASS fe=1 stored=0
+PASS CH14 tx=18 rx=16+17 overrun=1 reset=1
+<REPO>/tb/ch14/tb_uart_fifo_flow.sv:245: $finish called at 59950000 (1ps)
++ grep -Fxq 'PASS CH14 tx=18 rx=16+17 overrun=1 reset=1' simulation.log

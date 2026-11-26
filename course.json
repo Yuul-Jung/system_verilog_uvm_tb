@@ -2,7 +2,7 @@
   "site_title": "RTL Testbench · SystemVerilog · UVM 실무 검증",
   "site_description": "기존 RTL 재사용 검증 · 6부 24장",
   "course_code": "SV UVM TB",
-  "version": "v59",
+  "version": "v60",
   "total_planned_chapters": 24,
   "chapters": [
     {
@@ -101,7 +101,7 @@
       "title": "시간적 속성 검사",
       "subtitle": "SVA 속성으로 PWM 시간 계약 검증",
       "slug": "ch11_temporal_assertions",
-      "version": "v04",
+      "version": "v05",
       "source": "tb/ch11/tb_pwm_sva.sv"
     },
     {
@@ -128,7 +128,7 @@
       "title": "FIFO 및 흐름 제어",
       "subtitle": "실제 UART RX/TX FIFO 16바이트, ready/valid, backpressure 검증",
       "slug": "ch14_fifo_flow_control",
-      "version": "v03",
+      "version": "v04",
       "source": "tb/ch14/tb_uart_fifo_flow.sv"
     },
     {
@@ -209,7 +209,7 @@
       "title": "NPU 통합 정답 비교",
       "subtitle": "4뉴런 독립 정수 모델·정확한 지연·최대 길이 64·동점·거부 조건",
       "slug": "ch23_npu_integrated_scoreboard",
-      "version": "v04",
+      "version": "v05",
       "source": "tb/ch23/tb_npu_integrated.sv"
     },
     {

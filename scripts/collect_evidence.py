@@ -61,7 +61,11 @@ NEGATIVE_RESULTS = {
     (22, "CORRUPT_IRQ"): ("negative.log", r"UVM_FATAL\b.*\[IRQ_MISMATCH\] status=10 expected=11 collisions=1"),
     (24, "fault"): ("negative.log", r"FATAL: .*DETECTED_INJECTED_FAULT case=9"),
 }
-NORMAL_FAILURE = r"^(?:FATAL:|Fatal:|FAIL\b|ERROR:|Error:|UVM_(?:ERROR|FATAL)\b(?!\s*:))"
+# (변경) Verilator 형식(`%Error`, `[120] %Fatal`)과 들여 쓴 FAIL 행도 실패로 본다.
+NORMAL_FAILURE = (r"^\s*(?:FATAL:|Fatal:|FAIL\b|ERROR:|Error:|UVM_(?:ERROR|FATAL)\b(?!\s*:))"
+                  r"|^(?:\[[^\]\n]*\]\s*)?%(?:Error|Fatal)\b")
+# (추가) 실행 후 바뀐 소스는 이 기록에 실행 당시/현재 해시와 재검증 범위를 남긴다.
+POST_RUN_CHANGES = ROOT / "docs/evidence/POST_RUN_CHANGES_v59.json"
 
 
 def sha(data):
@@ -75,8 +79,15 @@ def sanitize(text):
     text = re.sub(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}", "<EMAIL>", text)
     text = re.sub(r"\b(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)\b", "<TOKEN>", text)
     # XCRG HTML과 shell trace에도 계정명·호스트명이 들어갈 수 있다.
-    text = text.replace(socket.gethostname(), "[HOST]")
-    text = re.sub(rf"\b{re.escape(getpass.getuser())}\b", "[USER]", text)
+    # (변경) 계정명은 경로·이메일·환경변수처럼 계정을 식별하는 문맥에서만 지운다.
+    # 단어 단위 전역 치환은 계정명이 root·user처럼 흔한 단어일 때 본문을 훼손한다.
+    host = re.escape(socket.gethostname())
+    if host:
+        text = re.sub(rf"(?<![\w.-]){host}(?![\w-])", "[HOST]", text)
+    user = re.escape(getpass.getuser())
+    text = re.sub(rf"(?<=[/\\]){user}(?=[/\\\s\"':]|$)", "[USER]", text, flags=re.M)
+    text = re.sub(rf"(?<![\w.-]){user}(?=@)", "[USER]", text)
+    text = re.sub(rf"\b(USER|LOGNAME|USERNAME|HOME)=([^\s]*){user}\b", r"\1=\2[USER]", text)
     return text
 
 
@@ -170,8 +181,31 @@ def snapshot_logs(number, bundle, prefix):
     return records
 
 
+def post_run_changes():
+    """실행 이후 의도적으로 바뀐 소스. 해시 불일치는 이 기록과 정확히 일치할 때만 허용한다."""
+    if not POST_RUN_CHANGES.is_file():
+        return {}
+    records = json.loads(POST_RUN_CHANGES.read_text())["changes"]
+    return {r["path"]: r for r in records}
+
+
 def verify(bundle):
     failures = []
+    changed = post_run_changes()
+    accepted_changes = set()
+
+    def source_matches(name, recorded):
+        path = relative_file(ROOT, name)
+        if not path.is_file():
+            return False
+        current = sha(path.read_bytes())
+        if current == recorded:
+            return True
+        change = changed.get(name)
+        if change and change.get("run_sha256") == recorded and change.get("current_sha256") == current:
+            accepted_changes.add(name)
+            return True
+        return False
 
     def relative_file(base, name):
         path = base / name
@@ -220,7 +254,8 @@ def verify(bundle):
             for name, marker in NORMAL_RESULTS[number].items():
                 text = logs.get(prefix + name, "")
                 start = r"^UVM_INFO\b[^\n]*\[RESULT\]\s+" if 17 <= number <= 22 else "^"
-                if (not re.search(start + re.escape(marker) + r"\s*$", text, re.M)
+                # (변경) 완료 행은 정확히 한 번만 허용한다. 이어 붙인 로그를 막는다.
+                if (len(re.findall(start + re.escape(marker) + r"\s*$", text, re.M)) != 1
                         or re.search(NORMAL_FAILURE, text, re.M)):
                     failures.append(f"CH{number:02d}: normal completion/diagnostic: {name}")
                 if 17 <= number <= 22:
@@ -270,21 +305,32 @@ def verify(bundle):
         if not required or not required.issubset(sources):
             failures.append("missing required sources_sha256 entries")
         for name, digest in sources.items():
-            path = relative_file(ROOT, name)
-            if not path.is_file() or sha(path.read_bytes()) != digest:
+            if not source_matches(name, digest):
                 failures.append(f"source SHA256: {name}")
         audit = bundle / "audit_sources.json"
         if audit.is_file():
             for name, digest in json.loads(audit.read_text())["files_sha256"].items():
-                path = relative_file(ROOT, name)
-                if not path.is_file() or sha(path.read_bytes()) != digest:
+                if not source_matches(name, digest):
                     failures.append(f"audit source SHA256: {name}")
+        # (추가) 공개 체크섬 목록도 직접 대조한다.
+        sums = bundle / "SHA256SUMS"
+        if sums.is_file():
+            for line in sums.read_text().splitlines():
+                digest, _, name = line.partition("  ")
+                path = relative_file(bundle, name)
+                if not path.is_file() or sha(path.read_bytes()) != digest:
+                    failures.append(f"SHA256SUMS: {name}")
     except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
         failures.append(f"malformed/incomplete evidence: {sanitize(str(exc))}")
     if failures:
         print("FAIL evidence: " + ", ".join(failures))
         return 1
     print("PASS evidence: 24 chapters, 12 negative cases, required sources/logs and SHA256")
+    if accepted_changes:
+        chapters = sorted({c for n in accepted_changes for c in changed[n].get("chapters", [])})
+        print(f"NOTE post-run source changes: {len(accepted_changes)} files recorded in "
+              f"{POST_RUN_CHANGES.relative_to(ROOT).as_posix()}; affected chapters: "
+              + (", ".join(f"CH{c:02d}" for c in chapters) or "none"))
     return 0
 
 

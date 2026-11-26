@@ -1,0 +1,3 @@
+[55000] %Fatal: tb_pwm_sva.sv:49: Assertion failed in tb_pwm_sva.ap_apply_pending: DETECTED_SVA_PENDING t=55
+%Error: <REPO>/tb/ch11/tb_pwm_sva.sv:49: Verilog $stop
+Aborting...

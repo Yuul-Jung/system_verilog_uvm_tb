@@ -193,10 +193,21 @@ class ReviewTests(unittest.TestCase):
     def test_evidence_redaction(self):
         import getpass
         import socket
-        private = f"/home/example/project a.person@example.com {getpass.getuser()} {socket.gethostname()}"
+        user, host = getpass.getuser(), socket.gethostname()
+        private = (f"/home/example/project a.person@example.com /srv/{user}/x "
+                   f"{user}@{host} USER={user} host={host}")
         public = sanitize(private)
-        for value in ("/home/", "a.person@example.com", getpass.getuser(), socket.gethostname()):
+        for value in ("/home/", "a.person@example.com", f"/{user}/", f"{user}@",
+                      f"USER={user}", host):
             self.assertNotIn(value, public)
+
+    def test_evidence_redaction_keeps_common_words(self):
+        # (추가) 계정명이 root여도 일반 문장의 단어는 훼손하지 않는다.
+        from unittest.mock import patch
+        with patch("getpass.getuser", return_value="root"):
+            self.assertEqual(sanitize("file path escapes evidence/source root"),
+                             "file path escapes evidence/source root")
+            self.assertEqual(sanitize("/srv/root/x root@pc"), "/srv/[USER]/x [USER]@pc")
 
     def test_evidence_hash_rejects_tampered_log(self):
         source = ROOT / 'docs/evidence/v59'

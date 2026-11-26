@@ -12,7 +12,11 @@ case "$chapter" in
   *) runner="scripts/run_ch$chapter.sh" ;;
 esac
 cd "$COURSE_ROOT"
-source scripts/setup_env.sh
+# (변경) 환경 점검은 경고만 한다. Vivado가 없어도 Icarus·Verilator 장은
+# 실행할 수 있고, 각 장 실행기가 필요한 도구를 다시 확인한다.
+if ! source scripts/setup_env.sh; then
+  echo "WARN: 일부 도구가 없습니다. 이 장에 필요한 도구는 장별 실행기가 확인합니다." >&2
+fi
 case "$-" in
   *x*) exec bash -x "$runner" ;;
 esac

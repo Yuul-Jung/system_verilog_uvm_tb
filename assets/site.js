@@ -88,7 +88,7 @@
         "id": "ch11",
         "number": 11,
         "title": "시간적 속성 검사",
-        "file": "ch11_temporal_assertions_v04.html"
+        "file": "ch11_temporal_assertions_v05.html"
       },
       {
         "id": "ch12",
@@ -106,7 +106,7 @@
         "id": "ch14",
         "number": 14,
         "title": "FIFO 및 흐름 제어",
-        "file": "ch14_fifo_flow_control_v03.html"
+        "file": "ch14_fifo_flow_control_v04.html"
       },
       {
         "id": "ch15",
@@ -160,7 +160,7 @@
         "id": "ch23",
         "number": 23,
         "title": "NPU 통합 정답 비교",
-        "file": "ch23_npu_integrated_scoreboard_v04.html"
+        "file": "ch23_npu_integrated_scoreboard_v05.html"
       },
       {
         "id": "ch24",

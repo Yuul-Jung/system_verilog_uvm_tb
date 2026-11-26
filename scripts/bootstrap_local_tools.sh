@@ -43,6 +43,14 @@ if [[ ! -d "$SOURCE_DIR/.git" ]]; then
 fi
 
 export PATH="$LOCAL_ROOT/usr/bin:$PATH"
+# (추가) 압축만 푼 help2man은 같은 위치의 Locale::gettext가 필요하다.
+# 시스템 Perl 경로에 없으면 Verilator 문서 생성 단계에서 빌드가 중단된다.
+for perl_dir in "$LOCAL_ROOT"/usr/lib/*/perl5/* "$LOCAL_ROOT"/usr/share/perl5; do
+    if [[ -d "$perl_dir" ]]; then
+        PERL5LIB="$perl_dir${PERL5LIB:+:$PERL5LIB}"
+    fi
+done
+export PERL5LIB
 unset VERILATOR_ROOT
 
 (

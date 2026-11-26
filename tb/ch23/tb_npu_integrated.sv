@@ -176,15 +176,46 @@ module tb_npu_integrated;
         end
         // 편향은 누산 결과에 더해지며 뉴런 3이 우승한다.
         load_x(0,16'sd1); load_x(1,16'sd1);
+        // (추가) 네 lane의 bias 경로를 모두 0이 아닌 값으로 사용한다.
+        // 음수 bias는 41비트 부호 확장, 뉴런 2 bias는 덧셈 누락을 검출한다.
+        load_bias(0,-40'sd3);
+        load_bias(1,40'sd5);
+        load_bias(2,-40'sd7);
         load_bias(3,40'sd10);
         execute(2);
         if(class_o !== 2'd3) $fatal(1,"FAIL BIAS_CLASS");
         // 길이 1: 남은 유효 가중치에 대한 결과만 비교.
         execute(1);
-        // (추가) 길이 0, 미적재 주소, 최대 범위 초과를 각각 거부.
+        // (추가) 연산 중 쓰기는 메모리를 바꾸지 않고 error_o 한 클록만 발생.
+        calculate(1);
+        @(negedge clk);
+        if(load_ready_o !== 1'b1) $fatal(1,"FAIL BUSY_WRITE_IDLE");
+        length_i=1; start_i=1;
+        @(negedge clk);
+        start_i=0;
+        if(busy_o !== 1'b1 || load_ready_o !== 1'b0)
+            $fatal(1,"FAIL BUSY_WRITE_PRECONDITION");
+        addr_i=0; data_i=16'sd7; x_wr_en=1;
+        @(posedge clk); #1;
+        if(error_o !== 1'b1 || busy_o !== 1'b1)
+            $fatal(1,"FAIL BUSY_WRITE_ERROR");
+        @(negedge clk);
+        x_wr_en=0;
+        cycles=0;
+        while(done_o !== 1'b1) begin
+            @(posedge clk); #1;
+            cycles=cycles+1;
+            if(cycles>10) $fatal(1,"FAIL BUSY_WRITE_DONE_TIMEOUT");
+        end
+        if(class_o !== expected_class || error_o !== 1'b0)
+            $fatal(1,"FAIL BUSY_WRITE_RESULT");
+        for(i=0;i<4;i=i+1)
+            if($signed(scores_o[i*41+:41]) !== expected[i])
+                $fatal(1,"FAIL BUSY_WRITE_SCORE neuron=%0d",i);
+        $display("BUSY_WRITE rejected error_pulse=1 result_kept=1");
+        // (추가) 길이 0, 미적재 주소를 각각 거부.
         reject_start(0);
         reject_start(3);
-        reject_start(65);
 
         // (추가) 네 점수가 모두 0인 실제 동점: 가장 낮은 번호 0.
         for(i=0;i<4;i=i+1) load_bias(i,40'sd0);
@@ -208,6 +239,9 @@ module tb_npu_integrated;
            $signed(scores_o[0+:41]) !== 41'sd618475290623 ||
            $signed(scores_o[41+:41]) !== -41'sd618473193472)
             $fatal(1,"FAIL EXTREME_SCORE");
+        // (변경) 64개 주소가 모두 적재된 뒤 길이 65를 시험해야
+        // 미적재 검사가 아닌 최대 길이 검사만으로 거부됨을 확인할 수 있다.
+        reject_start(65);
 
         // (추가) reset은 유효 비트를 지운다. 기존 RAM 값은 사용 불가.
         @(negedge clk); resetn=0;

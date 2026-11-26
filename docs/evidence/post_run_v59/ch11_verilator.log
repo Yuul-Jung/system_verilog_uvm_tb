@@ -1,0 +1,6 @@
+ACTIVATION reset=5 disabled=20 disabled_duty=4 apply=5 zero=16 full=8
+PASS CH11 SVA checks=4
+- <REPO>/tb/ch11/tb_pwm_sva.sv:149: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.054 2026-11-01
+- Verilator: $finish at 760ns; walltime 0.000 s; speed 9.629 ms/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 4 MB

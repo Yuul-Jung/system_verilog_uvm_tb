@@ -1,11 +1,13 @@
-# Source Manifest · 현행 v59
+# Source Manifest · 현행 v60
 
 기준일: 2026-11-26 KST. 이 문서는 현재 발행본·실행 경로·소스 해시의 정본이다. 과거 제작 당시의 NOT_RUN과 도구 설명은 [이전 기록](docs/SOURCE_MANIFEST_HISTORY_v58.md)에 분리했다.
 
-- 과정: `system_verilog_uvm_tb`, 6부 24장, `course.json` v59.
+- 과정: `system_verilog_uvm_tb`, 6부 24장, `course.json` v60.
 - 기준 저장소 커밋: `10d0ec00ecffca46aa49f88704f2782982ec7fc5` 위에서 수정 후 실제 실행. 실행 당시 파일 바이트는 증거 manifest의 SHA256으로 특정한다.
 - 규칙: `rule_md` @ `028248a19afc66e9aafdab393fbe0de10a3930ca` 및 과정 AGENTS.md.
-- 원본 RTL과 TB: 이번 v59 교정에서 변경 없음. 제08장 실행 스크립트에만 정확한 완료 행 검사를 추가했다.
+- 원본 RTL: 변경 없음.
+- v60 교정(2026-11-26 독립 적대적 검증 반영): 제11·14·23장 TB에 결함 검출 시험을 추가하고 각각 v05·v04·v05로 발행했다. `run_chapter.sh`는 Vivado가 없어도 Icarus·Verilator 장을 실행하며, `bootstrap_local_tools.sh`는 내려받은 `help2man`이 쓰는 Perl 모듈 경로를 설정한다. 증거 검사기는 Verilator 오류 형식, 완료 행 1회, SHA256SUMS를 추가로 대조한다.
+- v59 증거는 실행 당시 소스와 짝을 이루므로 그대로 보존한다. 실행 이후 바뀐 파일과 재실행 범위는 [실행 후 변경 기록](docs/evidence/POST_RUN_CHANGES_v59.md)에 있다. 제14·23장은 같은 도구(Icarus 12.0)로 다시 PASS했고, 제11장 개정 TB는 Verilator 5.054로만 확인했다(**XSIM NOT_RUN**).
 - [공개 실행 증거](docs/evidence/v59/README.md) · [기계 판독 manifest](docs/evidence/v59/manifest.json) · [종합 검증 보고서](docs/COURSE_VALIDATION_v03.md).
 
 ## 현재 실행 환경과 경로
@@ -28,10 +30,10 @@
 | 08 | [v04](ch08_objects_constraints_v04.html) | `tb/ch08/tb_uart_objects.sv` | `scripts/run_ch08.sh` | PASS / 0 |
 | 09 | [v04](ch09_reference_model_scoreboard_v04.html) | `tb/ch09/tb_pwm_scoreboard.sv` | `scripts/run_ch09.sh` | PASS / 0 |
 | 10 | [v05](ch10_corner_reset_timeout_v05.html) | `tb/ch10/tb_pwm_corner_reset_timeout.sv` | `scripts/run_ch10.sh` | PASS / 0 |
-| 11 | [v04](ch11_temporal_assertions_v04.html) | `tb/ch11/tb_pwm_sva.sv` | `tb/ch11/run_ch11.sh` | PASS / 0 |
+| 11 | [v05](ch11_temporal_assertions_v05.html) | `tb/ch11/tb_pwm_sva.sv` | `tb/ch11/run_ch11.sh` | 이전 TB XSIM PASS / 0 · 개정 TB Verilator PASS · XSIM NOT_RUN |
 | 12 | [v03](ch12_functional_coverage_v03.html) | `tb/ch12/tb_pwm_coverage.sv` | `tb/ch12/run_ch12.sh` | PASS / 0 |
 | 13 | [v03](ch13_uart_stream_verification_v03.html) | `tb/ch13/tb_uart_stream.sv` | `scripts/run_ch13.sh` | PASS / 0 |
-| 14 | [v03](ch14_fifo_flow_control_v03.html) | `tb/ch14/tb_uart_fifo_flow.sv` | `scripts/run_ch14.sh` | PASS / 0 |
+| 14 | [v04](ch14_fifo_flow_control_v04.html) | `tb/ch14/tb_uart_fifo_flow.sv` | `scripts/run_ch14.sh` | PASS / 0 (개정 TB 재실행) |
 | 15 | [v03](ch15_axi4lite_register_verification_v03.html) | `tb/ch15/tb_axi4lite_registers.sv` | `scripts/run_ch15.sh` | PASS / 0 |
 | 16 | [v03](ch16_mac_npu_integer_verification_v03.html) | `tb/ch16/tb_mac_integer.sv` | `scripts/run_ch16.sh` | PASS / 0 |
 | 17 | [v04](ch17_minimal_uvm_environment_v04.html) | `tb/ch17/tb_pwm_uvm.sv` | `scripts/run_ch17.sh` | PASS / 0 |
@@ -40,7 +42,7 @@
 | 20 | [v04](ch20_factory_config_objection_v04.html) | `tb/ch20/tb_pwm_factory_config_objection.sv` | `scripts/run_ch20.sh` | PASS / 0 |
 | 21 | [v04](ch21_uvm_register_abstraction_v04.html) | `tb/ch21/tb_axi_uvm_ral.sv` | `scripts/run_ch21.sh` | PASS / 0 |
 | 22 | [v05](ch22_multi_agent_vip_v05.html) | `tb/ch22/tb_axi_multiagent_irq.sv` | `scripts/run_ch22.sh` | PASS / 0 |
-| 23 | [v04](ch23_npu_integrated_scoreboard_v04.html) | `tb/ch23/tb_npu_integrated.sv` | `scripts/run_ch23.sh` | PASS / 0 |
+| 23 | [v05](ch23_npu_integrated_scoreboard_v05.html) | `tb/ch23/tb_npu_integrated.sv` | `scripts/run_ch23.sh` | PASS / 0 (개정 TB 재실행) |
 | 24 | [v04](ch24_regression_ci_reporting_v04.html) | `tb/ch24/tb_uart_regression.sv` | `scripts/run_ch24.sh` | PASS / 0 |
 
 제01~03장은 자동 정오 판정 없이 실행·관찰을 완료했다. 나머지 21장은 자동 판정 PASS다. 별도 부정 시험 12건은 전용 진단과 개별 종료 코드를 공개 증거에 기록했다.
@@ -77,5 +79,5 @@
 
 - 로컬 24장 실행과 12개 부정 시험: 실제 수행, 공개 로그와 해시 보존.
 - 브라우저: 표준 6개 폭과 29개 SVG, 모바일·키보드·복사 검증은 종합 보고서의 최종 결과를 기준으로 한다.
-- 원격 Actions: NOT_RUN. 공개 Pages: 최신·구버전 HTML 및 핵심 증거 103개 HTTP 200/SHA256 일치 확인. [원격 검증 기록](docs/REMOTE_VERIFICATION_v59.json)을 참조한다.
+- 원격 Actions: `CH24 UART regression` 워크플로가 4회 실행되어 모두 성공했다(마지막 실행은 ch24 최신 변경 커밋 `e3f84a5`). 다른 장은 원격 CI 대상이 아니다. 공개 Pages: 최신·구버전 HTML 및 핵심 증거 103개 HTTP 200/SHA256 일치 확인. [원격 검증 기록](docs/REMOTE_VERIFICATION_v59.json)을 참조한다.
 - 과거 기록은 당시 상태를 보존하는 자료이며 이 현행 표를 덮어쓰지 않는다.

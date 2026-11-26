@@ -26,14 +26,14 @@
 | 12 | 기능 커버리지 | 제2부 04.2장 RTL·AXI 풀이 · 06절 독립 PWM Core 전체 | `pwm_core.v` | 기능 커버리지 | EXACT_BLOB |
 | 13 | UART 스트림 검증 | NPU 제1장 UART 계산기 · 03절 / 1-1 UART 에코 | `uart_echo_controller.v` | 바이트 스트림·대기 | COMMENT_ONLY |
 | 14 | FIFO 및 흐름 제어 | NPU 제1장 UART 계산기 · 03절 / 1-1 UART 에코 | `uart_core.v` + `uart_rx.v` + `uart_tx.v` | 실제 FIFO/PHY | COMMENT_ONLY |
-| 15 | AXI4-Lite 레지스터 검증 | 제2부 04.2장 03~04절 및 10.3장 §2~3 (AXI/레지스터 개념), 03.2장 IRQ 참고 | `axi4lite_slave_adapter.v` + `custom_register_bank.v` | AW/W/B/AR/R·WSTRB | CONCEPT_ONLY |
+| 15 | AXI4-Lite 레지스터 검증 | 제2부 04.2장 03~04절 및 10.3장 §2~3 (AXI/레지스터 개념), 03.2장 IRQ 참고 | `axi4lite_slave_adapter.v` + `custom_register_bank.v` | AW/W/B/AR/R·WSTRB | EXACT_BLOB (제1부 원본) |
 | 16 | MAC·NPU 정수 연산 검증 | NPU 제1장 UART 계산기 · 04절 / 1-2 MAC 누산, 06절 / 1-4 MAC 파이프라인 | `mac_core.v` + `mac_pipeline_core.v` | 정수 곱·누산·지연 | EXACT_BLOB |
 | 17 | 최소 UVM 환경 | 제2부 04.2장 RTL·AXI 풀이 · 06절 독립 PWM Core 전체 | `pwm_core.v` | UVM 최소 환경 | EXACT_BLOB |
 | 18 | Sequence에서 Driver까지 | 제2부 04.2장 RTL·AXI 풀이 · 06절 독립 PWM Core 전체 | `pwm_core.v` | Sequence/Driver | EXACT_BLOB |
 | 19 | Monitor·Agent·Scoreboard | 제2부 04.2장 RTL·AXI 풀이 · 06절 독립 PWM Core 전체 | `pwm_core.v` | Monitor/Scoreboard | EXACT_BLOB |
 | 20 | Factory·Config·Objection | 제2부 04.2장 RTL·AXI 풀이 · 06절 독립 PWM Core 전체 | `pwm_core.v` | Factory/Config/Objection | EXACT_BLOB |
-| 21 | UVM 레지스터 추상화 | 제2부 04.2장 03~04절 및 10.3장 §2~3 (AXI/레지스터 개념), 03.2장 IRQ 참고 | `axi4lite_slave_adapter.v` + `custom_register_bank.v` | RAL/Adapter/Predictor | CONCEPT_ONLY |
-| 22 | 다중 Agent·VIP | 제2부 04.2장 03~04절 및 10.3장 §2~3 (AXI/레지스터 개념), 03.2장 IRQ 참고 | `axi4lite_slave_adapter.v` + `custom_register_bank.v` | AXI/Reset/IRQ 다중 Agent | CONCEPT_ONLY |
+| 21 | UVM 레지스터 추상화 | 제2부 04.2장 03~04절 및 10.3장 §2~3 (AXI/레지스터 개념), 03.2장 IRQ 참고 | `axi4lite_slave_adapter.v` + `custom_register_bank.v` | RAL/Adapter/Predictor | EXACT_BLOB (제1부 원본) |
+| 22 | 다중 Agent·VIP | 제2부 04.2장 03~04절 및 10.3장 §2~3 (AXI/레지스터 개념), 03.2장 IRQ 참고 | `axi4lite_slave_adapter.v` + `custom_register_bank.v` | AXI/Reset/IRQ 다중 Agent | EXACT_BLOB (제1부 원본) |
 | 23 | NPU 통합 정답 비교 | NPU 제2장 4뉴런 NPU 보드 · 10절 / 2-8 통합 NPU Top; 제1장 05절 / 1-3 DSP 곱셈 | `npu_engine4.v` + `npu_dsp_mac_lane.v` + `dsp_multiplier.v` | 4뉴런 점수·완료 지연·argmax | RTL_CHANGED |
 | 24 | 회귀·CI·검증 보고 | NPU 제1장 UART 계산기 · 03절 / 1-1 UART 에코 | `uart_echo_controller.v` | 시드 반복·회귀·CI | COMMENT_ONLY |
 
@@ -54,8 +54,8 @@
 | uart_tx.v | common/rtl/uart_tx.v | dfcb0cf10293a2a66ab7d704621a5219144673eb | 8b5fc5c391b6715f0ed04582a71953101c008c62 |
 | mac_core.v | ch01/rtl/mac_core.v | d3f911b882f65e8f6096d76d31a2b710c18ae38d | d3f911b882f65e8f6096d76d31a2b710c18ae38d |
 | mac_pipeline_core.v | ch03/rtl/mac_pipeline_core.v | f690b2db2a16626a43e0bb9f3c859d616e57116d | f690b2db2a16626a43e0bb9f3c859d616e57116d |
-| axi4lite_slave_adapter.v | 동일 파일 경로 미확인 | eadaf8d3580023bed0c9b06f3e9b2a99de0cf266 | NOT_VERIFIED |
-| custom_register_bank.v | 동일 파일 경로 미확인 | 49e5d0219574d1bcb9086dc99f259c191e35d82e | NOT_VERIFIED |
+| axi4lite_slave_adapter.v | amd_soc_p1: legacy/code/soc12/axi4lite_slave_adapter.v 외 soc13~soc22 14곳 | eadaf8d3580023bed0c9b06f3e9b2a99de0cf266 | eadaf8d3580023bed0c9b06f3e9b2a99de0cf266 |
+| custom_register_bank.v | amd_soc_p1: legacy/code/soc11/custom_register_bank.v 외 soc12~soc17 10곳 | 49e5d0219574d1bcb9086dc99f259c191e35d82e | 49e5d0219574d1bcb9086dc99f259c191e35d82e |
 | npu_engine4.v | mini_npu/rtl/npu_engine4.v | 066218754ddfcc7807eff7333b308c207ab28175 | 62d66ff7a54d99734b0c3546b2d881ddf553a2ed |
 | npu_dsp_mac_lane.v | mini_npu/rtl/npu_dsp_mac_lane.v | a9dae4662d2aaa82cb6ba629597650217d30e0d9 | cc673c0836e98dca47f95e7ecc638684c88f5f29 |
 | dsp_multiplier.v | ch02/rtl/dsp_multiplier.v | 3dfb157f0e34dfb548fff7b3a6e5911ba664d504 | 3dfb157f0e34dfb548fff7b3a6e5911ba664d504 |
@@ -65,6 +65,7 @@
 - 검증 13장도 실제 DUT는 `uart_echo_controller` 하나다. 14장의 UART FIFO/PHY와 혼동하지 않는다.
 - 검증 11·12장의 실행 스크립트는 `tb/ch11/run_ch11.sh`, `tb/ch12/run_ch12.sh`에 존재한다. `scripts/` 공통 경로로 잘못 안내하지 않는다.
 - 검증 24장의 Bash 스크립트는 `scripts/run_ch24.py`로 위임하며 실제 대상은 UART Echo 하나다. 과정 전체 자동 회귀라고 과장하지 않는다.
+- 2026-11-26 독립 재검증: 검증 15·21·22장의 AXI 어댑터와 RMAP 레지스터 은행은 제1부 저장소 `amd_soc_p1`의 `legacy/code/soc11`~`soc22`(SoC 11·12장 계열)에 같은 Git Blob으로 존재한다. 이전의 CONCEPT_ONLY/NOT_VERIFIED 표기는 제1부를 검색하지 않아 생긴 과소 표기였으므로 EXACT_BLOB으로 정정한다. `amd_soc_rtl/part01/legacy`에도 같은 Blob이 있다.
 - 검증 15·21·22장의 RMAP 레지스터 은행과 현행 제2부 PWM/버튼 IP는 동일한 회로가 아니다. 원본 전체와 주소맵을 제공하며 설계 안내서는 개념 참고로만 명시한다. NPU AXI IP와도 혼동 금지.
 - 검증 23장의 기존 엔진은 DRAIN2에서 argmax 결과와 완료 신호를 갱신하지만, 현행 엔진은 CMP1/CMP2를 거쳐 완료한다. 정상 연산 완료 시점이 2클록 늘어난 경로이므로 TB의 기대 지연·busy/done·경계조건을 새 소스로 다시 검토한다. 기존 스냅샷을 무단 덮어쓰지 않는다.
 - 학생용 본문에는 실제 설계 과정명과 장·절, 필요한 파일명만 안내한다. 비공개 저장소 링크, SHA, 감사 이력은 배포 본문에 넣지 않는다. 공개 승인된 소스/의존 파일 및 전체 TB를 확보해야 실습이 독립적으로 가능하다.
@@ -72,5 +73,5 @@
 
 ## 이번 검증 범위
 - 24개 실행 경로와 주요 RTL 파일 목록 확인(11·12·24 특수 경로 포함).
-- 현행 설계 안내서 6개 관련 페이지의 실제 절·모듈 확인, 12개 스냅샷 존재 확인, 현행 동일/변경 비교 10개 파일, 2개 현행 원본 경로 미확인.
+- 현행 설계 안내서 6개 관련 페이지의 실제 절·모듈 확인, 12개 스냅샷 존재 확인, 현행 동일/변경 비교 10개 파일, 2개(AXI 어댑터·레지스터 은행)는 2026-11-26에 제1부 원본 경로를 확인해 EXACT_BLOB으로 정정.
 - 실제 Vivado XSIM 실행, 24개 TB의 전수 동작 검증, 전체 페이지 렌더링: NOT_RUN.
