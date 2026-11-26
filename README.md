@@ -2,7 +2,7 @@
 
 - **교육과정:** 6부 24장. 기존 RTL을 보존하고 독립 테스트벤치로 검증합니다.
 - **진입점:** [전체 학습안내서](index.html) · [전체 편성](CURRICULUM.md) · [설계 대응표](docs/DESIGN_VERIFICATION_MAP.md)
-- **검증 상태:** 24장 실제 실행 완료(관찰 3장·자동 PASS 21장), 부정 시험 12건 검출. [v59 공개 증거](docs/evidence/v59/README.md)와 [종합 보고서](docs/COURSE_VALIDATION_v03.md)에서 확인합니다. v60에서 제11·14·23장 TB와 실행 스크립트를 고친 내역과 재실행 범위는 [실행 후 변경 기록](docs/evidence/POST_RUN_CHANGES_v59.md)에 있습니다(제11장 개정 TB의 XSIM 재실행은 NOT_RUN).
+- **검증 상태:** 24장 실제 실행 완료(관찰 3장·자동 PASS 21장), 부정 시험 12건 검출. [v59 공개 증거](docs/evidence/v59/README.md)와 [종합 보고서](docs/COURSE_VALIDATION_v03.md)에서 확인합니다. v60에서 제11·14·23장 TB와 실행 스크립트를 고친 내역과 재실행 범위는 [실행 후 변경 기록](docs/evidence/POST_RUN_CHANGES_v59.md)에 있습니다(제11장 개정 TB는 XSIM 2024.2로 재실행 PASS).
 
 ## 최신 장별 자료
 

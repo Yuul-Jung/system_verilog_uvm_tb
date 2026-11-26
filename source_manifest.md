@@ -7,7 +7,7 @@
 - 규칙: `rule_md` @ `028248a19afc66e9aafdab393fbe0de10a3930ca` 및 과정 AGENTS.md.
 - 원본 RTL: 변경 없음.
 - v60 교정(2026-11-26 독립 적대적 검증 반영): 제11·14·23장 TB에 결함 검출 시험을 추가하고 각각 v05·v04·v05로 발행했다. `run_chapter.sh`는 Vivado가 없어도 Icarus·Verilator 장을 실행하며, `bootstrap_local_tools.sh`는 내려받은 `help2man`이 쓰는 Perl 모듈 경로를 설정한다. 증거 검사기는 Verilator 오류 형식, 완료 행 1회, SHA256SUMS를 추가로 대조한다.
-- v59 증거는 실행 당시 소스와 짝을 이루므로 그대로 보존한다. 실행 이후 바뀐 파일과 재실행 범위는 [실행 후 변경 기록](docs/evidence/POST_RUN_CHANGES_v59.md)에 있다. 제14·23장은 같은 도구(Icarus 12.0)로 다시 PASS했고, 제11장 개정 TB는 Verilator 5.054로만 확인했다(**XSIM NOT_RUN**).
+- v59 증거는 실행 당시 소스와 짝을 이루므로 그대로 보존한다. 실행 이후 바뀐 파일과 재실행 범위는 [실행 후 변경 기록](docs/evidence/POST_RUN_CHANGES_v59.md)에 있다. 제14·23장은 같은 도구(Icarus 12.0)로, 제11장은 Vivado XSIM 2024.2로 다시 실행해 모두 PASS했다.
 - [공개 실행 증거](docs/evidence/v59/README.md) · [기계 판독 manifest](docs/evidence/v59/manifest.json) · [종합 검증 보고서](docs/COURSE_VALIDATION_v03.md).
 
 ## 현재 실행 환경과 경로
@@ -30,7 +30,7 @@
 | 08 | [v04](ch08_objects_constraints_v04.html) | `tb/ch08/tb_uart_objects.sv` | `scripts/run_ch08.sh` | PASS / 0 |
 | 09 | [v04](ch09_reference_model_scoreboard_v04.html) | `tb/ch09/tb_pwm_scoreboard.sv` | `scripts/run_ch09.sh` | PASS / 0 |
 | 10 | [v05](ch10_corner_reset_timeout_v05.html) | `tb/ch10/tb_pwm_corner_reset_timeout.sv` | `scripts/run_ch10.sh` | PASS / 0 |
-| 11 | [v05](ch11_temporal_assertions_v05.html) | `tb/ch11/tb_pwm_sva.sv` | `tb/ch11/run_ch11.sh` | 이전 TB XSIM PASS / 0 · 개정 TB Verilator PASS · XSIM NOT_RUN |
+| 11 | [v05](ch11_temporal_assertions_v05.html) | `tb/ch11/tb_pwm_sva.sv` | `tb/ch11/run_ch11.sh` | PASS / 0 (개정 TB, XSIM 2024.2 재실행) |
 | 12 | [v03](ch12_functional_coverage_v03.html) | `tb/ch12/tb_pwm_coverage.sv` | `tb/ch12/run_ch12.sh` | PASS / 0 |
 | 13 | [v03](ch13_uart_stream_verification_v03.html) | `tb/ch13/tb_uart_stream.sv` | `scripts/run_ch13.sh` | PASS / 0 |
 | 14 | [v04](ch14_fifo_flow_control_v04.html) | `tb/ch14/tb_uart_fifo_flow.sv` | `scripts/run_ch14.sh` | PASS / 0 (개정 TB 재실행) |

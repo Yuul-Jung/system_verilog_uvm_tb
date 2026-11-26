@@ -249,9 +249,13 @@
           "ch23_runner.txt": {
             "public_path": "post_run_v59/ch23_runner.txt",
             "sha256": "8bd2548396f1e0bb449db787d04e6ec37e1331e368532da21390c885978fe671"
+          },
+          "ch11_xsim_tail.log": {
+            "public_path": "post_run_v59/ch11_xsim_tail.log",
+            "sha256": "2c3c2b78de7768c32067501a72259412abcd156e41e183d16af23dc2fc65e688"
           }
         },
-        "xsim": "NOT_RUN"
+        "xsim": "CH11 PASS (Vivado 설치 PC에서 run_chapter.sh 11). 그 외 XSIM 장은 TB 불변, 재실행 NOT_RUN"
       }
     },
     {
@@ -277,12 +281,16 @@
       ],
       "reason": "D-04: enable=0·duty=4 적용과 disabled_duty 활성화 집계 추가. 완료 행과 부정 시험(t=55)은 동일.",
       "rerun": {
-        "tool": "Verilator 5.054 (XSIM 대체)",
+        "tool": "Vivado XSIM 2024.2 + Verilator 5.054",
         "chapters": [
           11
         ],
-        "status": "PASS, negative DETECTED_SVA_PENDING t=55",
+        "status": "XSIM 2024.2: PASS CH11 SVA checks=4, PASS CH11 HARNESS (부정 시험 검출, xsim exit=0). Verilator: PASS, negative DETECTED_SVA_PENDING t=55",
         "logs": {
+          "ch11_xsim_tail.log": {
+            "public_path": "post_run_v59/ch11_xsim_tail.log",
+            "sha256": "2c3c2b78de7768c32067501a72259412abcd156e41e183d16af23dc2fc65e688"
+          },
           "ch11_verilator.log": {
             "public_path": "post_run_v59/ch11_verilator.log",
             "sha256": "6483e2d729cf69108074929cc8f4d3cfe28ed85f5f1d22a08feb1cca4465ba29"
@@ -300,7 +308,7 @@
             "sha256": "3b2f04f2e3b84e2aceacc794ae7737f09d70a5c05a24f9a30952e4630ceb98da"
           }
         },
-        "xsim": "NOT_RUN"
+        "xsim": "PASS (2026-11-26 11:07 KST, 사용자 PC, 출력 마지막 20행 발췌)"
       }
     },
     {

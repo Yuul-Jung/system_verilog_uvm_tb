@@ -6,11 +6,11 @@
 |---|---|---|---|
 | `tb/ch23/tb_npu_integrated.sv` | 길이 65 거부가 미적재 검사에 가려짐, 뉴런 0·2·3 편향과 연산 중 쓰기 미시험 | Icarus Verilog 12.0 | PASS. [로그](post_run_v59/ch23_simulation.log) |
 | `tb/ch14/tb_uart_fifo_flow.sv` | 프레이밍 오류 경로 미시험 | Icarus Verilog 12.0 | PASS. [로그](post_run_v59/ch14_simulation.log) |
-| `tb/ch11/tb_pwm_sva.sv` | `ap_disabled_low`의 선행 조건이 duty=0 구간에서만 발생해 enable 차단 누락을 구별하지 못함 | Verilator 5.054 (XSIM 대체) | 정상 PASS, 부정 `DETECTED_SVA_PENDING t=55`. [정상](post_run_v59/ch11_verilator.log) · [부정](post_run_v59/ch11_verilator_negative.log). **XSIM NOT_RUN** |
+| `tb/ch11/tb_pwm_sva.sv` | `ap_disabled_low`의 선행 조건이 duty=0 구간에서만 발생해 enable 차단 누락을 구별하지 못함 | Vivado XSIM 2024.2, Verilator 5.054 | XSIM: `PASS CH11 SVA checks=4`, `PASS CH11 HARNESS`(부정 시험 검출). [XSIM 발췌](post_run_v59/ch11_xsim_tail.log). Verilator: [정상](post_run_v59/ch11_verilator.log) · [부정](post_run_v59/ch11_verilator_negative.log) |
 | `scripts/run_chapter.sh` | Vivado가 없으면 Icarus 장도 종료 코드 1 | Icarus Verilog 12.0, Vivado 없는 환경 | 01·04·14·23장 종료 코드 0. [실행 기록](post_run_v59/ch01_runner.txt) |
 | `scripts/collect_evidence.py` 외 시험 2개 | Verilator `%Error` 미검출, 계정명 단어 전역 치환 | 시험 실행 | `test_review_fixes.py`, `test_evidence_completeness.py`를 root·일반 계정에서 통과 |
 | HTML·`course.json`·`assets/site.js` | 제11·14·23장 새 버전 링크 | `validate_course.py` | PASS |
 
 함께 바뀐 `scripts/bootstrap_local_tools.sh`는 v59 증거의 대상 파일이 아닙니다. 수정 후 빈 폴더에서 Verilator 5.054와 Z3 설치까지 다시 실행해 확인했습니다.
 
-검증 장비에 Vivado가 없어 XSIM 8개 장(11·12·17~22)은 이번에 XSIM으로 다시 실행하지 않았습니다. 이 가운데 TB가 바뀐 것은 제11장뿐입니다. 나머지 7개 장의 TB·RTL은 v59 증거와 같습니다.
+제11장 개정 TB는 2026-11-26 Vivado 2024.2가 설치된 PC에서 `bash scripts/run_chapter.sh 11`로 실행해 PASS했습니다. 공개 로그는 그 출력의 마지막 20행이며, 계정 경로는 `<REPO>`로 바꿨습니다. 나머지 XSIM 7개 장(12·17~22)은 TB·RTL이 v59 증거와 같으므로 다시 실행하지 않았습니다.
