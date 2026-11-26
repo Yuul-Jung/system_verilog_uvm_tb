@@ -1,0 +1,28 @@
+FULL_EVIDENCE empty: baseline=0 fixed=1
+FULL_EVIDENCE failed_single: baseline=0 fixed=1
+FULL_EVIDENCE duplicate_24: baseline=0 fixed=1
+test_ch24_incomplete_report_with_valid_hash (__main__.EvidenceCompletenessTests.test_ch24_incomplete_report_with_valid_hash) ... ok
+test_complete_real_evidence (__main__.EvidenceCompletenessTests.test_complete_real_evidence) ... ok
+test_duplicate_and_invalid_chapter_ids (__main__.EvidenceCompletenessTests.test_duplicate_and_invalid_chapter_ids) ... ok
+test_duplicate_log_record (__main__.EvidenceCompletenessTests.test_duplicate_log_record) ... ok
+test_each_chapter_status_and_exit_code (__main__.EvidenceCompletenessTests.test_each_chapter_status_and_exit_code) ... ok
+test_each_negative_status_exit_and_dedicated_diagnostic (__main__.EvidenceCompletenessTests.test_each_negative_status_exit_and_dedicated_diagnostic) ... ok
+test_each_required_log_record (__main__.EvidenceCompletenessTests.test_each_required_log_record) ... ok
+test_empty_and_wrong_normal_completion_with_valid_hash (__main__.EvidenceCompletenessTests.test_empty_and_wrong_normal_completion_with_valid_hash) ... ok
+test_malformed_evidence_fails_cleanly (__main__.EvidenceCompletenessTests.test_malformed_evidence_fails_cleanly) ... ok
+test_missing_and_duplicate_negative_cases (__main__.EvidenceCompletenessTests.test_missing_and_duplicate_negative_cases) ... ok
+test_missing_each_chapter (__main__.EvidenceCompletenessTests.test_missing_each_chapter) ... ok
+test_missing_file_and_hash_tampering (__main__.EvidenceCompletenessTests.test_missing_file_and_hash_tampering) ... ok
+test_negative_does_not_trust_expected_marker_or_allow_normal_pass (__main__.EvidenceCompletenessTests.test_negative_does_not_trust_expected_marker_or_allow_normal_pass) ... ok
+test_negative_exit_contract_and_paths (__main__.EvidenceCompletenessTests.test_negative_exit_contract_and_paths) ... ok
+test_normal_fatal_and_nonzero_uvm_summary (__main__.EvidenceCompletenessTests.test_normal_fatal_and_nonzero_uvm_summary) ... ok
+test_order_and_optional_legacy_do_not_change_completeness (__main__.EvidenceCompletenessTests.test_order_and_optional_legacy_do_not_change_completeness) ... ok
+test_required_source_hashes (__main__.EvidenceCompletenessTests.test_required_source_hashes) ... ok
+test_required_sources_do_not_disappear_with_missing_files (__main__.EvidenceCompletenessTests.test_required_sources_do_not_disappear_with_missing_files) ... ok
+test_suite_negative_log_requires_diagnostic_too (__main__.EvidenceCompletenessTests.test_suite_negative_log_requires_diagnostic_too) ... ok
+test_three_reported_counterexamples_against_old_and_fixed_cli (__main__.EvidenceCompletenessTests.test_three_reported_counterexamples_against_old_and_fixed_cli) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 20.317s
+
+OK

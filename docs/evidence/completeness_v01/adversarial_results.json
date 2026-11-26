@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "work_date": "2026-11-26",
+  "timezone": "Asia/Seoul",
+  "tested_commit": "ed4f6f264176a7889db0b0f9c388e1527710d5e2",
+  "checker_sha256": "a9b19e5e80f98fb0f6e4cbb6f0dcd74adc73f5a045600b89b0ce35481b9e538f",
+  "fixture_manifest_sha256": "711a87c5c91ca708bef79efb6b72d131ee3f75540d0b317dec67cd77fb3d6e1a",
+  "command": [
+    "python3",
+    "scripts/collect_evidence.py",
+    "--verify",
+    "--output",
+    "<TEMP_BUNDLE>"
+  ],
+  "cases": [
+    {
+      "case": "normal_v59",
+      "condition": "정상 v59 증거",
+      "expected": "PASS",
+      "exit_code": 0,
+      "stdout": "PASS evidence: 24 chapters, 12 negative cases, required sources/logs and SHA256\n",
+      "stderr": "",
+      "manifest_sha256": "a0aa9a622a1598d3a24c9bbaf9c3ea82360979c4dd22921f7bb4d10c14409cfa",
+      "result": "MATCH"
+    },
+    {
+      "case": "zero_chapters",
+      "condition": "검증 장 0개",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: chapters must contain 01..24 exactly once, suite negative diagnostic: CH10/fault, suite negative diagnostic: CH10/timeout, suite negative diagnostic: CH11/sva, suite negative diagnostic: CH17/NO_VIF, suite negative diagnostic: CH18/INVALID_DUTY, suite negative diagnostic: CH19/CORRUPT_SAMPLE, suite negative diagnostic: CH20/NO_OVERRIDE, suite negative diagnostic: CH20/NO_CFG, suite negative diagnostic: CH20/EARLY_DROP, suite negative diagnostic: CH21/NO_PREDICT, suite negative diagnostic: CH22/CORRUPT_IRQ, suite negative diagnostic: CH24/fault, CH24: incomplete/failed report.json\n",
+      "stderr": "",
+      "manifest_sha256": "74d7977d552be2ba4fc39ea3d655363fe988c64d53cbef2d21d4899a0c19c1e4",
+      "result": "MATCH"
+    },
+    {
+      "case": "only_23_chapters",
+      "condition": "검증 장 23개",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: chapters must contain 01..24 exactly once, suite negative diagnostic: CH24/fault, CH24: incomplete/failed report.json\n",
+      "stderr": "",
+      "manifest_sha256": "7f50aa66f7d605e0a9e625fee78337c0b01a988d965d0b145e746bb3da6246f3",
+      "result": "MATCH"
+    },
+    {
+      "case": "chapter_1_repeated_24",
+      "condition": "제1장 24개 중복",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: chapters must contain 01..24 exactly once, suite negative diagnostic: CH10/fault, suite negative diagnostic: CH10/timeout, suite negative diagnostic: CH11/sva, suite negative diagnostic: CH17/NO_VIF, suite negative diagnostic: CH18/INVALID_DUTY, suite negative diagnostic: CH19/CORRUPT_SAMPLE, suite negative diagnostic: CH20/NO_OVERRIDE, suite negative diagnostic: CH20/NO_CFG, suite negative diagnostic: CH20/EARLY_DROP, suite negative diagnostic: CH21/NO_PREDICT, suite negative diagnostic: CH22/CORRUPT_IRQ, suite negative diagnostic: CH24/fault, CH24: incomplete/failed report.json\n",
+      "stderr": "",
+      "manifest_sha256": "1d8e41c18d9573c76fad5cb56298bbda0ec2e85f8321d51fa0d7bcbe06ee9747",
+      "result": "MATCH"
+    },
+    {
+      "case": "failed_status",
+      "condition": "실패 상태가 포함된 증거",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: CH04: invalid status/exit_code\n",
+      "stderr": "",
+      "manifest_sha256": "777f289d818f027471d92d608049034c4f6175799dd36e7036afc6d5331d76f3",
+      "result": "MATCH"
+    },
+    {
+      "case": "normal_log_missing",
+      "condition": "정상 로그 누락",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: missing required log: runs/ch08/output.log, CH08: normal completion/diagnostic: output.log\n",
+      "stderr": "",
+      "manifest_sha256": "4057ec51ed349eaa036d8d712c4c96d92a74966dbc02d7327b82737c41bd9181",
+      "result": "MATCH"
+    },
+    {
+      "case": "negative_missing",
+      "condition": "부정 시험 누락",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: case_probes must contain all 12 dedicated cases exactly once\n",
+      "stderr": "",
+      "manifest_sha256": "143191981f91cfdec9c0eac6f49bf0b0304e304a2613f3240ee784808df1e54f",
+      "result": "MATCH"
+    },
+    {
+      "case": "negative_duplicate",
+      "condition": "부정 시험 중복",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: case_probes must contain all 12 dedicated cases exactly once, duplicate negative log path\n",
+      "stderr": "",
+      "manifest_sha256": "4569a80d2a59984dc26b746927d6effd6e401f1cfec94e44a381e963f2ee811a",
+      "result": "MATCH"
+    },
+    {
+      "case": "dedicated_diagnostic_mismatch",
+      "condition": "전용 오류 메시지 불일치",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: negative status/exit/diagnostic: CH10/fault\n",
+      "stderr": "",
+      "manifest_sha256": "e3d67a03b1e9edf28636c40971e7410e3ab396b5e10ffef71281070574f1facf",
+      "result": "MATCH"
+    },
+    {
+      "case": "source_missing",
+      "condition": "필수 소스 누락",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: missing required sources_sha256 entries\n",
+      "stderr": "",
+      "manifest_sha256": "ccc92498174e4d74aa84209208fd652528865221d50343504085205cd66f88a8",
+      "result": "MATCH"
+    },
+    {
+      "case": "log_hash_mismatch",
+      "condition": "로그 해시 불일치",
+      "expected": "FAIL",
+      "exit_code": 1,
+      "stdout": "FAIL evidence: log SHA256: runs/ch08/output.log\n",
+      "stderr": "",
+      "manifest_sha256": "a0aa9a622a1598d3a24c9bbaf9c3ea82360979c4dd22921f7bb4d10c14409cfa",
+      "result": "MATCH"
+    }
+  ],
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "scripts/collect_evidence.py",
+        "--verify"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "stdout": "PASS evidence: 24 chapters, 12 negative cases, required sources/logs and SHA256\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/validate_course.py"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "stdout": "PASS course validation: 24 chapters; per-file links, sections, SVG names, TB\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "sha256sum",
+        "-c",
+        "SHA256SUMS"
+      ],
+      "cwd": "docs/evidence/v59",
+      "exit_code": 0,
+      "stdout": "README.md: OK\naudit_sources.json: OK\nch16_python_reference.txt: OK\ncodebox_checks.json: OK\ndesign_remote_check.json: OK\nlegacy/ch01/output.log: OK\nlegacy/ch02/output.log: OK\nlegacy/ch03/output.log: OK\nlegacy/ch04/output.log: OK\nlegacy/ch05/output.log: OK\nlegacy/ch06/output.log: OK\nlegacy/ch07/build.log: OK\nlegacy/ch07/output.log: OK\nlegacy/ch07/tool_version.txt: OK\nlegacy/ch08/build.log: OK\nlegacy/ch08/output.log: OK\nlegacy/ch08/tool_version.txt: OK\nlegacy/ch09/output.log: OK\nlegacy/ch10/apply_timeout.log: OK\nlegacy/ch10/fault_injection.log: OK\nlegacy/ch10/normal.log: OK\nlegacy/ch11/ch11.log: OK\nlegacy/ch11/ch11_negative.log: OK\nlegacy/ch12/output.log: OK\nlegacy/ch12/report/functionalCoverageReport/dashboard.html: OK\nlegacy/ch12/report/functionalCoverageReport/groups.html: OK\nlegacy/ch12/report/functionalCoverageReport/grp0.html: OK\nlegacy/ch12/xcrg.log: OK\nlegacy/ch13/simulation.log: OK\nlegacy/ch14/simulation.log: OK\nlegacy/ch15/simulation.log: OK\nlegacy/ch16/simulation.log: OK\nlegacy/ch17/elaborate.log: OK\nlegacy/ch17/negative.log: OK\nlegacy/ch17/normal.log: OK\nlegacy/ch18/elaborate.log: OK\nlegacy/ch18/negative.log: OK\nlegacy/ch18/normal.log: OK\nlegacy/ch19/elaborate.log: OK\nlegacy/ch19/negative.log: OK\nlegacy/ch19/normal.log: OK\nlegacy/ch20/EARLY_DROP.log: OK\nlegacy/ch20/NO_CFG.log: OK\nlegacy/ch20/NO_OVERRIDE.log: OK\nlegacy/ch20/alt.log: OK\nlegacy/ch20/normal.log: OK\nlegacy/ch21/elaborate.log: OK\nlegacy/ch21/negative.log: OK\nlegacy/ch21/normal.log: OK\nlegacy/ch22/elaborate.log: OK\nlegacy/ch22/negative.log: OK\nlegacy/ch22/normal.log: OK\nlegacy/ch23/simulation.log: OK\nlegacy/ch24/compile.log: OK\nlegacy/ch24/negative.log: OK\nlegacy/ch24/report.json: OK\nlegacy/ch24/seed_1.log: OK\nlegacy/ch24/seed_42.log: OK\nlegacy/ch24/seed_7.log: OK\nmanifest.json: OK\nprobes/ch10_fault.txt: OK\nprobes/ch10_timeout.txt: OK\nprobes/ch11_sva.txt: OK\nprobes/ch17_NO_VIF.txt: OK\nprobes/ch18_INVALID_DUTY.txt: OK\nprobes/ch19_CORRUPT_SAMPLE.txt: OK\nprobes/ch20_EARLY_DROP.txt: OK\nprobes/ch20_NO_CFG.txt: OK\nprobes/ch20_NO_OVERRIDE.txt: OK\nprobes/ch21_NO_PREDICT.txt: OK\nprobes/ch22_CORRUPT_IRQ.txt: OK\nprobes/ch24_fault.txt: OK\nregression_tests.txt: OK\nruns/ch01/output.log: OK\nruns/ch01/runner.txt: OK\nruns/ch02/output.log: OK\nruns/ch02/runner.txt: OK\nruns/ch03/output.log: OK\nruns/ch03/runner.txt: OK\nruns/ch04/output.log: OK\nruns/ch04/runner.txt: OK\nruns/ch05/output.log: OK\nruns/ch05/runner.txt: OK\nruns/ch06/output.log: OK\nruns/ch06/runner.txt: OK\nruns/ch07/build.log: OK\nruns/ch07/output.log: OK\nruns/ch07/runner.txt: OK\nruns/ch07/tool_version.txt: OK\nruns/ch08/build.log: OK\nruns/ch08/output.log: OK\nruns/ch08/runner.txt: OK\nruns/ch08/tool_version.txt: OK\nruns/ch09/output.log: OK\nruns/ch09/runner.txt: OK\nruns/ch10/apply_timeout.log: OK\nruns/ch10/fault_injection.log: OK\nruns/ch10/normal.log: OK\nruns/ch10/runner.txt: OK\nruns/ch11/ch11.log: OK\nruns/ch11/ch11_negative.log: OK\nruns/ch11/runner.txt: OK\nruns/ch12/output.log: OK\nruns/ch12/report/functionalCoverageReport/.css/.accordin.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.bintables.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.checkboxes.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.collapse.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.colorbuttons.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.cptables.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.crosstable.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.dashtable.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.fadein.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.groupstable.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.grpdivs.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.grpheader.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.grplayout.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.grptable.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.header.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.sorttablebuttons.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.tabs.css: OK\nruns/ch12/report/functionalCoverageReport/.css/.tooltips.css: OK\nruns/ch12/report/functionalCoverageReport/.js/.checkdisp.js: OK\nruns/ch12/report/functionalCoverageReport/.js/.collapsible.js: OK\nruns/ch12/report/functionalCoverageReport/.js/.cptablecollapse.js: OK\nruns/ch12/report/functionalCoverageReport/.js/.showaccordin.js: OK\nruns/ch12/report/functionalCoverageReport/.js/.showbintable.js: OK\nruns/ch12/report/functionalCoverageReport/.js/.smoothscroll.js: OK\nruns/ch12/report/functionalCoverageReport/.js/.sortTable.js: OK\nruns/ch12/report/functionalCoverageReport/.js/.stickyheader.js: OK\nruns/ch12/report/functionalCoverageReport/.js/.togglevisibility.js: OK\nruns/ch12/report/functionalCoverageReport/dashboard.html: OK\nruns/ch12/report/functionalCoverageReport/groups.html: OK\nruns/ch12/report/functionalCoverageReport/grp0.html: OK\nruns/ch12/runner.txt: OK\nruns/ch12/xcrg.log: OK\nruns/ch13/runner.txt: OK\nruns/ch13/simulation.log: OK\nruns/ch14/runner.txt: OK\nruns/ch14/simulation.log: OK\nruns/ch15/runner.txt: OK\nruns/ch15/simulation.log: OK\nruns/ch16/runner.txt: OK\nruns/ch16/simulation.log: OK\nruns/ch17/elaborate.log: OK\nruns/ch17/negative.log: OK\nruns/ch17/normal.log: OK\nruns/ch17/runner.txt: OK\nruns/ch18/elaborate.log: OK\nruns/ch18/negative.log: OK\nruns/ch18/normal.log: OK\nruns/ch18/runner.txt: OK\nruns/ch19/elaborate.log: OK\nruns/ch19/negative.log: OK\nruns/ch19/normal.log: OK\nruns/ch19/runner.txt: OK\nruns/ch20/EARLY_DROP.log: OK\nruns/ch20/NO_CFG.log: OK\nruns/ch20/NO_OVERRIDE.log: OK\nruns/ch20/alt.log: OK\nruns/ch20/normal.log: OK\nruns/ch20/runner.txt: OK\nruns/ch21/elaborate.log: OK\nruns/ch21/negative.log: OK\nruns/ch21/normal.log: OK\nruns/ch21/runner.txt: OK\nruns/ch22/elaborate.log: OK\nruns/ch22/negative.log: OK\nruns/ch22/normal.log: OK\nruns/ch22/runner.txt: OK\nruns/ch23/runner.txt: OK\nruns/ch23/simulation.log: OK\nruns/ch24/compile.log: OK\nruns/ch24/negative.log: OK\nruns/ch24/report.json: OK\nruns/ch24/runner.txt: OK\nruns/ch24/seed_1.log: OK\nruns/ch24/seed_42.log: OK\nruns/ch24/seed_7.log: OK\ntiming_checks.json: OK\nvisual/diagrams-part1.webp: OK\nvisual/diagrams-part2.webp: OK\nvisual/diagrams-part3.webp: OK\nvisual/diagrams-part4.webp: OK\nvisual/diagrams-part5.webp: OK\nvisual/diagrams-part6.webp: OK\nvisual/measurements.json: OK\nvisual/mobile-part1.webp: OK\nvisual/mobile-part2.webp: OK\nvisual/mobile-part3.webp: OK\nvisual/mobile-part4.webp: OK\nvisual/mobile-part5.webp: OK\nvisual/mobile-part6.webp: OK\nvisual/redirects.json: OK\nwaves/ch01_uart_echo.vcd: OK\nwaves/ch02_pwm_clock_reset.vcd: OK\nwaves/ch07_uart_interface.vcd: OK\nwaves/ch23_npu_integrated.vcd: OK\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "scripts/collect_evidence.py",
+        "scripts/test_evidence_completeness.py"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "preservation": {
+    "baseline": "6edf029dd6c8abb140566330a532214a3fd48d56",
+    "paths": [
+      "reference_rtl",
+      "tb",
+      "assets",
+      "course.json",
+      "index.html",
+      "ch[0-9][0-9]_*.html",
+      "scripts/run_ch*.sh",
+      "scripts/setup_env.sh",
+      "scripts/run_ch24.py",
+      "docs/evidence/v59/manifest.json",
+      "docs/evidence/v59/runs",
+      "docs/evidence/v59/probes",
+      "docs/evidence/v59/waves",
+      "docs/evidence/v59/legacy"
+    ],
+    "exit_code": 0,
+    "result": "BYTE_IDENTICAL"
+  },
+  "automated_suites": [
+    {
+      "command": [
+        "python3",
+        "scripts/test_evidence_completeness.py"
+      ],
+      "exit_code": 0,
+      "tests": 20,
+      "log": "test_evidence_completeness.txt",
+      "log_sha256": "181bfffa8acb5da8bd4f9831b2af0d7311a8ef99fba8feb7a6a4269f31bae81b"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_review_fixes.py"
+      ],
+      "exit_code": 0,
+      "tests": 18,
+      "log": "test_review_fixes.txt",
+      "log_sha256": "6b90dd52868171a7f9a89caa642b7e3b5ece7450701a203ff72d9e8c107ebe38"
+    }
+  ]
+}
